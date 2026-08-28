@@ -1,4 +1,7 @@
 function main(wb: ExcelScript.Workbook, html: string): string {
+  const dec = (s: string) => s
+    .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
   const re = /<ul|<\/ul|<a href="([^"]+\.html)"[^>]*>([^<]*)<\/a>/gi;
   const out: string[] = [];
   const st: number[] = [];
@@ -9,7 +12,7 @@ function main(wb: ExcelScript.Workbook, html: string): string {
       const m = /(\d+)\.html$/.exec(x[1]);
       if (m !== null && d > 0) {
         out.push(m[1] + "|" + (st[d - 1] || 0) + "|" + d + "|" +
-                 x[2].trim() + "|" + x[1]);
+                 dec(x[2].trim()) + "|" + x[1]);
         st[d] = Number(m[1]);
       }
     } else if (x[0].charAt(1) === "/") {
