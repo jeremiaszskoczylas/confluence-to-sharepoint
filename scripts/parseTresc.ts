@@ -14,8 +14,9 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(/<span[^>]*class="(cloakToggle|aui-icon)[^"]*"[^>]*><\/span>/gi, "");
   h = h.replace(/<img[^>]*src="images\/icons\/[^"]*"[^>]*>/gi, "");
   h = h.replace(
-    /<div class="confluence-information-macro confluence-information-macro-([a-z]+)">\s*<div class="confluence-information-macro-body">/gi,
-    (m: string, t: string) => '<div><div><p><strong>' + (P[t] || "UWAGA:") + '</strong></p>');
+    /<div class="confluence-information-macro confluence-information-macro-([a-z]+)">\s*<div class="confluence-information-macro-body">([\s\S]*?)<\/div>\s*<\/div>/gi,
+    (m: string, t: string, c: string) =>
+      '<blockquote><p><strong>' + (P[t] || "UWAGA:") + '</strong></p>' + c + '</blockquote>');
   h = h.replace(/(href|src)="attachments\//gi, '$1="' + base);
   h = h.replace(/href="[^"]*?(\d+)\.html"/gi, 'href="{{CONF:$1}}"');
   h = h.replace(/href="(\/confluence\/display\/~[^"]*|index\.html)"/gi, 'href="#"');
