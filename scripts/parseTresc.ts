@@ -1,7 +1,7 @@
 function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   const P: { [k: string]: string } = {
-    information: "&#8505; INFO:", warning: "&#9888; UWAGA:",
-    note: "&#128204; NOTATKA:", tip: "&#128161; WSKAZOWKA:"
+    information: "&#8505; INFO:", note: "&#9888; UWAGA:",
+    warning: "&#128721; OSTRZEZENIE:", tip: "&#9989; WSKAZOWKA:"
   };
   const i = html.indexOf('id="main-content"');
   if (i < 0) { return "ERR: brak main-content"; }
