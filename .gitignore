@@ -1,0 +1,7 @@
+# Dokumentacja projektowa — zawiera dane wewnetrzne, nie trafia do publicznego repo
+docs/
+
+# Pliki robocze
+*.output
+*.log
+.vscode/
