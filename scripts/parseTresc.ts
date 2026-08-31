@@ -21,5 +21,12 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(/href="[^"]*?(\d+)\.html"/gi, 'href="{{CONF:$1}}"');
   h = h.replace(/href="(\/confluence\/display\/~[^"]*|index\.html)"/gi, 'href="#"');
   h = h.replace(/<input[^>]*>/gi, "&#9744; ");
-  return h;
+  const canvas = [{
+    controlType: 4,
+    id: "c5f0a545-0f0d-4f31-9e2e-000000000001",
+    position: { layoutIndex: 1, zoneIndex: 1, sectionIndex: 1, controlIndex: 1, sectionFactor: 12 },
+    addedFromPersistedData: true,
+    innerHTML: h
+  }];
+  return JSON.stringify(canvas);
 }
