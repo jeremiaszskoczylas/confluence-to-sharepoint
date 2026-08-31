@@ -5,3 +5,9 @@ docs/
 *.output
 *.log
 .vscode/
+
+# Zrzuty ekranu z firmowego srodowiska - nigdy do publicznego repo
+scrennyizdjecia/
+*.jpg
+*.jpeg
+*.png
