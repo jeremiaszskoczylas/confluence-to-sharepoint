@@ -135,6 +135,34 @@ body('CreatePage')?['d']?['Id']
 
 ---
 
+## 8b. Akcja: RenamePage   (Send an HTTP request to SharePoint)
+
+Endpoint tworzacy strony nadaje LOSOWA nazwe pliku (np. 1j19sg3p.aspx) — ta akcja
+zmienia ja na nazwe z eksportu (SourceFile z .html -> .aspx). Daje to czytelne,
+unikalne adresy i obsluguje strony bez tytulu w nazwie pliku.
+
+Wstaw MIEDZY UstawMetadane a Publish.
+
+- Method: `POST`
+- Uri — CALE pole jako jedno **[fx]** (podmien <WITRYNA> w DWOCH miejscach;
+  podwojne apostrofy '' sa celowe — tak sie escapuje apostrof):
+
+```
+concat('_api/web/getfilebyserverrelativeurl(''/sites/<WITRYNA>/', body('CreatePage')?['d']?['Url'], ''')/moveto(newurl=''/sites/<WITRYNA>/SitePages/', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'), ''',flags=1)')
+```
+
+- Headers: jeden wiersz — Accept: `application/json;odata=verbose`
+- Body: PUSTE
+
+UWAGA: po dodaniu tej akcji, w akcji OdhaczWMapie pole TargetUrl musi byc
+wyrazeniem (stary d.Url przestaje byc prawdziwy po zmianie nazwy):
+
+```
+concat('SitePages/', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'))
+```
+
+---
+
 ## 9. Akcja: Publish   (Send an HTTP request to SharePoint)
 
 - Method: `POST`
