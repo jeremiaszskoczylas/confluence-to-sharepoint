@@ -13,6 +13,7 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(/ style="[^"]*"/gi, "");
   h = h.replace(/<span[^>]*class="(cloakToggle|aui-icon)[^"]*"[^>]*><\/span>/gi, "");
   h = h.replace(/<img[^>]*src="images\/icons\/[^"]*"[^>]*>/gi, "");
+  h = h.replace(/<img[^>]*data-image-src="([^"]+)"[^>]*>/gi, '<img src="$1">');
   h = h.replace(
     /<div class="confluence-information-macro confluence-information-macro-([a-z]+)">\s*<div class="confluence-information-macro-body">([\s\S]*?)<\/div>\s*<\/div>/gi,
     (m: string, t: string, c: string) =>
