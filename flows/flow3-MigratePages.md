@@ -6,7 +6,7 @@ Sciaga do zbudowania flow w Power Automate. Kazdy blok `kod` kopiujesz w calosci
 
 | Placeholder | Na co podmienic |
 |---|---|
-| `<WITRYNA>` | fragment adresu Twojej witryny po /sites/ |
+|  `<SCIEZKA-WITRYNY>` | PELNA sciezka server-relative witryny, np. /sites/moja-witryna albo /teams/Dzial/podwitryna |
 | `<FOLDER-EKSPORTU>` | sciezka do rozpakowanego eksportu w bibliotece plikow |
 
 ## WAZNE ZASADY
@@ -69,7 +69,7 @@ Wszystko ponizej jest WEWNATRZ tej petli.
 - Pole `base` **[tekst]**:
 
 ```
-/sites/<WITRYNA>/SiteAssets/DocMedia/attachments/
+<SCIEZKA-WITRYNY>/SiteAssets/DocMedia/attachments/
 ```
 
 ---
@@ -144,11 +144,11 @@ unikalne adresy i obsluguje strony bez tytulu w nazwie pliku.
 Wstaw MIEDZY UstawMetadane a Publish.
 
 - Method: `POST`
-- Uri — CALE pole jako jedno **[fx]** (podmien <WITRYNA> w DWOCH miejscach;
+- Uri — CALE pole jako jedno **[fx]** (podmien <SCIEZKA-WITRYNY> w DWOCH miejscach;
   podwojne apostrofy '' sa celowe — tak sie escapuje apostrof):
 
 ```
-concat('_api/web/getfilebyserverrelativeurl(''/sites/<WITRYNA>/', body('CreatePage')?['d']?['Url'], ''')/moveto(newurl=''/sites/<WITRYNA>/SitePages/', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'), ''',flags=1)')
+concat('_api/web/getfilebyserverrelativeurl(''<SCIEZKA-WITRYNY>/', body('CreatePage')?['d']?['Url'], ''')/moveto(newurl=''<SCIEZKA-WITRYNY>/SitePages/', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'), ''',flags=1)')
 ```
 
 - Headers: jeden wiersz — Accept: `application/json;odata=verbose`
@@ -192,7 +192,7 @@ body('CreatePage')?['d']?['Id']
 - TargetUrl **[fx]**:
 
 ```
-body('CreatePage')?['d']?['Url']
+concat('SitePages/', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'))
 ```
 
 - MigratedOn **[fx]**:
