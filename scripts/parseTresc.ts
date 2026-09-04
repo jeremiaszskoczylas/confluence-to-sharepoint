@@ -22,16 +22,18 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(/href="[^"]*?(\d+)\.html"/gi, 'href="{{CONF:$1}}"');
   h = h.replace(/href="(\/confluence\/display\/~[^"]*|index\.html)"/gi, 'href="#"');
   h = h.replace(/<input[^>]*>/gi, "&#9744; ");
-  h = h.replace(/(<br\s*\/?>\s*){2,}/gi, "<br/>");
-  h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/\1>/gi, "");
-  h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/\1>/gi, "");
-  h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/\1>/gi, "");
+  h = h.replace(/<br[^>]*>\s*(?=<br)/gi, "");
+  h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
+  h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
+  h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
 
   const segs: { t: string; c: string; k: boolean }[] = [];
   const rx = /<h2[^>]*>([\s\S]*?)<\/h2>\s*<span[^>]*class="cloak[\s"][^>]*>/gi;
   let pos = 0;
+  let guard = 0;
   let m2 = rx.exec(h);
-  while (m2 !== null) {
+  while (m2 !== null && guard < 200) {
+    guard++;
     const start = rx.lastIndex;
     const tk = /<span\b|<\/span>/gi;
     tk.lastIndex = start;
