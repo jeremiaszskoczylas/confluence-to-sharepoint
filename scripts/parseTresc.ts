@@ -56,26 +56,28 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
 
   const used = segs.filter(s =>
     s.k || s.c.replace(/<[^>]+>|&nbsp;|\s/g, "").length > 0);
-  const canvas = used.map((s, n) => {
-    const ctl = {
-      controlType: 4,
+  const enc = (s: string) => s
+    .replace(/&/g, "&amp;").replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const parts = used.map((s, n) => {
+    const cd: { [k: string]: unknown } = {
+      controlType: 4, displayMode: 2,
       id: "b1b1b1b1-0000-4000-8000-" + ("00000000000" + n).slice(-12),
       position: {
         layoutIndex: 1, zoneIndex: n + 1, sectionIndex: 1,
         controlIndex: 1, sectionFactor: 12
       },
-      addedFromPersistedData: true,
-      innerHTML: s.c
+      emphasis: {}
     };
     if (s.k) {
-      return {
-        ...ctl, zoneGroupMetadata: {
-          type: 1, displayName: s.t, isExpanded: false,
-          showDividerLine: true, iconAlignment: "left"
-        }
+      cd["zoneGroupMetadata"] = {
+        type: 1, displayName: s.t, isExpanded: false,
+        showDividerLine: true, iconAlignment: "left"
       };
     }
-    return ctl;
+    return '<div data-sp-canvascontrol="" data-sp-canvasdataversion="1.0" ' +
+      'data-sp-controldata="' + enc(JSON.stringify(cd)) + '">' +
+      '<div data-sp-rte="">' + s.c + "</div></div>";
   });
-  return JSON.stringify(canvas);
+  return parts.join("");
 }
