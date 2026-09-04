@@ -11,3 +11,6 @@ scrennyizdjecia/
 *.jpg
 *.jpeg
 *.png
+
+# Srodowisko testowe - TYLKO lokalnie, nigdy do publicznego repo
+scripts/test/
