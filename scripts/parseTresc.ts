@@ -1,4 +1,4 @@
-function main(wb: ExcelScript.Workbook, html: string, base: string): string {
+function main(wb: ExcelScript.Workbook, html: string, base: string, sekcje: boolean): string {
   const P: { [k: string]: string } = {
     information: "&#8505; INFO:", note: "&#9888; UWAGA:",
     warning: "&#128721; OSTRZEZENIE:", tip: "&#9989; WSKAZOWKA:"
@@ -26,6 +26,20 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
+
+  if (!sekcje) {
+    const canvas = [{
+      controlType: 4,
+      id: "c5f0a545-0f0d-4f31-9e2e-000000000001",
+      position: {
+        layoutIndex: 1, zoneIndex: 1, sectionIndex: 1,
+        controlIndex: 1, sectionFactor: 12
+      },
+      addedFromPersistedData: true,
+      innerHTML: h
+    }];
+    return JSON.stringify(canvas);
+  }
 
   const segs: { t: string; c: string; k: boolean }[] = [];
   const rx = /<h2[^>]*>([\s\S]*?)<\/h2>\s*<span[^>]*class="cloak[\s"][^>]*>/gi;
