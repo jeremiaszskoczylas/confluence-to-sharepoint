@@ -17,7 +17,7 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(
     /<div class="confluence-information-macro confluence-information-macro-([a-z]+)">\s*<div class="confluence-information-macro-body">([\s\S]*?)<\/div>\s*<\/div>/gi,
     (m: string, t: string, c: string) =>
-      '<table><tr><td><p><strong>' + (P[t] || "UWAGA:") + '</strong></p>' + c + '</td></tr></table>');
+      '<table width="100%"><tr><td width="100%"><p><strong>' + (P[t] || "UWAGA:") + '</strong></p>' + c + '</td></tr></table>');
   h = h.replace(/(href|src)="attachments\//gi, '$1="' + base);
   h = h.replace(/href="[^"]*?(\d+)\.html"/gi, 'href="{{CONF:$1}}"');
   h = h.replace(/href="(\/confluence\/display\/~[^"]*|index\.html)"/gi, 'href="#"');
