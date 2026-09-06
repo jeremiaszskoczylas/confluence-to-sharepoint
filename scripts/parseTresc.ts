@@ -18,6 +18,23 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
     /<h[1-4][^>]*>(?:[^<]|<(?!\/h[1-4]))*?Change\s*History(?:[^<]|<(?!\/h[1-4]))*<\/h[1-4]>[\s\S]*?(?=<h[1-4][\s>]|$)/gi,
     "");
   h = h.replace(/ style="[^"]*"/gi, "");
+  const tyt: string[] = [];
+  h = h.replace(
+    /<h2([^>]*)>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/h2>/gi,
+    (m: string, atr: string, tt: string) => {
+      const czysty = tt.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      if (czysty.length === 0) { return m; }
+      tyt.push(czysty);
+      return "<hr><h2" + atr + ">" + tyt.length + ". " + tt + "</h2>";
+    });
+  if (tyt.length > 1) {
+    let w = '<table width="100%"><tr><td width="100%" align="left"><small><strong>' +
+      "Na tej stronie &mdash; " + tyt.length + ":</strong><br>";
+    for (let n = 0; n < tyt.length; n++) { w += (n + 1) + ". " + tyt[n] + "<br>"; }
+    w += "</small></td></tr></table>";
+    const gdzie = h.indexOf("<hr>");
+    h = gdzie >= 0 ? h.substring(0, gdzie) + w + h.substring(gdzie) : w + h;
+  }
   h = h.replace(/<span[^>]*class="(cloakToggle|aui-icon)[^"]*"[^>]*><\/span>/gi, "");
   h = h.replace(/<img[^>]*src="images\/icons\/[^"]*"[^>]*>/gi, "");
   h = h.replace(/<img[^>]*data-image-src="([^"]+)"[^>]*>/gi, '<img src="$1">');
