@@ -46,6 +46,48 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
     const gdzie = h.indexOf("<h2>1. ");
     h = gdzie >= 0 ? h.substring(0, gdzie) + w + h.substring(gdzie) : w + h;
   }
+  const gRe = /<p[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/p>\s*<span[^>]*class="cloak[\s"][^>]*>/gi;
+  let wyn = "";
+  let poz = 0;
+  let wTab = false;
+  let str2 = 0;
+  let g = gRe.exec(h);
+  while (g !== null && str2 < 400) {
+    str2++;
+    const etyk = g[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    const bStart = gRe.lastIndex;
+    const tk2 = /<span\b|<\/span>/gi;
+    tk2.lastIndex = bStart;
+    let d2 = 1;
+    let kon = h.length;
+    let t3 = tk2.exec(h);
+    while (t3 !== null) {
+      d2 += t3[0].charAt(1) === "/" ? -1 : 1;
+      if (d2 === 0) { kon = t3.index; break; }
+      t3 = tk2.exec(h);
+    }
+    const przed = h.substring(poz, g.index);
+    const dalej = wTab && przed.replace(/\s|<br[^>]*>/gi, "").length === 0;
+    if (!dalej) {
+      if (wTab) { wyn += "</table>"; }
+      wyn += przed + '<table width="100%">';
+      wTab = true;
+    }
+    const low = etyk.toLowerCase();
+    let ozn = "<strong>" + etyk + "</strong>";
+    if (low === "yes" || low === "tak") {
+      ozn = '<font color="#107C10"><strong>&#10003; ' + etyk + "</strong></font>";
+    } else if (low === "no" || low === "nie") {
+      ozn = '<font color="#C4314B"><strong>&#10007; ' + etyk + "</strong></font>";
+    }
+    wyn += '<tr><td width="15%" align="left">' + ozn + "</td>" +
+      '<td align="left">' + h.substring(bStart, kon) + "</td></tr>";
+    poz = kon + 7;
+    gRe.lastIndex = poz;
+    g = gRe.exec(h);
+  }
+  if (wTab) { wyn += "</table>"; }
+  h = wyn + h.substring(poz);
   h = h.replace(/<span[^>]*class="(cloakToggle|aui-icon)[^"]*"[^>]*><\/span>/gi, "");
   h = h.replace(/<img[^>]*src="images\/icons\/[^"]*"[^>]*>/gi, "");
   h = h.replace(/<img[^>]*data-image-src="([^"]+)"[^>]*>/gi, '<img src="$1">');
@@ -56,6 +98,7 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
       (P[t] || "UWAGA:") + '</strong><br>' +
       c.replace(/<\/p>\s*<p[^>]*>/gi, "<br>").replace(/<\/?p[^>]*>/gi, "") +
       '</small></td></tr></table>');
+  h = h.replace(/(href|src)="(?:\.\.\/)+[^"]*?attachments\//gi, '$1="' + base);
   h = h.replace(/(href|src)="attachments\//gi, '$1="' + base);
   h = h.replace(/href="[^"]*?(\d+)\.html"/gi, 'href="{{CONF:$1}}"');
   h = h.replace(/href="(\/confluence\/display\/~[^"]*|index\.html)"/gi, 'href="#"');
