@@ -24,22 +24,26 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   h = h.replace(/ style="[^"]*"/gi, "");
   h = h.replace(/<(\/?)h1([^>]*)>/gi, "<$1h2$2>");
   const tyt: string[] = [];
+  const kotw: string[] = [];
   h = h.replace(
     /<h2[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/h2>/gi,
     (m: string, tt: string) => {
-      const czysty = tt.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      const czysty = tt.replace(/<[^>]+>/g, "").replace(/&[a-z]+;/gi, " ")
+        .replace(/\s+/g, " ").trim();
       if (czysty.length === 0) { return m; }
       tyt.push(czysty);
-      return '<h2 id="sek' + tyt.length + '">' + tyt.length + ". " + tt + "</h2>";
+      const pelny = tyt.length + ". " + czysty;
+      kotw.push(pelny.toLowerCase().replace(/[^a-z0-9\s.-]/g, "").replace(/\s+/g, "-"));
+      return "<h2>" + tyt.length + ". " + tt + "</h2>";
     });
   if (tyt.length > 1) {
     let w = '<table width="100%"><tr><td width="100%" align="left"><small><strong>' +
       "Na tej stronie &mdash; " + tyt.length + ":</strong><br>";
     for (let n = 0; n < tyt.length; n++) {
-      w += '<a href="#sek' + (n + 1) + '">' + (n + 1) + ". " + tyt[n] + "</a><br>";
+      w += '<a href="#' + kotw[n] + '">' + (n + 1) + ". " + tyt[n] + "</a><br>";
     }
     w += "</small></td></tr></table>";
-    const gdzie = h.indexOf('<h2 id="sek1">');
+    const gdzie = h.indexOf("<h2>1. ");
     h = gdzie >= 0 ? h.substring(0, gdzie) + w + h.substring(gdzie) : w + h;
   }
   h = h.replace(/<span[^>]*class="(cloakToggle|aui-icon)[^"]*"[^>]*><\/span>/gi, "");
