@@ -1,7 +1,9 @@
 function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   const P: { [k: string]: string } = {
-    information: "&#8505; INFO:", note: "&#9888; UWAGA:",
-    warning: "&#128721; OSTRZEZENIE:", tip: "&#9989; WSKAZOWKA:"
+    information: '<font color="#B7791F"><u>&#8505; INFO:</u></font>',
+    note: '<font color="#C4314B"><u>&#9888; UWAGA:</u></font>',
+    warning: '<font color="#C4314B"><u>&#128721; OSTRZEZENIE:</u></font>',
+    tip: '<font color="#107C10"><u>&#9989; WSKAZOWKA:</u></font>'
   };
   const i = html.indexOf('id="main-content"');
   if (i < 0) { return "ERR: brak main-content"; }
@@ -18,7 +20,9 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
     /<div class="confluence-information-macro confluence-information-macro-([a-z]+)">\s*<div class="confluence-information-macro-body">([\s\S]*?)<\/div>\s*<\/div>/gi,
     (m: string, t: string, c: string) =>
       '<table width="100%"><tr><td width="100%" align="left"><small><strong>' +
-      (P[t] || "UWAGA:") + '</strong>' + c + '</small></td></tr></table>');
+      (P[t] || "UWAGA:") + '</strong><br>' +
+      c.replace(/<\/p>\s*<p[^>]*>/gi, "<br>").replace(/<\/?p[^>]*>/gi, "") +
+      '</small></td></tr></table>');
   h = h.replace(/(href|src)="attachments\//gi, '$1="' + base);
   h = h.replace(/href="[^"]*?(\d+)\.html"/gi, 'href="{{CONF:$1}}"');
   h = h.replace(/href="(\/confluence\/display\/~[^"]*|index\.html)"/gi, 'href="#"');
