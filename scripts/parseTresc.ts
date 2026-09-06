@@ -1,4 +1,4 @@
-function main(wb: ExcelScript.Workbook, html: string, base: string): string {
+function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: string): string {
   const P: { [k: string]: string } = {
     information: '<font color="#B7791F"><u>&#8505; INFO:</u></font>',
     note: '<font color="#C4314B"><u>&#9888; UWAGA:</u></font>',
@@ -61,6 +61,9 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
   h = h.replace(/<h2/gi, "<hr><h2");
   h = h.replace(/^\s*<hr>/, "");
+  if (tytul !== undefined && tytul !== null && tytul.length > 0) {
+    h = "<h1>" + tytul + "</h1><hr>" + h;
+  }
   const canvas = [{
     controlType: 4,
     id: "c5f0a545-0f0d-4f31-9e2e-000000000001",
