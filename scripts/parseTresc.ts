@@ -15,24 +15,30 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(/<div[^>]*class="[^"]*toc-macro[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "");
   h = h.replace(/<ul[^>]*class="[^"]*toc-indentation[^"]*"[^>]*>[\s\S]*?<\/ul>/gi, "");
   h = h.replace(
+    /<h[1-4][^>]*>(?:[^<]|<(?!\/h[1-4]))*?(?:Table\s*of\s*Contents|Spis\s*tre)(?:[^<]|<(?!\/h[1-4]))*<\/h[1-4]>\s*(?:<ul[\s\S]*?<\/ul>|<ol[\s\S]*?<\/ol>)?/gi,
+    "");
+  h = h.replace(
     /<h[1-4][^>]*>(?:[^<]|<(?!\/h[1-4]))*?Change\s*History(?:[^<]|<(?!\/h[1-4]))*<\/h[1-4]>[\s\S]*?(?=<h[1-4][\s>]|$)/gi,
     "");
   h = h.replace(/ style="[^"]*"/gi, "");
+  h = h.replace(/<(\/?)h1([^>]*)>/gi, "<$1h2$2>");
   const tyt: string[] = [];
   h = h.replace(
-    /<h2([^>]*)>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/h2>/gi,
-    (m: string, atr: string, tt: string) => {
+    /<h2[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/h2>/gi,
+    (m: string, tt: string) => {
       const czysty = tt.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
       if (czysty.length === 0) { return m; }
       tyt.push(czysty);
-      return "<hr><h2" + atr + ">" + tyt.length + ". " + tt + "</h2>";
+      return '<h2 id="sek' + tyt.length + '">' + tyt.length + ". " + tt + "</h2>";
     });
   if (tyt.length > 1) {
     let w = '<table width="100%"><tr><td width="100%" align="left"><small><strong>' +
       "Na tej stronie &mdash; " + tyt.length + ":</strong><br>";
-    for (let n = 0; n < tyt.length; n++) { w += (n + 1) + ". " + tyt[n] + "<br>"; }
+    for (let n = 0; n < tyt.length; n++) {
+      w += '<a href="#sek' + (n + 1) + '">' + (n + 1) + ". " + tyt[n] + "</a><br>";
+    }
     w += "</small></td></tr></table>";
-    const gdzie = h.indexOf("<hr>");
+    const gdzie = h.indexOf('<h2 id="sek1">');
     h = gdzie >= 0 ? h.substring(0, gdzie) + w + h.substring(gdzie) : w + h;
   }
   h = h.replace(/<span[^>]*class="(cloakToggle|aui-icon)[^"]*"[^>]*><\/span>/gi, "");
@@ -52,6 +58,8 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
+  h = h.replace(/<h2/gi, "<hr><h2");
+  h = h.replace(/^\s*<hr>/, "");
   const canvas = [{
     controlType: 4,
     id: "c5f0a545-0f0d-4f31-9e2e-000000000001",
