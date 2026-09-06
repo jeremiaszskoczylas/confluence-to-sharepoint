@@ -12,10 +12,11 @@ function main(wb: ExcelScript.Workbook, html: string, base: string): string {
   const e = h.indexOf('<div id="footer"');
   if (e > 0) { h = h.substring(0, e); }
 
-  h = h.replace(/<div[^>]*class="[^"]*toc-macro[^"]*"[^>]*>[\s\S]*?<\/div>/gi, "");
-  h = h.replace(/<ul[^>]*class="[^"]*toc-indentation[^"]*"[^>]*>[\s\S]*?<\/ul>/gi, "");
+  h = h.replace(/<style[\s\S]*?<\/style>/gi, "");
+  h = h.replace(/<div[^>]*class=["'][^"']*toc-macro[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
+  h = h.replace(/<ul[^>]*class=["'][^"']*toc-indentation[^"']*["'][^>]*>[\s\S]*?<\/ul>/gi, "");
   h = h.replace(
-    /<h[1-4][^>]*>(?:[^<]|<(?!\/h[1-4]))*?(?:Table\s*of\s*Contents|Spis\s*tre)(?:[^<]|<(?!\/h[1-4]))*<\/h[1-4]>\s*(?:<ul[\s\S]*?<\/ul>|<ol[\s\S]*?<\/ol>)?/gi,
+    /<h[1-4][^>]*>(?:[^<]|<(?!\/h[1-4]))*?(?:Table\s*of\s*Contents|Spis\s*tre)(?:[^<]|<(?!\/h[1-4]))*<\/h[1-4]>\s*(?:<span[^>]*class=["']cloak[\s"'][^>]*>(?:[^<]|<(?!\/span>))*<\/span>|<ul[\s\S]*?<\/ul>|<ol[\s\S]*?<\/ol>)?/gi,
     "");
   h = h.replace(
     /<h[1-4][^>]*>(?:[^<]|<(?!\/h[1-4]))*?Change\s*History(?:[^<]|<(?!\/h[1-4]))*<\/h[1-4]>[\s\S]*?(?=<h[1-4][\s>]|$)/gi,
