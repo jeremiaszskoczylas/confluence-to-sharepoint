@@ -1,4 +1,5 @@
-function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: string): string {
+function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: string,
+  linki: string, nag: string, pod: string): string {
   const P: { [k: string]: string } = {
     information: '<font color="#B7791F"><u>&#8505; INFO:</u></font>',
     note: '<font color="#C4314B"><u>&#9888; UWAGA:</u></font>',
@@ -108,8 +109,28 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
   h = h.replace(/<h2/gi, "<hr><h2");
   h = h.replace(/^\s*<hr>/, "");
+  if (linki !== undefined && linki !== null && linki.length > 1) {
+    const L: { [k: string]: string } = JSON.parse(linki) as { [k: string]: string };
+    h = h.replace(/href="\{\{CONF:(\d+)\}\}"/g,
+      (m: string, id: string) => 'href="' + (L[id] !== undefined ? L[id] : "#") + '"');
+    h = h.replace(/href="https?:\/\/[^"]*\/display\/[^\/"]+\/([^"#?]+)[^"]*"/gi,
+      (m: string, t: string) => {
+        let nazwa = t.replace(/\+/g, " ");
+        try { nazwa = decodeURIComponent(nazwa); } catch { nazwa = t; }
+        const u = L["t:" + nazwa.toLowerCase().trim()];
+        return u !== undefined ? 'href="' + u + '"' : m;
+      });
+  }
+  let gora = "";
+  if (nag !== undefined && nag !== null && nag.length > 0) {
+    gora += "<p><small>" + nag + "</small></p>";
+  }
   if (tytul !== undefined && tytul !== null && tytul.length > 0) {
-    h = "<h1>" + tytul + "</h1><hr>" + h;
+    gora += "<h1>" + tytul + "</h1><hr>";
+  }
+  h = gora + h;
+  if (pod !== undefined && pod !== null && pod.length > 0) {
+    h = h + "<hr>" + pod;
   }
   const canvas = [{
     controlType: 4,
