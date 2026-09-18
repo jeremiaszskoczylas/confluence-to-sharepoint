@@ -274,22 +274,22 @@ Body: PUSTE
 
 ## 14. SaveMapa — Send an HTTP request to SharePoint
 
-UWAGA: NIE przez savepageasdraft (przyjmuje tylko forme JSON kanwy i daje 502 na formie HTML,
-ktora oddaje GetMapa). Zapis idzie bezposrednio do pola elementu listy — tak robi PnP.
+`wstawMape` zwraca kanwe jako TABLICE JSON kontrolek (odczytana z data-sp-controldata strony,
+z zachowanym zoneGroupMetadata zwijanych sekcji) — czyli ten sam format, ktorym SaveDraft
+zapisuje strony. Wiec ta sama droga: savepageasdraft.
 
 Method: POST
 
-Uri (fx) — podwojne apostrofy wokol Site Pages sa celowe:
+Uri (fx):
 ```
-concat('_api/web/lists/getbytitle(''Site Pages'')/items(', body('GetMapa')?['d']?['Id'], ')/ValidateUpdateListItem')
+concat('_api/sitepages/pages(', body('GetMapa')?['d']?['Id'], ')/savepageasdraft')
 ```
 Headers: Accept i Content-Type jak w 8.
 
 Body (fx) — CALE pole:
 ```
-string(setProperty(json('{"bNewDocumentUpdate":true}'),'formValues',createArray(setProperty(json('{"FieldName":"CanvasContent1"}'),'FieldValue',body('WstawMape')?['result']))))
+string(setProperty(setProperty(json('{"__metadata":{"type":"SP.Publishing.SitePage"}}'),'Title','Mapa dokumentacji'),'CanvasContent1',body('WstawMape')?['result']))
 ```
-Sprawdzenie po biegu: w Outputs tej akcji, w `value[0]`, pole `ErrorMessage` ma byc `null`.
 
 ---
 
