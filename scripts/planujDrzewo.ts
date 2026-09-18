@@ -1,9 +1,13 @@
 function main(wb: ExcelScript.Workbook, dane: string, witryna: string): string {
   interface W {
-    Id: number; Title: string; ConfluenceId: number; ParentConfluenceId: number;
+    Id: number; ID?: number; Title: string; ConfluenceId: number; ParentConfluenceId: number;
     SourceFile: string; TargetUrl: string; TargetPageId: number;
   }
-  const rows: W[] = (JSON.parse(dane) as W[]).filter(r => r.TargetPageId > 0);
+  const surowe: W[] = JSON.parse(dane) as W[];
+  for (const r of surowe) {
+    if ((r.Id === undefined || r.Id === null) && r.ID !== undefined) { r.Id = r.ID; }
+  }
+  const rows: W[] = surowe.filter(r => r.TargetPageId > 0 && r.Id !== undefined);
   const byConf: { [k: string]: W } = {};
   for (const r of rows) { byConf[String(r.ConfluenceId)] = r; }
 
