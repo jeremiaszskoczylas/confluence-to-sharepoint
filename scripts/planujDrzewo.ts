@@ -49,7 +49,7 @@ function main(wb: ExcelScript.Workbook, dane: string, witryna: string): string {
       pageId: r.TargetPageId,
       file: r.SourceFile,
       title: r.Title,
-      parentPageId: parent !== undefined ? parent.TargetPageId : 0,
+      parentPageId: parent !== undefined ? Number(parent.TargetPageId) : 0,
       category: branch !== undefined ? bezNr(branch.Title) : "",
       treePath: "/" + chain.map(x => String(x.ConfluenceId)).join("/") + "/",
       treeSort: chain.map(x => pad(x.Id)).join("."),

@@ -8,7 +8,9 @@ function main(wb: ExcelScript.Workbook, canvas: string, fragmenty: string): stri
     const rte = p.indexOf("data-sp-rte");
     if (rte < 0) { continue; }
     const start = p.indexOf(">", rte) + 1;
-    const end = p.lastIndexOf("</div></div>");
+    // koniec tresci = poczatek koncowego ciagu </div> (rte + kontrolka [+ zewnetrzny wrapper])
+    const ogon = /(\s*<\/div>)+\s*$/.exec(p);
+    const end = ogon !== null ? ogon.index : -1;
     if (start <= 0 || end < start) { continue; }
     if (n < fr.length) { parts[i] = p.substring(0, start) + fr[n] + p.substring(end); }
     n++;
