@@ -226,6 +226,9 @@ MigrationStatus Value (lista):
 ```
 LinksRemapped
 ```
+**WSZYSTKIE pozostale pola tej akcji PUSTE** — w szczegolnosci ParentConfluenceId, Depth,
+ConfluenceId, TargetPageId. Wpisane 0 nadpisze hierarchie w mapie przy kazdym biegu
+(tak stracilismy ParentConfluenceId 2026-09-18; naprawa: flow4b-NaprawHierarchie).
 
 ---
 
@@ -257,6 +260,23 @@ string(outputs('Plan')?['mapa'])
 ```
 
 ---
+
+## 13a. StopGdyERR — Control → Condition (PRZED CheckoutMapa)
+
+Bezpiecznik: jesli skrypt zwrocil ERR, flow ma sie ZATRZYMAC, a nie zapisac komunikat
+jako tresc strony (to dawalo pusta mape).
+
+Lewa strona (fx):
+```
+startsWith(body('WstawMape')?['result'], 'ERR')
+```
+is equal to: `true`
+
+W galezi **If yes**: Control → **Terminate**, Status: `Failed`, Message (fx):
+```
+body('WstawMape')?['result']
+```
+Galaz If no: pusta. Akcje 13b–15 dodaj PONIZEJ warunku (nie w galezi).
 
 ## 13b. CheckoutMapa — Send an HTTP request to SharePoint (PRZED SaveMapa)
 
