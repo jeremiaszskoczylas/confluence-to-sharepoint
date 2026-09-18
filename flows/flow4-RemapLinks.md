@@ -112,6 +112,22 @@ items('Apply_to_each')?['pod']
 
 ---
 
+## 7b. Checkout — Send an HTTP request to SharePoint (PRZED SaveDraft)
+
+Strony sa opublikowane — bez wypozyczenia zapis szkicu konczy sie 409 Conflict.
+
+Method: POST
+
+Uri (fx):
+```
+concat('_api/sitepages/pages(', items('Apply_to_each')?['pageId'], ')/checkoutpage')
+```
+Headers — jeden wiersz: Accept → application/json;odata=verbose
+
+Body: PUSTE
+
+---
+
 ## 8. SaveDraft — Send an HTTP request to SharePoint
 
 Method: POST
@@ -239,6 +255,20 @@ fragmenty (fx):
 ```
 string(outputs('Plan')?['mapa'])
 ```
+
+---
+
+## 13b. CheckoutMapa — Send an HTTP request to SharePoint (PRZED SaveMapa)
+
+Method: POST
+
+Uri (fx):
+```
+concat('_api/sitepages/pages(', body('GetMapa')?['d']?['Id'], ')/checkoutpage')
+```
+Headers — jeden wiersz: Accept → application/json;odata=verbose
+
+Body: PUSTE
 
 ---
 
