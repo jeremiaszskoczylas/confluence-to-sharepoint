@@ -246,6 +246,11 @@ Headers — jeden wiersz: Accept → application/json;odata=verbose
 
 ## 13. WstawMape — Excel Online → Run script
 
+Skrypt (v3) buduje kanwe mapy OD ZERA z fragmentow — w tym samym minimalnym formacie,
+ktorym SaveDraft zapisuje strony (jedyny format o potwierdzonym renderowaniu).
+Kazdy fragment trafia do osobnej sekcji. Parametr canvas jest ignorowany, ale zostaje,
+zeby nie przebudowywac akcji; GetMapa jest nadal potrzebne (Id strony).
+
 Script (lista):
 ```
 wstawMape
@@ -294,9 +299,8 @@ Body: PUSTE
 
 ## 14. SaveMapa — Send an HTTP request to SharePoint
 
-`wstawMape` zwraca kanwe jako TABLICE JSON kontrolek (odczytana z data-sp-controldata strony,
-z zachowanym zoneGroupMetadata zwijanych sekcji) — czyli ten sam format, ktorym SaveDraft
-zapisuje strony. Wiec ta sama droga: savepageasdraft.
+`wstawMape` zwraca kanwe jako TABLICE JSON kontrolek w formacie SaveDraft — ta sama droga:
+savepageasdraft.
 
 Method: POST
 
@@ -329,9 +333,14 @@ Headers — jeden wiersz: Accept → application/json;odata=verbose
 
 - Tresc kazdej strony jest BUDOWANA OD NOWA ze zrodel (parser + mapowanie linkow).
   Reczne edycje stron sprzed tego flow zostana nadpisane. Po nim edycja jest wolna.
-- Strona mapy: flow podmienia WYLACZNIE tresc 5 web partow tekstowych (korzen + 4 galezie),
-  ustawienia zwijanych sekcji zostaja. Inna liczba web partow = `WstawMape` zwraca `ERR:`
-  i nic nie zapisuje.
+- Strona mapy: flow BUDUJE KANWE OD NOWA — 5 sekcji (korzen + 4 galezie), kazda z jednym
+  web partem tekstowym. Ustawienia sekcji (zwijanie, tytul) NIE sa zachowywane — po biegu
+  wlacz zwijanie recznie: Edit → sekcja → Edit section → Make this section collapsible
+  (4 razy). Kolejny bieg flow to resetuje.
+  Dlaczego nie automatycznie: tablica JSON z `zoneGroupMetadata` (zarowno zgadywana, jak
+  i przepisana ze strony) daje w savepageasdraft pusta strone — sprawdzone dwa razy
+  (parser v3, wstawMape v2). Pusty fragment lub bledny JSON = `WstawMape` zwraca `ERR:`
+  i bezpiecznik 13a zatrzymuje flow.
 - `category` musi istniec w wyborach kolumny `Category` w Site Pages.
 - Flow jest idempotentny — mozna uruchamiac wielokrotnie.
 - Czas: ~60 x 30 s = 30–40 min.
