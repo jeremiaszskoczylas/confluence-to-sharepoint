@@ -17,6 +17,7 @@ bez rejestracji aplikacji w Entra ID.
 | `parseTresc.ts` | `html`, `base`, `tytul`, `linki`, `nag`, `pod` | Główny parser. Czyści treść strony i buduje `CanvasContent1` (jeden web part tekstowy). Trzy ostatnie parametry (mapowanie linków, ścieżka, podstrony) wypełnia Flow 4; w Flow 3 zostają puste. |
 | `planujDrzewo.ts` | `dane`, `witryna` | Flow 4. Z wierszy mapy migracji liczy dla każdej strony: rodzica, kategorię, `TreePath`/`TreeSort`, kolejność, ścieżkę (breadcrumb) i blok podstron; zwraca też mapowanie linków (po id i po tytule) oraz fragmenty HTML strony-mapy. |
 | `wstawMape.ts` | `canvas`, `fragmenty` | Flow 4. Buduje kanwę strony-mapy od zera: każdy fragment jako osobna sekcja z jednym web partem tekstowym, w minimalnym formacie `CanvasContent1` (tym samym co `parseTresc`). `canvas` jest ignorowany — zachowany dla zgodności z akcją w flow. |
+| `wstawMapeJedenWebPart.ts` | `canvas`, `fragmenty` | Flow 4, wariant awaryjny. Jak `wstawMape`, ale wszystkie fragmenty w jednym web parcie rozdzielone `<hr>` — dokładnie format, którym `parseTresc` zapisuje strony. Do izolowania błędu: format kanwy vs. sama strona. |
 
 ## Co robi `parseTresc`
 

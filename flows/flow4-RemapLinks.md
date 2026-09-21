@@ -266,6 +266,16 @@ string(outputs('Plan')?['mapa'])
 
 ---
 
+### 13-test. Gdy mapa jest pusta mimo poprawnego result i 200 w SaveMapa
+
+Test 1 — NOWA strona: Site Pages → New → Page → pusty szablon, nazwij np. `Mapa-test`,
+Publish. W `GetMapa` podmien `<MAPA>` na `Mapa-test.aspx`, uruchom flow.
+Renderuje → stara strona byla uszkodzona: usun ja, zmien nazwe nowej (Rename) i wroc do `<MAPA>`.
+
+Test 2 — jesli nowa strona tez pusta: do skryptu `wstawMape` wklej kod
+`scripts/wstawMapeJedenWebPart.ts` (1 web part, fragmenty rozdzielone `<hr>`), uruchom flow.
+Renderuje → problemem sa wielokrotne sekcje w tablicy JSON; mapa zostaje w jednym web parcie.
+
 ## 13a. StopGdyERR — Control → Condition (PRZED CheckoutMapa)
 
 Bezpiecznik: jesli skrypt zwrocil ERR, flow ma sie ZATRZYMAC, a nie zapisac komunikat
