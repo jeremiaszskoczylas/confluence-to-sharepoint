@@ -46,8 +46,34 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
         nazwy.length + "): " + nazwy.join(" &middot; ") +
         " &mdash; ponizej wszystkie warianty</u></font></small></p>";
     });
+  // Kazda zakladka staje sie natywna sekcja zwijana. Kontener i panele znikaja,
+  // zeby segmenty mialy zbilansowane znaczniki; aktywna karta zostaje rozwinieta.
+  const byloAktywne = h.indexOf("active-pane") >= 0;
   let nrZak = 0;
-  const pasek = (atr: string): string => {
+  const wytnijDiv = (s: string, wzor: RegExp, pre: (atr: string) => string, post: string): string => {
+    let wynik = s;
+    for (let it = 0; it < 200; it++) {
+      wzor.lastIndex = 0;
+      const g = wzor.exec(wynik);
+      if (g === null) { break; }
+      const po = g.index + g[0].length;
+      const tk = /<div\b|<\/div>/gi;
+      tk.lastIndex = po;
+      let d = 1;
+      let kon = -1;
+      let t = tk.exec(wynik);
+      while (t !== null) {
+        d += t[0].charAt(1) === "/" ? -1 : 1;
+        if (d === 0) { kon = t.index; break; }
+        t = tk.exec(wynik);
+      }
+      if (kon < 0) { break; }
+      wynik = wynik.substring(0, g.index) + pre(g[1] !== undefined ? g[1] : "") +
+        wynik.substring(po, kon) + post + wynik.substring(kon + 6);
+    }
+    return wynik;
+  };
+  const znacznik = (atr: string): string => {
     nrZak++;
     const idm = /id=["']([^"']+)["']/.exec(atr);
     const dlm = /data-label=["']([^"']+)["']/.exec(atr);
@@ -56,16 +82,19 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
     else if (dlm !== null) { e = dlm[1]; }
     else {
       const k = kolejka.shift();
-      e = k !== undefined ? k : "Zak&#322;adka " + nrZak;
+      e = k !== undefined ? k : "Zakladka " + nrZak;
     }
-    return "<h3>&#128209; " + e + "</h3><div" + atr + ">";
+    const roz = atr.indexOf("active-pane") >= 0 || (nrZak === 1 && !byloAktywne);
+    return "<!--SEK:" + (roz ? "1" : "0") + ":" +
+      e.replace(/--+>?|[<>]/g, " ").replace(/s+/g, " ").trim() + "-->";
   };
-  h = h.replace(/<div([^>]*class=["'][^"']*tabs-pane[^"']*["'][^>]*)>/gi,
-    (m: string, atr: string) => pasek(atr));
-  h = h.replace(/<div([^>]*\sdata-label=["'][^"']+["'][^>]*)>/gi,
-    (m: string, atr: string) => atr.indexOf("tabs-pane") >= 0 ? m : pasek(atr));
+  h = wytnijDiv(h, /<div[^>]*class=["'][^"']*(?:aui-tabs|deck)[^"']*["'][^>]*>/gi,
+    () => "", "<!--/SEK-->");
+  h = wytnijDiv(h, /<div([^>]*class=["'][^"']*tabs-pane[^"']*["'][^>]*)>/gi,
+    (atr: string) => znacznik(atr), "");
+  h = wytnijDiv(h, /<div([^>]*\sdata-label=["'][^"']+["'][^>]*)>/gi,
+    (atr: string) => znacznik(atr), "");
   const tyt: string[] = [];
-  const kotw: string[] = [];
   h = h.replace(
     /<h2[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/h2>/gi,
     (m: string, tt: string) => {
@@ -74,19 +103,9 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
       if (czysty.length === 0) { return m; }
       tyt.push(czysty);
       const pelny = tyt.length + ". " + czysty;
-      kotw.push(pelny.toLowerCase().replace(/[^a-z0-9\s.-]/g, "").replace(/\s+/g, "-"));
-      return "<h2>" + tyt.length + ". " + tt + "</h2>";
+      // cloak staje sie natywna sekcja zwijana - jego tytul to nazwa sekcji na pasku
+      return "<!--SEK:0:" + pelny.replace(/--+>?|[<>]/g, " ").trim() + "-->";
     });
-  if (tyt.length > 1) {
-    let w = '<table width="100%"><tr><td width="100%" align="left"><small><strong>' +
-      "Na tej stronie &mdash; " + tyt.length + ":</strong><br>";
-    for (let n = 0; n < tyt.length; n++) {
-      w += '<a href="#' + kotw[n] + '">' + (n + 1) + ". " + tyt[n] + "</a><br>";
-    }
-    w += "</small></td></tr></table>";
-    const gdzie = h.indexOf("<h2>1. ");
-    h = gdzie >= 0 ? h.substring(0, gdzie) + w + h.substring(gdzie) : w + h;
-  }
   const gRe = /<p[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/p>\s*<span[^>]*class="cloak[\s"][^>]*>/gi;
   let wyn = "";
   let poz = 0;
@@ -170,14 +189,72 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   }
   h = gora + h;
   if (pod !== undefined && pod !== null && pod.length > 0) {
-    h = h + "<hr>" + pod;
+    h = h + (h.indexOf("<!--SEK:") >= 0 ? "<!--/SEK-->" : "") + "<hr>" + pod;
   }
-  const canvas = [{
-    controlType: 4,
-    id: "c5f0a545-0f0d-4f31-9e2e-000000000001",
-    position: { layoutIndex: 1, zoneIndex: 1, sectionIndex: 1, controlIndex: 1, sectionFactor: 12 },
-    addedFromPersistedData: true,
-    innerHTML: h
-  }];
+  // --- podzial na sekcje strony ---
+  // Znaczniki <!--SEK:R:nazwa--> (R=1 rozwinieta, 0 zwinieta) i <!--/SEK--> wstawila
+  // wczesniej obsluga cloakow i zakladek. Brak znacznikow = jedna kontrolka, czyli
+  // dokladnie format sprzed tej zmiany (strony bez cloakow/zakladek sa nietkniete).
+  interface Seg { nazwa: string; rozwin: boolean; tresc: string }
+  const segs: Seg[] = [];
+  const zRe = /<!--SEK:([01]):([\s\S]*?)-->|<!--\/SEK-->/g;
+  let ost = 0;
+  let biez: Seg = { nazwa: "", rozwin: true, tresc: "" };
+  let z = zRe.exec(h);
+  while (z !== null) {
+    biez.tresc += h.substring(ost, z.index);
+    segs.push(biez);
+    ost = z.index + z[0].length;
+    biez = z[1] !== undefined
+      ? { nazwa: z[2], rozwin: z[1] === "1", tresc: "" }
+      : { nazwa: "", rozwin: true, tresc: "" };
+    z = zRe.exec(h);
+  }
+  biez.tresc += h.substring(ost);
+  segs.push(biez);
+  const pelne: Seg[] = segs.filter(s =>
+    s.tresc.replace(/<[^>]+>|&nbsp;|\s/g, "").length > 0 || s.nazwa.length > 0);
+  if (pelne.length === 0) { pelne.push({ nazwa: "", rozwin: true, tresc: h }); }
+
+  // Kazdy segment musi miec zbilansowane <div> - osierocone domkniecia zostaja
+  // po kontenerze main-content albo po wycietym kontenerze zakladek.
+  const zbilansuj = (t: string): string => {
+    let d = 0;
+    let w = t.replace(/<div\b[^>]*>|<\/div>/gi, (m: string) => {
+      if (m.charAt(1) === "/") {
+        if (d === 0) { return ""; }
+        d--;
+        return m;
+      }
+      d++;
+      return m;
+    });
+    while (d > 0) { w += "</div>"; d--; }
+    return w;
+  };
+  const canvas: { [k: string]: unknown }[] = [];
+  for (let n = 0; n < pelne.length; n++) {
+    const s = pelne[n];
+    let t = zbilansuj(s.tresc.replace(/^\s*<hr>/, ""));
+    if (t.replace(/<[^>]+>|&nbsp;|\s/g, "").length === 0) { t = "<p></p>"; }
+    const k: { [k: string]: unknown } = {
+      controlType: 4,
+      id: "c5f0a545-0f0d-4f31-9e2e-" + ("000000000000" + String(n + 1)).slice(-12),
+      position: {
+        layoutIndex: 1, zoneIndex: n + 1, sectionIndex: n + 1,
+        controlIndex: 1, sectionFactor: 12
+      },
+      addedFromPersistedData: true,
+      emphasis: {},
+      innerHTML: t
+    };
+    if (s.nazwa.length > 0) {
+      k["zoneGroupMetadata"] = {
+        type: 1, displayName: s.nazwa, isExpanded: s.rozwin,
+        showDividerLine: true, iconAlignment: "left"
+      };
+    }
+    canvas.push(k);
+  }
   return JSON.stringify(canvas);
 }

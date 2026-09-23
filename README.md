@@ -14,15 +14,21 @@ bez rejestracji aplikacji w Entra ID.
 | `analyzeConfluenceHtml.ts` | `html` | Sonda diagnostyczna. Raportuje tagi, klasy CSS, makra, obrazy i linki występujące w pliku — służy rozpoznaniu formatu przed napisaniem parsera. |
 | `pokazFragment.ts` | `html`, `klasa` | Zwraca fragment HTML otaczający wskazaną klasę CSS. Do podglądu struktury konkretnej konstrukcji. |
 | `parseIndex.ts` | `html` | Parsuje `index.html` z eksportu. Zwraca płaską listę `ID|ID_rodzica|poziom|tytuł|plik` odtwarzającą hierarchię stron. |
-| `parseTresc.ts` | `html`, `base`, `tytul`, `linki`, `nag`, `pod` | Główny parser. Czyści treść strony i buduje `CanvasContent1` (jeden web part tekstowy). Trzy ostatnie parametry (mapowanie linków, ścieżka, podstrony) wypełnia Flow 4; w Flow 3 zostają puste. |
+| `parseTresc.ts` | `html`, `base`, `tytul`, `linki`, `nag`, `pod` | Główny parser. Czyści treść strony i buduje `CanvasContent1`. Cloaki i zakładki stają się natywnymi sekcjami zwijanymi SharePointa, reszta treści trafia do sekcji zwykłych. Trzy ostatnie parametry (mapowanie linków, ścieżka, podstrony) wypełnia Flow 4; w Flow 3 zostają puste. |
 | `planujDrzewo.ts` | `dane`, `witryna` | Flow 4. Z wierszy mapy migracji liczy dla każdej strony: rodzica, kategorię, `TreePath`/`TreeSort`, kolejność, ścieżkę (breadcrumb) i blok podstron; zwraca też mapowanie linków (po id i po tytule) oraz fragmenty HTML strony-mapy. |
-| `budujMape.ts` | `fragmenty` | Flow 4c. Buduje `CanvasContent1` strony-mapy: jeden web part tekstowy z całym drzewem (fragmenty z `planujDrzewo` rozdzielone `<hr>`), dokładnie w formacie `parseTresc`. |
+| `budujMape.ts` | `fragmenty` | Flow 4c. Buduje `CanvasContent1` strony-mapy: korzeń w sekcji zwykłej, każda gałąź jako sekcja zwijana (nazwa z tytułu gałęzi). |
 | `testSekcje.ts` | `wariant` | Eksperyment diagnostyczny (A/B/C/D). Generuje `CanvasContent1` w czterech formatach, żeby ustalić, który SharePoint renderuje na nowo tworzonej stronie: wiele sekcji, sekcje zwijane, dwie kolumny, kontrola. |
 
 ## Co robi `parseTresc`
 
 - wycina blok `id="main-content"`, odrzuca nagłówek i stopkę
-- usuwa atrybuty `style` — czym **rozwija sekcje `cloak`** ukryte przez `display: none`
+- usuwa atrybuty `style` — czym odsłania treść sekcji `cloak` ukrytych przez `display: none`
+- **cloaki → natywne sekcje zwijane** SharePointa (zwinięte, jak w Confluence); nazwa sekcji
+  to numer i tytuł cloaka
+- **zakładki** (makra Tabs / Tab Container / Deck of Cards) → sekcje zwijane; karta aktywna
+  w Confluence (`active-pane`) zostaje rozwinięta, treść przed i po zakładkach wraca
+  do sekcji zwykłych
+- zwraca kanwę wielosekcyjną: `[{controlType:4, position, zoneGroupMetadata?, innerHTML}]`
 - usuwa puste znaczniki: przełączniki `cloakToggle`, ikony `aui-icon`
 - usuwa ikony dekoracyjne `images/icons/*`
 - zamienia panele informacyjne na prefiksy tekstowe (`⚠️ UWAGA:`, `ℹ️ INFO:`, `📌 NOTATKA:`, `💡 WSKAZÓWKA:`)
@@ -39,6 +45,10 @@ odbywa się po klasach CSS.
 Nazwy plików w eksporcie mają postać `Tytul-Strony_<pageId>.html`, ale zdarzają się też
 pliki samego ID (`<pageId>.html`) — regex musi obsługiwać oba warianty, inaczej takie strony
 wypadną z migracji bez ostrzeżenia.
+
+Zakładek SharePoint Online nie ma w standardzie, a dodatki (Hillbilly Tabs, Accordion Pro,
+web party PnP) wymagają SPFx i katalogu aplikacji. Najbliższym natywnym odpowiednikiem
+zakładek i cloaków są sekcje zwijane — i tak są tu odwzorowane.
 
 SharePoint Text web part akceptuje wyłącznie podzbiór HTML. Konstrukcje spoza niego są
 usuwane po cichu przy zapisie — stąd jawne przekształcanie paneli i checkboxów zamiast

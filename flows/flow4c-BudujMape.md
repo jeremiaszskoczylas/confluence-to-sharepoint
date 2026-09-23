@@ -147,11 +147,11 @@ Body: PUSTE
 - `BudujMape` → result zaczyna sie od `[{"controlType":4,"id":"c5f0a545` i zawiera `<h1>Mapa dokumentacji</h1>`
 - `CreatePage` → body `d.Id` (liczba) i `d.Url` (losowa nazwa `SitePages/xxxx.aspx`)
 - `SaveDraft` → 200, `RenamePage` → 200, `Publish` → 200
-- strona `<MAPA>` (Ctrl+F5): naglowek, link do strony glownej, 4 galezie z listami, linie miedzy nimi
+- strona `<MAPA>` (Ctrl+F5): link do strony glownej, pod nim 4 ZWIJANE sekcje z nazwami galezi;
+  po rozwinieciu - zagniezdzone listy stron
 
 ## Zasady
 
 - Kazdy bieg tworzy NOWA strone i nadpisuje `<MAPA>` (flags=1). Reczne edycje mapy przepadaja.
-- Zwijanych sekcji nie ma celowo — kazda proba zapisu wielu sekcji / metadanych sekcji
-  przez savepageasdraft dawala pusta strone (parser v3, wstawMape v2, v3, jeden-web-part
-  na starej stronie). Zwijane drzewo da aplikacja Power Apps.
+- Galezie sa natywnymi sekcjami zwijanymi SharePointa (zwiniete). Korzen zostaje widoczny.
+  Nic nie trzeba klikac po biegu - format potwierdzony testem A/B/C/D z 2026-09-23.

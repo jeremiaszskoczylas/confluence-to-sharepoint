@@ -241,6 +241,9 @@ jeden web part, ta sama droga co Flow 3. Jesli masz te akcje w RemapLinks — sk
 
 ## Zasady
 
+- Strony z cloakami i zakladkami maja teraz kanwe z WIELU sekcji (sekcje zwijane).
+  To ten sam format, ktory zdal test A/B/C/D - SaveDraft przyjmuje go bez zmian w akcjach.
+
 - Tresc kazdej strony jest BUDOWANA OD NOWA ze zrodel (parser + mapowanie linkow).
   Reczne edycje stron sprzed tego flow zostana nadpisane. Po nim edycja jest wolna.
 - Strona mapy: osobny flow 4c (BudujMape).
