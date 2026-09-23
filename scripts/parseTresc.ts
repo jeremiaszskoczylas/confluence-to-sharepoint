@@ -50,7 +50,8 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   // zeby segmenty mialy zbilansowane znaczniki; aktywna karta zostaje rozwinieta.
   const byloAktywne = h.indexOf("active-pane") >= 0;
   let nrZak = 0;
-  const wytnijDiv = (s: string, wzor: RegExp, pre: (atr: string) => string, post: string): string => {
+  const wytnijDiv = (s: string, wzor: RegExp,
+    buduj: (atr: string, tresc: string) => string, post: string): string => {
     let wynik = s;
     for (let it = 0; it < 200; it++) {
       wzor.lastIndex = 0;
@@ -68,33 +69,41 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
         t = tk.exec(wynik);
       }
       if (kon < 0) { break; }
-      wynik = wynik.substring(0, g.index) + pre(g[1] !== undefined ? g[1] : "") +
-        wynik.substring(po, kon) + post + wynik.substring(kon + 6);
+      wynik = wynik.substring(0, g.index) + buduj(g[1] !== undefined ? g[1] : "",
+        wynik.substring(po, kon)) + post + wynik.substring(kon + 6);
     }
     return wynik;
   };
-  const znacznik = (atr: string): string => {
+  const czysty = (s: string) => s.replace(/<[^>]+>/g, "")
+    .replace(/&[a-z]+;|&#\d+;/gi, " ").replace(/\s+/g, " ").trim();
+  // Nazwa zakladki: etykieta z menu, potem atrybut, potem NAGLOWEK OTWIERAJACY panel
+  // (wtedy znika z tresci, zeby nie dublowal paska sekcji), na koncu numer.
+  const znacznik = (atr: string, tresc: string): string => {
     nrZak++;
-    const idm = /id=["']([^"']+)["']/.exec(atr);
-    const dlm = /data-label=["']([^"']+)["']/.exec(atr);
+    const idm = /id=[\"\']([^\"\']+)[\"\']/.exec(atr);
+    const dlm = /data-label=[\"\']([^\"\']+)[\"\']/.exec(atr);
+    const ng = /^\s*<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/i.exec(tresc);
     let e = "";
+    let dalej = tresc;
     if (idm !== null && etyk[idm[1]] !== undefined) { e = etyk[idm[1]]; }
     else if (dlm !== null) { e = dlm[1]; }
-    else {
+    else if (ng !== null && czysty(ng[2]).length > 0) {
+      e = czysty(ng[2]);
+      dalej = tresc.substring(ng.index + ng[0].length);
+    } else {
       const k = kolejka.shift();
       e = k !== undefined ? k : "Zakladka " + nrZak;
     }
     const roz = atr.indexOf("active-pane") >= 0 || (nrZak === 1 && !byloAktywne);
     return "<!--SEK:" + (roz ? "1" : "0") + ":" +
-      e.replace(/--+>?|[<>]/g, " ").replace(/s+/g, " ").trim() + "-->";
+      czysty(e).replace(/--+>?|[<>]/g, " ").replace(/\s+/g, " ").trim() + "-->" + dalej;
   };
-  h = wytnijDiv(h, /<div[^>]*class=["'][^"']*(?:aui-tabs|deck)[^"']*["'][^>]*>/gi,
-    () => "", "<!--/SEK-->");
-  h = wytnijDiv(h, /<div([^>]*class=["'][^"']*tabs-pane[^"']*["'][^>]*)>/gi,
-    (atr: string) => znacznik(atr), "");
-  h = wytnijDiv(h, /<div([^>]*\sdata-label=["'][^"']+["'][^>]*)>/gi,
-    (atr: string) => znacznik(atr), "");
+  h = wytnijDiv(h, /<div[^>]*class=[\"\'][^\"\']*(?:aui-tabs|deck)[^\"\']*[\"\'][^>]*>/gi,
+    (atr: string, tresc: string) => tresc, "<!--/SEK-->");
+  h = wytnijDiv(h, /<div([^>]*class=[\"\'][^\"\']*tabs-pane[^\"\']*[\"\'][^>]*)>/gi,
+    (atr: string, tresc: string) => znacznik(atr, tresc), "");
   const tyt: string[] = [];
+  const kotw: string[] = [];
   h = h.replace(
     /<h2[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/h2>/gi,
     (m: string, tt: string) => {
@@ -103,9 +112,19 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
       if (czysty.length === 0) { return m; }
       tyt.push(czysty);
       const pelny = tyt.length + ". " + czysty;
-      // cloak staje sie natywna sekcja zwijana - jego tytul to nazwa sekcji na pasku
-      return "<!--SEK:0:" + pelny.replace(/--+>?|[<>]/g, " ").trim() + "-->";
+      kotw.push(pelny.toLowerCase().replace(/[^a-z0-9\s.-]/g, "").replace(/\s+/g, "-"));
+      return "<h2>" + tyt.length + ". " + tt + "</h2>";
     });
+  if (tyt.length > 1) {
+    let w = '<table width="100%"><tr><td width="100%" align="left"><small><strong>' +
+      "Na tej stronie &mdash; " + tyt.length + ":</strong><br>";
+    for (let n = 0; n < tyt.length; n++) {
+      w += '<a href="#' + kotw[n] + '">' + (n + 1) + ". " + tyt[n] + "</a><br>";
+    }
+    w += "</small></td></tr></table>";
+    const gdzie = h.indexOf("<h2>1. ");
+    h = gdzie >= 0 ? h.substring(0, gdzie) + w + h.substring(gdzie) : w + h;
+  }
   const gRe = /<p[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/p>\s*<span[^>]*class="cloak[\s"][^>]*>/gi;
   let wyn = "";
   let poz = 0;
