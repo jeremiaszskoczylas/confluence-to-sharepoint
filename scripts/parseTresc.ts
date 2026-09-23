@@ -24,32 +24,12 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
     "");
   h = h.replace(/ style="[^"]*"/gi, "");
   h = h.replace(/<(\/?)h1([^>]*)>/gi, "<$1h2$2>");
-  // --- zakladki (makra Tabs / Tab Container / Deck of Cards z Confluence) ---
-  // W eksporcie statycznym nie ma JS: panele leca jeden po drugim, bez oznaczen,
-  // przez co tresc wariantow zlewa sie w jeden ciag. Zamieniamy je na jawne bloki:
-  // wykaz zakladek + naglowek H3 z etykieta przed trescia kazdego wariantu.
-  const etyk: { [k: string]: string } = {};
-  const kolejka: string[] = [];
-  h = h.replace(
-    /<ul[^>]*class=["'][^"']*tabs-menu[^"']*["'][^>]*>([\s\S]*?)<\/ul>/gi,
-    (m: string, srodek: string) => {
-      const aRe = /<a[^>]*href=["']#([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
-      const nazwy: string[] = [];
-      let a = aRe.exec(srodek);
-      while (a !== null) {
-        const t = a[2].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-        if (t.length > 0) { etyk[a[1]] = t; kolejka.push(t); nazwy.push(t); }
-        a = aRe.exec(srodek);
-      }
-      if (nazwy.length === 0) { return ""; }
-      return '<p><small><font color="#605E5C"><u>&#128209; Zak&#322;adki (' +
-        nazwy.length + "): " + nazwy.join(" &middot; ") +
-        " &mdash; ponizej wszystkie warianty</u></font></small></p>";
-    });
-  // Kazda zakladka staje sie natywna sekcja zwijana. Kontener i panele znikaja,
-  // zeby segmenty mialy zbilansowane znaczniki; aktywna karta zostaje rozwinieta.
-  const byloAktywne = h.indexOf("active-pane") >= 0;
-  let nrZak = 0;
+  // --- zakladki (makro Tabs Container z Confluence) ---
+  // W eksporcie statycznym menu <ul class="tabs-menu"> jest PUSTE (Confluence buduje je
+  // JavaScriptem), a tytul kazdej zakladki siedzi w atrybucie data-pane-title panelu.
+  // Panele leca jeden po drugim, wiec bez oznaczenia tresc wariantow zlewa sie w ciag.
+  // Kazda zakladka staje sie natywna sekcja zwijana; aktywna karta zostaje rozwinieta.
+  h = h.replace(/<ul[^>]*class=["'][^"']*tabs-menu[^"']*["'][^>]*>[\s\S]*?<\/ul>/gi, "");
   const wytnijDiv = (s: string, wzor: RegExp,
     buduj: (atr: string, tresc: string) => string, post: string): string => {
     let wynik = s;
@@ -76,32 +56,51 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   };
   const czysty = (s: string) => s.replace(/<[^>]+>/g, "")
     .replace(/&[a-z]+;|&#\d+;/gi, " ").replace(/\s+/g, " ").trim();
-  // Nazwa zakladki: etykieta z menu, potem atrybut, potem NAGLOWEK OTWIERAJACY panel
+  // data-pane-title bywa zapisany samymi malymi literami - na pasku sekcji wyglada to zle,
+  // wiec podnosimy pierwsze litery slow. Tytul z wielkimi literami zostaje nietkniety.
+  const tytulZak = (s: string): string => {
+    const t = s.replace(/\s+/g, " ").trim();
+    if (t !== t.toLowerCase()) { return t; }
+    const w = t.split(" ");
+    let r = "";
+    for (let i = 0; i < w.length; i++) {
+      if (w[i].length === 0) { continue; }
+      const duze = i === 0 || w[i].length > 2;
+      r += (r.length > 0 ? " " : "") +
+        (duze ? w[i].charAt(0).toUpperCase() + w[i].substring(1) : w[i]);
+    }
+    return r;
+  };
+  // Nazwa zakladki: data-pane-title, w jego braku NAGLOWEK OTWIERAJACY panel
   // (wtedy znika z tresci, zeby nie dublowal paska sekcji), na koncu numer.
-  const znacznik = (atr: string, tresc: string): string => {
-    nrZak++;
-    const idm = /id=[\"\']([^\"\']+)[\"\']/.exec(atr);
-    const dlm = /data-label=[\"\']([^\"\']+)[\"\']/.exec(atr);
+  const znacznik = (atr: string, tresc: string, nr: number, bylo: boolean): string => {
+    const pt = /data-pane-title=["']([^"']*)["']/.exec(atr);
     const ng = /^\s*<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/i.exec(tresc);
     let e = "";
     let dalej = tresc;
-    if (idm !== null && etyk[idm[1]] !== undefined) { e = etyk[idm[1]]; }
-    else if (dlm !== null) { e = dlm[1]; }
+    if (pt !== null && pt[1].trim().length > 0) { e = tytulZak(pt[1]); }
     else if (ng !== null && czysty(ng[2]).length > 0) {
       e = czysty(ng[2]);
       dalej = tresc.substring(ng.index + ng[0].length);
-    } else {
-      const k = kolejka.shift();
-      e = k !== undefined ? k : "Zakladka " + nrZak;
-    }
-    const roz = atr.indexOf("active-pane") >= 0 || (nrZak === 1 && !byloAktywne);
+    } else { e = "Zakladka " + nr; }
+    const roz = atr.indexOf("active-pane") >= 0 || (nr === 1 && !bylo);
     return "<!--SEK:" + (roz ? "1" : "0") + ":" +
       czysty(e).replace(/--+>?|[<>]/g, " ").replace(/\s+/g, " ").trim() + "-->" + dalej;
   };
-  h = wytnijDiv(h, /<div[^>]*class=[\"\'][^\"\']*(?:aui-tabs|deck)[^\"\']*[\"\'][^>]*>/gi,
-    (atr: string, tresc: string) => tresc, "<!--/SEK-->");
-  h = wytnijDiv(h, /<div([^>]*class=[\"\'][^\"\']*tabs-pane[^\"\']*[\"\'][^>]*)>/gi,
-    (atr: string, tresc: string) => znacznik(atr, tresc), "");
+  // Panele przetwarzamy W OBREBIE kontenera, zeby w kazdej grupie zakladek
+  // pierwsza karta byla rozwinieta (na stronie bywa kilka grup).
+  const panelRe = /<div([^>]*class=["'][^"']*tabs-pane[^"']*["'][^>]*)>/gi;
+  const panele = (tresc: string): string => {
+    let nr = 0;
+    const bylo = tresc.indexOf("active-pane") >= 0;
+    return wytnijDiv(tresc, panelRe, (atr: string, wnetrze: string) => {
+      nr++;
+      return znacznik(atr, wnetrze, nr, bylo);
+    }, "");
+  };
+  h = wytnijDiv(h, /<div[^>]*class=["'][^"']*aui-tabs[^"']*["'][^>]*>/gi,
+    (atr: string, tresc: string) => panele(tresc), "<!--/SEK-->");
+  h = panele(h);
   const tyt: string[] = [];
   const kotw: string[] = [];
   h = h.replace(
