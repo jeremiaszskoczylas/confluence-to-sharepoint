@@ -17,6 +17,7 @@ bez rejestracji aplikacji w Entra ID.
 | `parseTresc.ts` | `html`, `base`, `tytul`, `linki`, `nag`, `pod` | Główny parser. Czyści treść strony i buduje `CanvasContent1` (jeden web part tekstowy). Trzy ostatnie parametry (mapowanie linków, ścieżka, podstrony) wypełnia Flow 4; w Flow 3 zostają puste. |
 | `planujDrzewo.ts` | `dane`, `witryna` | Flow 4. Z wierszy mapy migracji liczy dla każdej strony: rodzica, kategorię, `TreePath`/`TreeSort`, kolejność, ścieżkę (breadcrumb) i blok podstron; zwraca też mapowanie linków (po id i po tytule) oraz fragmenty HTML strony-mapy. |
 | `budujMape.ts` | `fragmenty` | Flow 4c. Buduje `CanvasContent1` strony-mapy: jeden web part tekstowy z całym drzewem (fragmenty z `planujDrzewo` rozdzielone `<hr>`), dokładnie w formacie `parseTresc`. |
+| `testSekcje.ts` | `wariant` | Eksperyment diagnostyczny (A/B/C/D). Generuje `CanvasContent1` w czterech formatach, żeby ustalić, który SharePoint renderuje na nowo tworzonej stronie: wiele sekcji, sekcje zwijane, dwie kolumny, kontrola. |
 
 ## Co robi `parseTresc`
 

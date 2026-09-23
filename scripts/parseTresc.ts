@@ -24,6 +24,46 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
     "");
   h = h.replace(/ style="[^"]*"/gi, "");
   h = h.replace(/<(\/?)h1([^>]*)>/gi, "<$1h2$2>");
+  // --- zakladki (makra Tabs / Tab Container / Deck of Cards z Confluence) ---
+  // W eksporcie statycznym nie ma JS: panele leca jeden po drugim, bez oznaczen,
+  // przez co tresc wariantow zlewa sie w jeden ciag. Zamieniamy je na jawne bloki:
+  // wykaz zakladek + naglowek H3 z etykieta przed trescia kazdego wariantu.
+  const etyk: { [k: string]: string } = {};
+  const kolejka: string[] = [];
+  h = h.replace(
+    /<ul[^>]*class=["'][^"']*tabs-menu[^"']*["'][^>]*>([\s\S]*?)<\/ul>/gi,
+    (m: string, srodek: string) => {
+      const aRe = /<a[^>]*href=["']#([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+      const nazwy: string[] = [];
+      let a = aRe.exec(srodek);
+      while (a !== null) {
+        const t = a[2].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+        if (t.length > 0) { etyk[a[1]] = t; kolejka.push(t); nazwy.push(t); }
+        a = aRe.exec(srodek);
+      }
+      if (nazwy.length === 0) { return ""; }
+      return '<p><small><font color="#605E5C"><u>&#128209; Zak&#322;adki (' +
+        nazwy.length + "): " + nazwy.join(" &middot; ") +
+        " &mdash; ponizej wszystkie warianty</u></font></small></p>";
+    });
+  let nrZak = 0;
+  const pasek = (atr: string): string => {
+    nrZak++;
+    const idm = /id=["']([^"']+)["']/.exec(atr);
+    const dlm = /data-label=["']([^"']+)["']/.exec(atr);
+    let e = "";
+    if (idm !== null && etyk[idm[1]] !== undefined) { e = etyk[idm[1]]; }
+    else if (dlm !== null) { e = dlm[1]; }
+    else {
+      const k = kolejka.shift();
+      e = k !== undefined ? k : "Zak&#322;adka " + nrZak;
+    }
+    return "<h3>&#128209; " + e + "</h3><div" + atr + ">";
+  };
+  h = h.replace(/<div([^>]*class=["'][^"']*tabs-pane[^"']*["'][^>]*)>/gi,
+    (m: string, atr: string) => pasek(atr));
+  h = h.replace(/<div([^>]*\sdata-label=["'][^"']+["'][^>]*)>/gi,
+    (m: string, atr: string) => atr.indexOf("tabs-pane") >= 0 ? m : pasek(atr));
   const tyt: string[] = [];
   const kotw: string[] = [];
   h = h.replace(
