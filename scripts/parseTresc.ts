@@ -73,6 +73,7 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   };
   // Nazwa zakladki: data-pane-title, w jego braku NAGLOWEK OTWIERAJACY panel
   // (wtedy znika z tresci, zeby nie dublowal paska sekcji), na koncu numer.
+  let pary = false;
   const znacznik = (atr: string, tresc: string, nr: number, bylo: boolean): string => {
     const pt = /data-pane-title=["']([^"']*)["']/.exec(atr);
     const ng = /^\s*<h([1-6])[^>]*>([\s\S]*?)<\/h\1>/i.exec(tresc);
@@ -83,16 +84,30 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
       e = czysty(ng[2]);
       dalej = tresc.substring(ng.index + ng[0].length);
     } else { e = "Zakladka " + nr; }
+    const nazwa = czysty(e).replace(/--+>?|[<>]/g, " ").replace(/\s+/g, " ").trim();
+    // Para zakladek (np. EMS / MyDay) -> dwie kolumny obok siebie, tytul jako naglowek
+    // w kolumnie. Wiecej niz dwie -> sekcje zwijane, bo trzy kolumny sa za waskie.
+    if (pary) {
+      return "<!--SEK:" + (nr === 1 ? "L" : "P") + ":-->" +
+        "<h2>" + nazwa + "</h2>" + dalej;
+    }
     const roz = atr.indexOf("active-pane") >= 0 || (nr === 1 && !bylo);
-    return "<!--SEK:" + (roz ? "1" : "0") + ":" +
-      czysty(e).replace(/--+>?|[<>]/g, " ").replace(/\s+/g, " ").trim() + "-->" + dalej;
+    return "<!--SEK:" + (roz ? "1" : "0") + ":" + nazwa + "-->" + dalej;
   };
-  // Panele przetwarzamy W OBREBIE kontenera, zeby w kazdej grupie zakladek
-  // pierwsza karta byla rozwinieta (na stronie bywa kilka grup).
+  // Panele przetwarzamy W OBREBIE kontenera, zeby kazda grupa zakladek byla
+  // rozpatrywana osobno (na stronie bywa kilka grup).
   const panelRe = /<div([^>]*class=["'][^"']*tabs-pane[^"']*["'][^>]*)>/gi;
+  const ilePaneli = (s: string) => {
+    let n = 0;
+    const r = /<div[^>]*class=["'][^"']*tabs-pane[^"']*["'][^>]*>/gi;
+    let m = r.exec(s);
+    while (m !== null) { n++; m = r.exec(s); }
+    return n;
+  };
   const panele = (tresc: string): string => {
     let nr = 0;
     const bylo = tresc.indexOf("active-pane") >= 0;
+    pary = ilePaneli(tresc) === 2;
     return wytnijDiv(tresc, panelRe, (atr: string, wnetrze: string) => {
       nr++;
       return znacznik(atr, wnetrze, nr, bylo);
@@ -210,29 +225,34 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
     h = h + (h.indexOf("<!--SEK:") >= 0 ? "<!--/SEK-->" : "") + "<hr>" + pod;
   }
   // --- podzial na sekcje strony ---
-  // Znaczniki <!--SEK:R:nazwa--> (R=1 rozwinieta, 0 zwinieta) i <!--/SEK--> wstawila
-  // wczesniej obsluga cloakow i zakladek. Brak znacznikow = jedna kontrolka, czyli
-  // dokladnie format sprzed tej zmiany (strony bez cloakow/zakladek sa nietkniete).
-  interface Seg { nazwa: string; rozwin: boolean; tresc: string }
+  // Znaczniki wstawila wczesniej obsluga cloakow i zakladek:
+  //   <!--SEK:1:nazwa--> sekcja zwijana rozwinieta, <!--SEK:0:nazwa--> zwinieta,
+  //   <!--SEK:L:--> lewa kolumna, <!--SEK:P:--> prawa kolumna, <!--/SEK--> koniec.
+  // Brak znacznikow = jedna kontrolka, czyli format sprzed tej zmiany
+  // (strony bez cloakow i zakladek sa nietkniete).
+  interface Seg { nazwa: string; rozwin: boolean; kol: string; tresc: string }
   const segs: Seg[] = [];
-  const zRe = /<!--SEK:([01]):([\s\S]*?)-->|<!--\/SEK-->/g;
+  const zRe = /<!--SEK:([01LP]):([\s\S]*?)-->|<!--\/SEK-->/g;
   let ost = 0;
-  let biez: Seg = { nazwa: "", rozwin: true, tresc: "" };
+  let biez: Seg = { nazwa: "", rozwin: true, kol: "", tresc: "" };
   let z = zRe.exec(h);
   while (z !== null) {
     biez.tresc += h.substring(ost, z.index);
     segs.push(biez);
     ost = z.index + z[0].length;
     biez = z[1] !== undefined
-      ? { nazwa: z[2], rozwin: z[1] === "1", tresc: "" }
-      : { nazwa: "", rozwin: true, tresc: "" };
+      ? {
+        nazwa: z[1] === "L" || z[1] === "P" ? "" : z[2],
+        rozwin: z[1] === "1", kol: z[1] === "L" || z[1] === "P" ? z[1] : "", tresc: ""
+      }
+      : { nazwa: "", rozwin: true, kol: "", tresc: "" };
     z = zRe.exec(h);
   }
   biez.tresc += h.substring(ost);
   segs.push(biez);
   const pelne: Seg[] = segs.filter(s =>
     s.tresc.replace(/<[^>]+>|&nbsp;|\s/g, "").length > 0 || s.nazwa.length > 0);
-  if (pelne.length === 0) { pelne.push({ nazwa: "", rozwin: true, tresc: h }); }
+  if (pelne.length === 0) { pelne.push({ nazwa: "", rozwin: true, kol: "", tresc: h }); }
 
   // Kazdy segment musi miec zbilansowane <div> - osierocone domkniecia zostaja
   // po kontenerze main-content albo po wycietym kontenerze zakladek.
@@ -251,16 +271,23 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
     return w;
   };
   const canvas: { [k: string]: unknown }[] = [];
+  let zone = 0;
   for (let n = 0; n < pelne.length; n++) {
     const s = pelne[n];
     let t = zbilansuj(s.tresc.replace(/^\s*<hr>/, ""));
     if (t.replace(/<[^>]+>|&nbsp;|\s/g, "").length === 0) { t = "<p></p>"; }
+    // Prawa kolumna dzieli sekcje z lewa (ten sam zoneIndex, sectionIndex 1 i 2,
+    // polowa szerokosci). Pozostale segmenty dostaja wlasna sekcje na pelna szerokosc.
+    if (s.kol !== "P") { zone++; }
     const k: { [k: string]: unknown } = {
       controlType: 4,
       id: "c5f0a545-0f0d-4f31-9e2e-" + ("000000000000" + String(n + 1)).slice(-12),
       position: {
-        layoutIndex: 1, zoneIndex: n + 1, sectionIndex: n + 1,
-        controlIndex: 1, sectionFactor: 12
+        layoutIndex: 1,
+        zoneIndex: zone,
+        sectionIndex: s.kol === "L" ? 1 : (s.kol === "P" ? 2 : zone),
+        controlIndex: 1,
+        sectionFactor: s.kol === "" ? 12 : 6
       },
       addedFromPersistedData: true,
       emphasis: {},

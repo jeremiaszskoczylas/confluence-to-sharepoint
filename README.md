@@ -26,9 +26,11 @@ bez rejestracji aplikacji w Entra ID.
 - usuwa atrybuty `style` — czym odsłania treść sekcji `cloak` ukrytych przez `display: none`
 - cloaki → rozwinięte, ponumerowane sekcje z liniami i wykazem odnośników na górze
   (kotwice zgodne z regułą SharePointa)
-- **zakładki** (`tabs-pane`) → natywne sekcje zwijane; karta aktywna (`active-pane`) zostaje
-  rozwinięta, treść przed i po zakładkach wraca do sekcji zwykłych. Panele przetwarzane są
-  w obrębie kontenera, więc przy kilku grupach na stronie każda ma swoją kartę rozwiniętą.
+- **zakładki** (`tabs-pane`): grupa dwóch zakładek → **dwie kolumny obok siebie**
+  (`sectionFactor` 6), tytuł zakładki jako nagłówek w kolumnie; grupa trzech lub więcej →
+  natywne sekcje zwijane z kartą aktywną (`active-pane`) rozwiniętą. Treść przed i po
+  zakładkach wraca do sekcji pełnej szerokości. Panele przetwarzane są w obrębie kontenera,
+  więc każda grupa na stronie rozpatrywana jest osobno.
   Nazwa sekcji pochodzi z `data-pane-title` (zapisany małymi literami dostaje wielkie
   pierwsze litery); w jego braku z nagłówka otwierającego panel, który wtedy znika z treści,
   a na końcu numer zastępczy. Menu `tabs-menu` jest w eksporcie **puste** — Confluence buduje
