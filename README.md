@@ -7,6 +7,11 @@ akcją `Run script`.
 Całość działa na **standardowych konektorach Power Platform** — bez premium, bez Dataverse,
 bez rejestracji aplikacji w Entra ID.
 
+## Dashboard (Power Apps)
+
+Instrukcje budowy aplikacji sa w katalogu [app/](app/) —
+listy SharePoint, szkielet, ekran glowny i drzewo dokumentacji.
+
 ## Flow-y
 
 Komplet sciag do Power Automate jest w katalogu [flows/](flows/) —
