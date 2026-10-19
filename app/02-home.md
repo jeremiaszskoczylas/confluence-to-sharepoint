@@ -298,29 +298,72 @@ With(
 Porownujemy godziny jako tekst w formacie `HH:mm`, dlatego w `DT_Rota`
 godziny musza byc zapisane dwucyfrowo: `08:00`, nie `8:00`.
 
-### Stopka karty: luki w deklaracjach
+### Stopka karty: pokrycie raportow na dzis
 
-Pod galeria **Text label** `lblObsadaUwaga`: X `272`, Y `628`, Width `520`,
-Height `24`, Size `11`, Color `gKolorSzary`, Text:
+Najwazniejsza informacja na tej karcie. Jesli osoba z endami ma w czwartek wolne,
+to w czwartek **wszystkie** plakietki E sa szare — znaczy, ze ktos z obecnych musi
+te endy przejac. Stopka nazywa to wprost, zeby nie trzeba bylo liczyc wzrokiem.
+
+Najpierw wspolna kolekcja. Zaznacz `scrHome` → **OnVisible**:
 ```
-With(
-    {
-        braki: Filter(
-            AddColumns(Filter(DT_Rota, Data = gDzis), "Rap",
-                LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)),
-            IsBlank(Rap)
-        )
-    },
-    If(CountRows(braki) = 0,
-        "Wszyscy z dzisiejszej zmiany maja zadeklarowane raporty",
-        CountRows(braki) & " bez deklaracji raportow: " &
-        Concat(braki, First(Split(Title, " ")).Value, ", ")
+ClearCollect(colDzis,
+    AddColumns(
+        Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca"),
+        "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
     )
 )
 ```
 
-Lista pokazuje tylko osoby z dzisiejszego grafiku. Kto ma raporty w tym tygodniu,
-ale dzis nie pracuje, bedzie widoczny w swoim dniu.
+Dopisz te sama formule na koncu OnSelect przycisku `btnRaportyZapisz`
+oraz ikony odswiezania, zeby stopka nadazala za zmianami.
+
+**Text label** `lblPokrycie`: X `272`, Y `628`, Width `420`, Height `24`,
+Size `11`, Color `gKolorSzary`, Text:
+```
+"Dzis na zmianie —  S: " &
+Coalesce(Concat(Filter(colDzis, Rap.Starty), First(Split(Title, " ")).Value, ", "), "nikt") &
+"   M: " &
+Coalesce(Concat(Filter(colDzis, Rap.Midy), First(Split(Title, " ")).Value, ", "), "nikt") &
+"   E: " &
+Coalesce(Concat(Filter(colDzis, Rap.Endy), First(Split(Title, " ")).Value, ", "), "nikt")
+```
+
+**Text label** `lblLuka` — ostrzezenie, widoczne tylko gdy czegos brakuje:
+
+| Wlasciwosc | Wartosc |
+|---|---|
+| X / Y | `272` / `652` |
+| Width / Height | `520` / `36` |
+| Size | `11` |
+| Color | `gKolorAkcentCiemny` |
+| Fill | `gKolorAkcentTlo` |
+| Visible | patrz nizej |
+
+Visible:
+```
+CountRows(Filter(colDzis, Rap.Starty)) = 0 ||
+CountRows(Filter(colDzis, Rap.Midy)) = 0 ||
+CountRows(Filter(colDzis, Rap.Endy)) = 0
+```
+
+Text:
+```
+"Dzis nikt nie robi: " &
+Concat(
+    Filter(
+        Table(
+            {n: "starty", ile: CountRows(Filter(colDzis, Rap.Starty))},
+            {n: "midy",   ile: CountRows(Filter(colDzis, Rap.Midy))},
+            {n: "endy",   ile: CountRows(Filter(colDzis, Rap.Endy))}
+        ),
+        ile = 0
+    ),
+    n, ", "
+) & " — ktos z dzisiejszej zmiany musi je przejac"
+```
+
+Liczone sa tylko osoby z `Rodzaj = "Praca"`, wiec urlop czy chorobowe nie zasłaniaja
+luki. Kto ma raporty w tym tygodniu, ale dzis nie pracuje, pojawi sie w swoim dniu.
 
 ---
 
@@ -488,7 +531,9 @@ Set(gDzis, Today())
 3. przestaw przelaczniki raportow → **Zapisz raporty** → wiersz w `DT_Reports`
 4. przy kazdej osobie widac trzy plakietki S, M, E — wypelnione oznaczaja raporty,
    ktore ta osoba robi w tym tygodniu
-5. jesli nie widac zdjec: sprawdz, czy `Email` w `DT_Rota` to prawdziwe adresy
+5. gdy nikt z obecnych nie ma danego raportu, pod lista zapala sie ostrzezenie;
+   sprawdz to, odznaczajac u siebie raport, ktory masz jako jedyny
+6. jesli nie widac zdjec: sprawdz, czy `Email` w `DT_Rota` to prawdziwe adresy
 
 ## H. Role managera (do zrobienia pozniej)
 
