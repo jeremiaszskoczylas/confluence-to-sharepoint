@@ -39,9 +39,10 @@ takze przy slabym rozroznianiu barw.
 scrHome          obsada dnia | moja przerwa | raporty tygodnia | komunikat managera
 scrDocs          zakladki serwisow + drzewo + wyszukiwarka
 scrGry           pusty placeholder (pozniej)
-
-Makiety wygladu: canvas „Dashboard zespolu — makiety" (link w rozmowie).
 ```
+
+Makiety wygladu powstaly jako osobny canvas „Dashboard zespolu — makiety".
+Link jest w rozmowie; nie trafia do repo, bo jest prywatny.
 
 Nawigacja: pionowy pasek po lewej, ten sam na kazdym ekranie.
 
