@@ -1,11 +1,14 @@
-# Flow 4c — BudujMape (sciaga do kopiowania)
+# 3 — BudujMape
 
-Tworzy strone „Mapa dokumentacji" OD ZERA — dokladnie ta sama droga, ktora Flow 3
-tworzyl strony: nowa strona → savepageasdraft z jednym web partem → zmiana nazwy → publish.
-Zadnych sekcji, zadnych szablonow, zadnego nadpisywania istniejacej strony.
+Tworzy strone-mape od zera: korzen w sekcji zwyklej, kazda galaz jako natywna
+sekcja zwijana SharePointa. Ta sama droga co tworzenie stron w kroku 1,
+wiec format jest sprawdzony.
 
-Oznaczenia: **fx** = panel wyrazen · **tekst** = wpisz zwykle · **lista** = z rozwijanej
+Zrodlem jest `DT_MigrationMap`. Po migracji do odswiezania mapy sluzy
+[04-OdswiezDrzewo.md](04-OdswiezDrzewo.md), ktory czyta biblioteke Site Pages
+i obejmuje takze strony zalozone recznie.
 
+---
 ## PODMIEN
 
 | Placeholder | Na co |
@@ -13,10 +16,10 @@ Oznaczenia: **fx** = panel wyrazen · **tekst** = wpisz zwykle · **lista** = z 
 | `<WITRYNA>` | pelna sciezka witryny, np. `/teams/Dzial/podwitryna` — bez domeny, bez ukosnika na koncu |
 | `<MAPA>` | docelowa nazwa pliku strony, np. `Documentation-Map.aspx` |
 
-## PRZED PIERWSZYM BIEGIEM
+## Uwaga
 
-Usun stara strone `<MAPA>` z Site Pages (kosz). Flow tworzy nowa pod ta sama nazwa,
-wiec link w lewym panelu dalej dziala.
+Istniejacej strony `<MAPA>` nie trzeba kasowac — akcja RenamePage nadpisuje ja
+w miejscu (`flags=1`), wiec link w lewym panelu caly czas dziala.
 
 Nazwy akcji DOKLADNIE jak w naglowkach — wyrazenia od nich zaleza.
 

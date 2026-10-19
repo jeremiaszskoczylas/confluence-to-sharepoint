@@ -1,4 +1,4 @@
-# Flow 4b — NaprawHierarchie
+# 99 — NaprawHierarchie (awaryjny)
 
 Odtwarza `ParentConfluenceId` i `Depth` w `DT_MigrationMap` z pliku `drzewo.txt`
 (wynik skryptu parseIndex). Nie rusza zadnej innej kolumny.

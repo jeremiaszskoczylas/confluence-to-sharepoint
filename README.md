@@ -7,6 +7,12 @@ akcją `Run script`.
 Całość działa na **standardowych konektorach Power Platform** — bez premium, bez Dataverse,
 bez rejestracji aplikacji w Entra ID.
 
+## Flow-y
+
+Komplet sciag do Power Automate jest w katalogu [flows/](flows/) —
+zacznij od [flows/README.md](flows/README.md), ktory podaje kolejnosc
+i trzy wartosci do podmiany.
+
 ## Skrypty
 
 | Plik | Parametry | Zastosowanie |
@@ -15,10 +21,10 @@ bez rejestracji aplikacji w Entra ID.
 | `pokazFragment.ts` | `html`, `klasa` | Zwraca fragment HTML otaczający wskazaną klasę CSS. Do podglądu struktury konkretnej konstrukcji. |
 | `pokazTaby.ts` | `html` | Sonda zakładek i załączników. Zwraca liczby wystąpień znanych klas oraz szkielet znaczników (nazwy tagów, `class`, `id`, `data-*`); treść zastępuje licznikiem znaków, więc raport można pokazać bez ujawniania zawartości strony. Widoczne zostają tylko krótkie etykiety z nagłówków i odnośników. |
 | `parseIndex.ts` | `html` | Parsuje `index.html` z eksportu. Zwraca płaską listę `ID|ID_rodzica|poziom|tytuł|plik` odtwarzającą hierarchię stron. |
-| `parseTresc.ts` | `html`, `base`, `tytul`, `linki`, `nag`, `pod` | Główny parser. Czyści treść strony i buduje `CanvasContent1`. Cloaki zostają rozwinięte jako numerowane sekcje z wykazem; tylko zakładki stają się natywnymi sekcjami zwijanymi. Trzy ostatnie parametry (mapowanie linków, ścieżka, podstrony) wypełnia Flow 4; w Flow 3 zostają puste. |
-| `planujDrzewo.ts` | `dane`, `witryna` | Flow 4. Z wierszy mapy migracji liczy dla każdej strony: rodzica, kategorię, `TreePath`/`TreeSort`, kolejność, ścieżkę (breadcrumb) i blok podstron; zwraca też mapowanie linków (po id i po tytule) oraz fragmenty HTML strony-mapy. |
-| `budujMape.ts` | `fragmenty` | Flow 4c. Buduje `CanvasContent1` strony-mapy: korzeń w sekcji zwykłej, każda gałąź jako sekcja zwijana (nazwa z tytułu gałęzi). |
-| `testSekcje.ts` | `wariant` | Eksperyment diagnostyczny (A/B/C/D). Generuje `CanvasContent1` w czterech formatach, żeby ustalić, który SharePoint renderuje na nowo tworzonej stronie: wiele sekcji, sekcje zwijane, dwie kolumny, kontrola. |
+| `parseTresc.ts` | `html`, `base`, `tytul`, `linki`, `nag`, `pod` | Główny parser. Czyści treść strony i buduje `CanvasContent1`. Cloaki zostają rozwinięte jako numerowane sekcje z wykazem; tylko zakładki stają się natywnymi sekcjami zwijanymi. Trzy ostatnie parametry (mapowanie linków, ścieżka, podstrony) wypełnia krok 2 (RemapLinks); w kroku 1 zostają puste. |
+| `planujDrzewo.ts` | `dane`, `witryna` | Krok 2 (RemapLinks). Z wierszy mapy migracji liczy dla każdej strony: rodzica, kategorię, `TreePath`/`TreeSort`, kolejność, ścieżkę (breadcrumb) i blok podstron; zwraca też mapowanie linków (po id i po tytule) oraz fragmenty HTML strony-mapy. |
+| `budujMape.ts` | `fragmenty` | Kroki 3 i 4. Buduje `CanvasContent1` strony-mapy: korzeń w sekcji zwykłej, każda gałąź jako sekcja zwijana (nazwa z tytułu gałęzi). |
+| `planujMape.ts` | `dane`, `pomin` | Krok 4 (utrzymanie). Liczy drzewo z biblioteki Site Pages po kolumnie `ParentPageId`, więc obejmuje też strony założone ręcznie. Zwraca metadane do wpisania (`TreePath`, `TreeSort`, `SortOrder`, `Category`), fragmenty mapy i liczbę stron bez przypisania. |
 
 ## Co robi `parseTresc`
 

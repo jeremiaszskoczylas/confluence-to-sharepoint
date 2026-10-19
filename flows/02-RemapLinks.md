@@ -1,22 +1,14 @@
-# Flow 4 — RemapLinks (sciaga do kopiowania)
+# 2 — RemapLinks
 
-Kazda wartosc do wklejenia jest w osobnym bloku. W widoku raw: potrojne klikniecie
-w linie = zaznaczona cala, Ctrl+C.
+Przebudowuje tresc WSZYSTKICH zmigrowanych stron: podmienia linki wewnetrzne na
+adresy w SharePoincie, dokłada sciezke nadrzedna i blok podstron, wypelnia metadane
+drzewa (`ParentPageId`, `TreePath`, `TreeSort`, `SortOrder`, `Category`).
 
-Oznaczenia: **fx** = panel wyrazen (w polu ma byc zeton) · **tekst** = wpisz zwykle ·
-**dyn** = dynamic content · **lista** = wybierz z rozwijanej
-
-## PODMIEN (2 placeholdery)
-
-| Placeholder | Na co |
-|---|---|
-| `<WITRYNA>` | pelna sciezka witryny, np. `/teams/Dzial/podwitryna` — bez domeny, bez ukosnika na koncu |
-| `<EKSPORT>` | folder rozpakowanego eksportu w bibliotece, np. `confluence-export/NAZWA` |
-
-Nazwy akcji DOKLADNIE jak w naglowkach (⋯ → Rename) — wyrazenia od nich zaleza.
+Uruchamiasz po kroku 1 oraz za kazdym razem, gdy zmieni sie `parseTresc`.
+Podmien `<WITRYNA>` i `<EKSPORT>` (patrz [README.md](README.md)).
+Nazwy akcji dokladnie jak w naglowkach.
 
 ---
-
 ## 1. Trigger — Manually trigger a flow
 
 ---
@@ -227,15 +219,15 @@ LinksRemapped
 ```
 **WSZYSTKIE pozostale pola tej akcji PUSTE** — w szczegolnosci ParentConfluenceId, Depth,
 ConfluenceId, TargetPageId. Wpisane 0 nadpisze hierarchie w mapie przy kazdym biegu
-(tak stracilismy ParentConfluenceId 2026-09-18; naprawa: flow4b-NaprawHierarchie).
+(tak stracilismy ParentConfluenceId 2026-09-18; naprawa: 99-NaprawHierarchie.md).
 
 ---
 
 ## 12. Mapa dokumentacji — OSOBNY FLOW
 
-Akcje mapy (GetMapa, WstawMape, StopGdyERR, CheckoutMapa, SaveMapa, PublishMapa) zostaly
-USUNIETE z tego flow. Mape buduje `flows/flow4c-BudujMape.md` — nowa strona od zera,
-jeden web part, ta sama droga co Flow 3. Jesli masz te akcje w RemapLinks — skasuj je.
+Mapy ten flow nie dotyka. Buduje ja [03-BudujMape.md](03-BudujMape.md).
+Jesli masz w RemapLinks akcje GetMapa, WstawMape, CheckoutMapa, SaveMapa
+lub PublishMapa z wczesniejszych wersji — skasuj je.
 
 ---
 
@@ -246,7 +238,7 @@ jeden web part, ta sama droga co Flow 3. Jesli masz te akcje w RemapLinks — sk
 
 - Tresc kazdej strony jest BUDOWANA OD NOWA ze zrodel (parser + mapowanie linkow).
   Reczne edycje stron sprzed tego flow zostana nadpisane. Po nim edycja jest wolna.
-- Strona mapy: osobny flow 4c (BudujMape).
+- Strona mapy: osobny flow, krok 3.
 - `category` musi istniec w wyborach kolumny `Category` w Site Pages.
 - Flow jest idempotentny — mozna uruchamiac wielokrotnie.
-- Czas: ~60 x 30 s = 30–40 min.
+- Czas: okolo 30 s na strone, czyli 30–40 min dla 60 stron.
