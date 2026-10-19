@@ -11,8 +11,27 @@ Wszystko na standardowych konektorach: SharePoint, Office 365 Users, Office 365 
 | 1 | [01-szkielet.md](01-szkielet.md) | aplikacja, nawigacja, motyw, zmienne startowe | 45 min |
 | 2 | [02-home.md](02-home.md) | ekran glowny: obsada, przerwy, raporty, komunikat | 2–3 h |
 | 3 | [03-dokumentacja.md](03-dokumentacja.md) | drzewo dokumentacji z zakladkami serwisow | 1–2 h |
+| 4 | [04-nowa-strona.md](04-nowa-strona.md) | dodawanie strony w wybranym miejscu drzewa | 1 h |
 
 Gierki i role dokladamy pozniej — szkielet jest na nie przygotowany.
+
+## Kolory
+
+Szarosci i biel, czerwien jako jedyny akcent.
+
+| Rola | Wartosc | Gdzie |
+|---|---|---|
+| tlo aplikacji | `244, 244, 245` | wszystkie ekrany |
+| karty | `255, 255, 255` | panele tresci |
+| pasek nawigacji | `35, 35, 38` | lewa kolumna |
+| akcent | `200, 16, 46` | przyciski glowne, aktywna zakladka, stan „na przerwie" |
+| akcent ciemny | `142, 11, 34` | najechanie na przycisk |
+| akcent tlo | `251, 233, 236` | plakietki, zaznaczony wiersz |
+| tekst | `28, 28, 30` | naglowki i tresc |
+| tekst drugorzedny | `104, 104, 110` | opisy, metadane |
+
+Statusy rozroznia nie tylko kolor, ale i tresc etykiety, wiec czytelne sa
+takze przy slabym rozroznianiu barw.
 
 ## Ekrany
 
@@ -20,6 +39,8 @@ Gierki i role dokladamy pozniej — szkielet jest na nie przygotowany.
 scrHome          obsada dnia | moja przerwa | raporty tygodnia | komunikat managera
 scrDocs          zakladki serwisow + drzewo + wyszukiwarka
 scrGry           pusty placeholder (pozniej)
+
+Makiety wygladu: canvas „Dashboard zespolu — makiety" (link w rozmowie).
 ```
 
 Nawigacja: pionowy pasek po lewej, ten sam na kazdym ekranie.

@@ -48,7 +48,7 @@ Fill `gKolorPanel`, BorderThickness `1`, BorderColor `RGBA(0,0,0,0.08)`.
 
 Fill:
 ```
-If(LookUp(DT_ManagerMessages, AktywnyDo >= gDzis, Wazne), gKolorCzerwony, gKolorAkcent)
+If(LookUp(DT_ManagerMessages, AktywnyDo >= gDzis, Wazne), gKolorAkcent, gKolorAkcent)
 ```
 
 ### Naglowek komunikatu
@@ -238,8 +238,8 @@ With(
     },
     If(
         ThisItem.Rodzaj <> "Praca", gKolorSzary,
-        !IsBlank(p) && teraz >= p.OdGodz && teraz < p.DoGodz, gKolorZolty,
-        teraz >= ThisItem.OdGodz && teraz < ThisItem.DoGodz, gKolorZielony,
+        !IsBlank(p) && teraz >= p.OdGodz && teraz < p.DoGodz, gKolorAkcent,
+        teraz >= ThisItem.OdGodz && teraz < ThisItem.DoGodz, gKolorTekst,
         gKolorSzary
     )
 )

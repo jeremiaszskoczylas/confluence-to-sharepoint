@@ -12,9 +12,11 @@ w osobnym bloku: potrojne klikniecie zaznacza cala linie, Ctrl+C kopiuje.
 | 2 | [02-RemapLinks.md](02-RemapLinks.md) | po migracji, potem przy kazdej zmianie parsera | 30–40 min biegu |
 | 3 | [03-BudujMape.md](03-BudujMape.md) | po kroku 2 | ~1 min |
 | 4 | [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md) | **utrzymanie** — po kazdej nowej/usunietej/przeniesionej stronie | ~2 min |
+| 5 | [05-NowaStrona.md](05-NowaStrona.md) | wywolywany z aplikacji przy dodawaniu strony | kilka sekund |
 | ! | [99-NaprawHierarchie.md](99-NaprawHierarchie.md) | awaryjnie, gdy hierarchia w mapie migracji zostanie nadpisana | ~5 min |
 
-Kroki 1–3 to migracja jednorazowa. Krok 4 to jedyne, co trzeba uruchamiac pozniej.
+Kroki 1–3 to migracja jednorazowa. Krok 4 to jedyne, co trzeba uruchamiac recznie
+pozniej; krok 5 odpala sie sam z aplikacji.
 
 ## Trzy wartosci do podmiany
 

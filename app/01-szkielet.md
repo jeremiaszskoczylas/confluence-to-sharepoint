@@ -24,14 +24,16 @@ Lewy pasek → **Data** → **Add data**. Dodaj kolejno:
 Zaznacz **App** w drzewie po lewej → wlasciwosc **OnStart** → wklej calosc:
 
 ```
-Set(gKolorTlo, RGBA(248, 249, 250, 1));
+Set(gKolorTlo, RGBA(244, 244, 245, 1));
 Set(gKolorPanel, RGBA(255, 255, 255, 1));
-Set(gKolorAkcent, RGBA(0, 90, 158, 1));
-Set(gKolorTekst, RGBA(32, 31, 30, 1));
-Set(gKolorSzary, RGBA(96, 94, 92, 1));
-Set(gKolorZielony, RGBA(16, 124, 16, 1));
-Set(gKolorCzerwony, RGBA(196, 49, 75, 1));
-Set(gKolorZolty, RGBA(183, 121, 31, 1));
+Set(gKolorAkcent, RGBA(200, 16, 46, 1));
+Set(gKolorAkcentCiemny, RGBA(142, 11, 34, 1));
+Set(gKolorAkcentTlo, RGBA(251, 233, 236, 1));
+Set(gKolorPasek, RGBA(35, 35, 38, 1));
+Set(gKolorTekst, RGBA(28, 28, 30, 1));
+Set(gKolorSzary, RGBA(104, 104, 110, 1));
+Set(gKolorSzaryJasny, RGBA(134, 134, 141, 1));
+Set(gKolorLinia, RGBA(0, 0, 0, 0.09));
 
 Set(gJa, User());
 Set(gDzis, Today());
@@ -82,7 +84,7 @@ Robimy raz na `scrHome`, potem kopiujemy na pozostale ekrany.
 | Y | `0` |
 | Width | `220` |
 | Height | `Parent.Height` |
-| Fill | `gKolorAkcent` |
+| Fill | `gKolorPasek` |
 
 ### Tytul
 
