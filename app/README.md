@@ -9,7 +9,7 @@ Wszystko na standardowych konektorach: SharePoint, Office 365 Users, Office 365 
 |---|---|---|---|
 | 0 | [00-listy.md](00-listy.md) | listy SharePoint i kolumna `Service` | 40 min |
 | 1 | [01-szkielet.md](01-szkielet.md) | aplikacja, nawigacja, motyw, zmienne startowe | 45 min |
-| 2 | [02-home.md](02-home.md) | ekran glowny: obsada, przerwy, raporty wlasne i zespolu, komunikat | 3 h |
+| 2 | [02-home.md](02-home.md) | ekran glowny: obsada z raportami, przerwy, komunikat | 2–3 h |
 | 3 | [03-dokumentacja.md](03-dokumentacja.md) | drzewo dokumentacji z zakladkami serwisow | 1–2 h |
 | 4 | [04-nowa-strona.md](04-nowa-strona.md) | dodawanie strony w wybranym miejscu drzewa | 1 h |
 
@@ -36,8 +36,7 @@ takze przy slabym rozroznianiu barw.
 ## Ekrany
 
 ```
-scrHome          komunikat managera | obsada dnia | moja przerwa + raporty
-                 + tabela raportow calego zespolu
+scrHome          komunikat managera | obsada dnia z raportami | przerwa + raporty
 scrDocs          zakladki serwisow + drzewo + wyszukiwarka
 scrGry           pusty placeholder (pozniej)
 ```

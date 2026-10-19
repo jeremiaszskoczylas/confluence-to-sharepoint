@@ -164,22 +164,32 @@ Size `16`, FontWeight `FontWeight.Semibold`, Text:
 "Kto dzis pracuje (" & CountRows(Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca")) & ")"
 ```
 
+**Text label** `lblObsadaLegenda`: X `272`, Y `282`, Width `520`, Height `20`,
+Size `11`, Color `gKolorSzaryJasny`,
+Text `"Raporty tygodnia:  S starty  ·  M midy  ·  E endy"`
+
 ### Galeria
 
 **Insert** → **Gallery** → **Blank vertical**, nazwa `galObsada`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| X / Y | `264` / `292` |
-| Width / Height | `528` / `352` |
+| X / Y | `264` / `308` |
+| Width / Height | `528` / `312` |
 | TemplateSize | `64` |
 | TemplatePadding | `0` |
 | ShowScrollbar | `true` |
 
-Items:
+Items — do grafiku dnia doklejamy deklaracje raportow z biezacego tygodnia:
 ```
-SortByColumns(Filter(DT_Rota, Data = gDzis), "Title", Ascending)
+AddColumns(
+    SortByColumns(Filter(DT_Rota, Data = gDzis), "Title", Ascending),
+    "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+)
 ```
+
+`Rap` jest pusty, gdy dana osoba nie zadeklarowala nic na ten tydzien —
+w wierszu widac wtedy trzy wygaszone plakietki.
 
 ### Zawartosc wiersza galerii
 
@@ -204,12 +214,52 @@ Size `11`, Color `gKolorSzary`, Text:
 If(ThisItem.Rodzaj = "Praca", ThisItem.OdGodz & " - " & ThisItem.DoGodz, ThisItem.Rodzaj)
 ```
 
+### Plakietki raportow w wierszu
+
+Trzy male etykiety obok siebie. Kazda ma **Height** `26`, **Width** `26`,
+**Y** `19`, **Size** `11`, **FontWeight** `FontWeight.Semibold`,
+**Align** `Align.Center`, **VerticalAlign** `VerticalAlign.Middle`,
+**BorderThickness** `1`, **BorderRadius** (w panelu Radius) `5`.
+
+| Kontrolka | X | Text |
+|---|---|---|
+| `lblRapS` | `300` | `"S"` |
+| `lblRapM` | `330` | `"M"` |
+| `lblRapE` | `360` | `"E"` |
+
+Dla `lblRapS`:
+
+Fill:
+```
+If(ThisItem.Rap.Starty, gKolorAkcentTlo, gKolorPanel)
+```
+Color:
+```
+If(ThisItem.Rap.Starty, gKolorAkcentCiemny, RGBA(182,182,188,1))
+```
+BorderColor:
+```
+If(ThisItem.Rap.Starty, RGBA(200,16,46,0.4), gKolorLinia)
+```
+Tooltip:
+```
+If(ThisItem.Rap.Starty, ThisItem.Title & " robi starty", ThisItem.Title & " nie robi startow")
+```
+
+Dla `lblRapM` i `lblRapE` te same cztery formuly, podmieniajac
+`ThisItem.Rap.Starty` na `ThisItem.Rap.Midy` oraz `ThisItem.Rap.Endy`.
+
+Pusty `Rap` (brak deklaracji) daje `false` w kazdym warunku, wiec wszystkie trzy
+plakietki sa wygaszone — od razu widac, kto jeszcze nic nie wybral.
+
+### Status
+
 **Text label** `lblOsobaStatus` — status wyliczany z grafiku i przerw:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| X / Y | `360` / `20` |
-| Width / Height | `160` / `24` |
+| X / Y | `400` / `20` |
+| Width / Height | `120` / `24` |
 | Size | `11` |
 | Align | `Align.Right` |
 
@@ -247,6 +297,30 @@ With(
 
 Porownujemy godziny jako tekst w formacie `HH:mm`, dlatego w `DT_Rota`
 godziny musza byc zapisane dwucyfrowo: `08:00`, nie `8:00`.
+
+### Stopka karty: luki w deklaracjach
+
+Pod galeria **Text label** `lblObsadaUwaga`: X `272`, Y `628`, Width `520`,
+Height `24`, Size `11`, Color `gKolorSzary`, Text:
+```
+With(
+    {
+        braki: Filter(
+            AddColumns(Filter(DT_Rota, Data = gDzis), "Rap",
+                LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)),
+            IsBlank(Rap)
+        )
+    },
+    If(CountRows(braki) = 0,
+        "Wszyscy z dzisiejszej zmiany maja zadeklarowane raporty",
+        CountRows(braki) & " bez deklaracji raportow: " &
+        Concat(braki, First(Split(Title, " ")).Value, ", ")
+    )
+)
+```
+
+Lista pokazuje tylko osoby z dzisiejszego grafiku. Kto ma raporty w tym tygodniu,
+ale dzis nie pracuje, bedzie widoczny w swoim dniu.
 
 ---
 
@@ -387,157 +461,13 @@ Notify("Zapisane", NotificationType.Success, 2000)
 Obok kazdego przelacznika **Text label** (X `1030`, ta sama wysokosc co przelacznik,
 Width `290`, Size `11`, Color `gKolorSzary`). Dla startow Text:
 ```
-CountRows(Filter(colZespol, Starty)) & " osoby w zespole"
+CountRows(Filter(DT_Reports, TydzienOd = gPoniedzialek, Starty)) & " osob w zespole"
 ```
 Dla midow i endow tak samo, zmieniajac `Starty` na `Midy` i `Endy`.
 
 ---
 
-## F. Raporty calego zespolu
-
-Tabela: kto w tym tygodniu robi ktore raporty. Widoczna dla wszystkich,
-wiec kazdy wie, gdzie sa luki.
-
-### Kolekcja
-
-Zaznacz `scrHome` → wlasciwosc **OnVisible** → wklej calosc:
-
-```
-ClearCollect(colZespol,
-    ForAll(
-        Distinct(
-            Filter(DT_Rota, Data >= gPoniedzialek, Data <= DateAdd(gPoniedzialek, 6, Days)),
-            Email
-        ) As e,
-        With({r: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = e.Value)},
-            {
-                Mail: e.Value,
-                Imie: LookUp(DT_Rota, Email = e.Value).Title,
-                Starty: !IsBlank(r) && r.Starty,
-                Midy:   !IsBlank(r) && r.Midy,
-                Endy:   !IsBlank(r) && r.Endy,
-                Brak:   IsBlank(r)
-            }
-        )
-    )
-)
-```
-
-Lista powstaje z grafiku tygodnia, wiec widac takze osoby, ktore **nic nie
-zadeklarowaly** — bez tego luka w obsadzie raportow byłaby niewidoczna.
-
-Jesli Power Apps podkresli `e.Value`, twoja wersja zwraca z `Distinct` kolumne
-`Result` — wtedy wpisz `e.Result` w trzech miejscach.
-
-Po zapisie raportow (sekcja E) dopisz na koncu OnSelect przycisku
-`btnRaportyZapisz` te sama formule, zeby tabela odswiezyla sie od razu.
-
-### Karta i naglowki kolumn
-
-**Rectangle** `recZespol`: X `248`, Y `680`, Width `1094`, Height `300`,
-Fill `gKolorPanel`, BorderThickness `1`, BorderColor `gKolorLinia`.
-
-**Text label** `lblZespolTytul`: X `272`, Y `696`, Width `500`, Height `28`,
-Size `16`, FontWeight `FontWeight.Semibold`, Text `"Raporty zespolu w tym tygodniu"`
-
-**Text label** `lblZespolTydzien`: X `1000`, Y `700`, Width `320`, Height `24`,
-Size `12`, Color `gKolorSzary`, Align `Align.Right`, Text:
-```
-"tydzien " & Text(gPoniedzialek, "dd.mm") & " – " & Text(DateAdd(gPoniedzialek, 6, Days), "dd.mm")
-```
-
-Naglowki kolumn — cztery **Text label**, Y `734`, Height `20`, Size `11`,
-Color `gKolorSzary`, FontWeight `FontWeight.Semibold`:
-
-| Tekst | X | Width | Align |
-|---|---|---|---|
-| `"OSOBA"` | `272` | `400` | lewo |
-| `"STARTY"` | `700` | `120` | `Align.Center` |
-| `"MIDY"` | `830` | `120` | `Align.Center` |
-| `"ENDY"` | `960` | `120` | `Align.Center` |
-| `"STAN"` | `1100` | `220` | `Align.Right` |
-
-**Rectangle** `recZespolLinia`: X `272`, Y `758`, Width `1046`, Height `1`,
-Fill `gKolorLinia`.
-
-### Galeria wierszy
-
-**Gallery** (Blank vertical) `galZespol`: X `264`, Y `766`, Width `1070`,
-Height `200`, TemplateSize `40`, TemplatePadding `0`.
-
-Items:
-```
-SortByColumns(colZespol, "Imie", Ascending)
-```
-
-W szablonie:
-
-**Rectangle** `recMojWiersz`: X `0`, Y `0`, Width `4`, Height `40`, Fill:
-```
-If(ThisItem.Mail = gJa.Email, gKolorAkcent, RGBA(0,0,0,0))
-```
-
-**Text label** `lblZImie`: X `8`, Y `8`, Width `400`, Height `24`,
-Text `ThisItem.Imie`, FontWeight:
-```
-If(ThisItem.Mail = gJa.Email, FontWeight.Semibold, FontWeight.Normal)
-```
-
-Trzy znaczniki. **Text label** `lblZStarty`: X `436`, Y `8`, Width `120`,
-Height `24`, Align `Align.Center`, Size `14`, FontWeight `FontWeight.Bold`,
-Text:
-```
-If(ThisItem.Starty, "✓", "–")
-```
-Color:
-```
-If(ThisItem.Starty, gKolorAkcentCiemny, RGBA(182,182,188,1))
-```
-
-`lblZMidy` (X `566`) i `lblZEndy` (X `696`) — tak samo, podmieniajac
-`ThisItem.Starty` na `ThisItem.Midy` i `ThisItem.Endy`.
-
-**Text label** `lblZStan`: X `836`, Y `8`, Width `220`, Height `24`,
-Size `11`, Align `Align.Right`, Text:
-```
-If(ThisItem.Brak, "brak deklaracji", "zadeklarowane")
-```
-Color:
-```
-If(ThisItem.Brak, gKolorAkcentCiemny, gKolorSzary)
-```
-
-**Rectangle** `recZWiersz`: X `8`, Y `39`, Width `1050`, Height `1`,
-Fill `RGBA(0,0,0,0.06)`.
-
-### Podsumowanie pod tabela
-
-**Text label** `lblZespolPodsum`: X `272`, Y `944`, Width `800`, Height `24`,
-Size `12`, Color `gKolorSzary`, Text:
-```
-"Starty: " & Concat(Filter(colZespol, Starty), First(Split(Imie, " ")).Value, ", ") &
-"   |   Midy: " & Concat(Filter(colZespol, Midy), First(Split(Imie, " ")).Value, ", ") &
-"   |   Endy: " & Concat(Filter(colZespol, Endy), First(Split(Imie, " ")).Value, ", ")
-```
-
-**Text label** `lblZespolBraki`: X `1080`, Y `944`, Width `240`, Height `24`,
-Size `12`, Align `Align.Right`, Text:
-```
-With({n: CountRows(Filter(colZespol, Brak))},
-    If(n = 0, "wszyscy zadeklarowali", n & " bez deklaracji")
-)
-```
-Color:
-```
-If(CountRows(Filter(colZespol, Brak)) = 0, gKolorSzary, gKolorAkcentCiemny)
-```
-
-Znacznik to nie sam kolor — obok niego stoi slowna kolumna „Stan", wiec tabela
-jest czytelna takze przy slabym rozroznianiu barw.
-
----
-
-## G. Odswiezanie
+## F. Odswiezanie
 
 **Insert** → **Icon** → **Reload**, nazwa `icoOdswiez`: X `1300`, Y `30`,
 Width / Height `28`, Color `gKolorSzary`.
@@ -545,23 +475,22 @@ Width / Height `28`, Color `gKolorSzary`.
 OnSelect:
 ```
 Refresh(DT_Rota); Refresh(DT_Breaks); Refresh(DT_Reports); Refresh(DT_ManagerMessages);
-Set(gDzis, Today());
-// a na koncu ta sama formula ClearCollect(colZespol, ...) co w sekcji F
+Set(gDzis, Today())
 ```
 
 ---
 
-## H. Sprawdzenie
+## G. Sprawdzenie
 
 1. **Alt + klik** → widac liste osob z dzisiejszej daty, ze zdjeciami i statusem
 2. wybierz godzine przerwy → **Zapisz przerwe** → w `DT_Breaks` pojawia sie wiersz,
    a status przy twoim nazwisku zmienia sie w godzinach przerwy
 3. przestaw przelaczniki raportow → **Zapisz raporty** → wiersz w `DT_Reports`
-4. tabela na dole pokazuje wszystkie osoby z grafiku tygodnia; osoby bez wpisu
-   w `DT_Reports` maja „brak deklaracji"
+4. przy kazdej osobie widac trzy plakietki S, M, E — wypelnione oznaczaja raporty,
+   ktore ta osoba robi w tym tygodniu
 5. jesli nie widac zdjec: sprawdz, czy `Email` w `DT_Rota` to prawdziwe adresy
 
-## I. Role managera (do zrobienia pozniej)
+## H. Role managera (do zrobienia pozniej)
 
 Teraz `gManager` jest na sztywno `false`. Docelowo: zaloz grupe SharePoint
 `GMSC Managers`, a w `App.OnStart` ustaw:
