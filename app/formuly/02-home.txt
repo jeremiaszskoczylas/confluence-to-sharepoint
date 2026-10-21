@@ -5,15 +5,28 @@
 
 
 ### scr_Home.OnVisible
-// Dzisiejsza obsada z doklejonymi deklaracjami Daily Checks.
-// Te sama formule wklej tez na koncu btn_Checks_Save.OnSelect
-// oraz ico_Home_Refresh.OnSelect.
+// CALOSC jednym blokiem. Polecenia rozdziela srednik — przy doklejaniu czegokolwiek
+// pamietaj o nim, bo jego brak to blad skladni.
+// colRosterToday: WSZYSCY z dzisiejszego grafiku (takze urlopy) plus deklaracje
+// Daily Checks. Galeria i liczniki korzystaja z tej jednej kolekcji.
 
 ClearCollect(colRosterToday,
     AddColumns(
-        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work"),
-        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
+        Filter(DT_Rota, ShiftDate = gblToday) As r,
+        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = r.Email)
     )
+);
+Set(gblMessage,
+    First(Sort(Filter(DT_ManagerMessages, ActiveUntil >= gblToday), Created, SortOrder.Descending))
+);
+UpdateContext(
+    {
+        loc_BreakStart:
+            With({b: LookUp(DT_Breaks, BreakDate = gblToday && Title = gblUser.Email)},
+                If(IsBlank(b), "12:00", b.StartTime)
+            ),
+        loc_BreakCustom: false
+    }
 )
 
 ---
@@ -38,30 +51,23 @@ Text(gblToday, "dddd, d mmmm yyyy", "en-GB")
 
 ### rec_Home_MsgBar.Fill
 
-If(LookUp(DT_ManagerMessages, ActiveUntil >= gblToday, IsImportant),
-    gblColorAccent,
-    gblColorNav
-)
+If(!IsBlank(gblMessage) && gblMessage.IsImportant, gblColorAccent, gblColorNav)
 
 ---
 
 
 ### lbl_Home_MsgTitle.Text
 
-With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
-    If(IsBlank(m), "No messages", m.Title)
-)
+If(IsBlank(gblMessage), "No messages", gblMessage.Title)
 
 ---
 
 
 ### htm_Home_MsgBody.HtmlText
 
-With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
-    If(IsBlank(m),
-        "<p style='color:#68686E'>No message from the manager today.</p>",
-        m.Body
-    )
+If(IsBlank(gblMessage),
+    "<p style='color:#68686E'>No message from the manager today.</p>",
+    gblMessage.Body
 )
 
 ---
@@ -69,8 +75,8 @@ With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
 
 ### lbl_Home_MsgMeta.Text
 
-With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
-    If(IsBlank(m), "", m.'Created By'.DisplayName & " · " & Text(m.Created, "dd mmm, hh:mm"))
+If(IsBlank(gblMessage), "",
+    gblMessage.'Created By'.DisplayName & " · " & Text(gblMessage.Created, "dd mmm, HH:mm")
 )
 
 ---
@@ -129,7 +135,7 @@ Set(gblEditMessage, false)
 
 ### lbl_Home_RosterTitle.Text
 
-"On shift today (" & CountRows(Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work")) & ")"
+"On shift today (" & CountRows(Filter(colRosterToday, ShiftType.Value = "Work")) & " of " & CountRows(colRosterToday) & ")"
 
 ---
 
@@ -143,10 +149,7 @@ Set(gblEditMessage, false)
 
 ### gal_Home_Roster.Items
 
-AddColumns(
-    SortByColumns(Filter(DT_Rota, ShiftDate = gblToday), "Title", Ascending),
-    "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
-)
+SortByColumns(colRosterToday, "Title", SortOrder.Ascending)
 
 ---
 
@@ -168,9 +171,9 @@ ThisItem.Title
 
 ### lbl_Roster_Hours.Text
 
-If(ThisItem.ShiftType = "Work",
+If(ThisItem.ShiftType.Value = "Work",
     ThisItem.StartTime & " - " & ThisItem.EndTime,
-    ThisItem.ShiftType
+    ThisItem.ShiftType.Value
 )
 
 ---
@@ -248,15 +251,18 @@ ThisItem.Title & If(ThisItem.Checks.End, " does end checks", " does not do end c
 
 ### lbl_Roster_Status.Text
 
+// Godziny porownujemy jako czas, nie jako tekst: TimeValue("08:00") daje wartosc,
+// ktora Power Fx porownuje operatorami bez niespodzianek.
 With(
     {
-        now: Text(Now(), "[$-en-US]HH:mm"),
+        now: Time(Hour(Now()), Minute(Now()), 0),
         brk: LookUp(DT_Breaks, BreakDate = gblToday && Title = ThisItem.Email)
     },
     If(
-        ThisItem.ShiftType <> "Work", ThisItem.ShiftType,
-        !IsBlank(brk) && now >= brk.StartTime && now < brk.EndTime, "On break " & brk.StartTime,
-        now >= ThisItem.StartTime && now < ThisItem.EndTime, "Working",
+        ThisItem.ShiftType.Value <> "Work", ThisItem.ShiftType.Value,
+        !IsBlank(brk) && now >= TimeValue(brk.StartTime) && now < TimeValue(brk.EndTime),
+            "On break " & brk.StartTime,
+        now >= TimeValue(ThisItem.StartTime) && now < TimeValue(ThisItem.EndTime), "Working",
         "Off shift"
     )
 )
@@ -268,13 +274,13 @@ With(
 
 With(
     {
-        now: Text(Now(), "[$-en-US]HH:mm"),
+        now: Time(Hour(Now()), Minute(Now()), 0),
         brk: LookUp(DT_Breaks, BreakDate = gblToday && Title = ThisItem.Email)
     },
     If(
-        ThisItem.ShiftType <> "Work", gblColorMuted,
-        !IsBlank(brk) && now >= brk.StartTime && now < brk.EndTime, gblColorAccent,
-        now >= ThisItem.StartTime && now < ThisItem.EndTime, gblColorText,
+        ThisItem.ShiftType.Value <> "Work", gblColorMuted,
+        !IsBlank(brk) && now >= TimeValue(brk.StartTime) && now < TimeValue(brk.EndTime), gblColorAccent,
+        now >= TimeValue(ThisItem.StartTime) && now < TimeValue(ThisItem.EndTime), gblColorText,
         gblColorMuted
     )
 )
@@ -286,20 +292,20 @@ With(
 // Kto z obecnych robi dzis ktore Daily Checks
 
 "On shift today —  S: " &
-Coalesce(Concat(Filter(colRosterToday, Checks.Starts), First(Split(Title, " ")).Value, ", "), "nobody") &
+Coalesce(Concat(Filter(colRosterToday, ShiftType.Value = "Work", Checks.Starts), First(Split(Title, " ")).Value, ", "), "nobody") &
 "   T: " &
-Coalesce(Concat(Filter(colRosterToday, Checks.Throughout), First(Split(Title, " ")).Value, ", "), "nobody") &
+Coalesce(Concat(Filter(colRosterToday, ShiftType.Value = "Work", Checks.Throughout), First(Split(Title, " ")).Value, ", "), "nobody") &
 "   E: " &
-Coalesce(Concat(Filter(colRosterToday, Checks.End), First(Split(Title, " ")).Value, ", "), "nobody")
+Coalesce(Concat(Filter(colRosterToday, ShiftType.Value = "Work", Checks.End), First(Split(Title, " ")).Value, ", "), "nobody")
 
 ---
 
 
 ### lbl_Home_Gap.Visible
 
-CountRows(Filter(colRosterToday, Checks.Starts)) = 0 ||
-CountRows(Filter(colRosterToday, Checks.Throughout)) = 0 ||
-CountRows(Filter(colRosterToday, Checks.End)) = 0
+CountRows(Filter(colRosterToday, ShiftType.Value = "Work", Checks.Starts)) = 0 ||
+CountRows(Filter(colRosterToday, ShiftType.Value = "Work", Checks.Throughout)) = 0 ||
+CountRows(Filter(colRosterToday, ShiftType.Value = "Work", Checks.End)) = 0
 
 ---
 
@@ -310,9 +316,9 @@ CountRows(Filter(colRosterToday, Checks.End)) = 0
 Concat(
     Filter(
         Table(
-            {n: "starts",     c: CountRows(Filter(colRosterToday, Checks.Starts))},
-            {n: "throughout", c: CountRows(Filter(colRosterToday, Checks.Throughout))},
-            {n: "end",        c: CountRows(Filter(colRosterToday, Checks.End))}
+            {n: "starts",     c: CountRows(Filter(colRosterToday, ShiftType.Value = "Work", Checks.Starts))},
+            {n: "throughout", c: CountRows(Filter(colRosterToday, ShiftType.Value = "Work", Checks.Throughout))},
+            {n: "end",        c: CountRows(Filter(colRosterToday, ShiftType.Value = "Work", Checks.End))}
         ),
         c = 0
     ),
@@ -332,22 +338,6 @@ Concat(
 ---
 // Trzy przyciski typowych godzin. Kazdy ma Text, Fill, Color i OnSelect.
 // loc_BreakStart trzyma wybrana godzine na tym ekranie.
-
-
-### scr_Home.OnVisible — dopisek dla przerwy
-// Dopisz na koncu OnVisible ekranu (po ClearCollect colRosterToday):
-
-UpdateContext(
-    {
-        loc_BreakStart:
-            With({b: LookUp(DT_Breaks, BreakDate = gblToday && Title = gblUser.Email)},
-                If(IsBlank(b), "12:00", b.StartTime)
-            ),
-        loc_BreakCustom: false
-    }
-)
-
----
 
 
 ### btn_Break_12.Text
@@ -413,8 +403,7 @@ If(loc_BreakStart = "14:00" && !loc_BreakCustom, RGBA(255, 255, 255, 1), gblColo
 
 ### btn_Break_Other.OnSelect
 
-UpdateContext({loc_BreakCustom: true});
-SetFocus(txt_Break_Custom)
+UpdateContext({loc_BreakCustom: true})
 
 ### btn_Break_Other.Fill
 
@@ -628,8 +617,8 @@ With({existing: LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = gblUs
 );
 ClearCollect(colRosterToday,
     AddColumns(
-        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work"),
-        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
+        Filter(DT_Rota, ShiftDate = gblToday) As r,
+        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = r.Email)
     )
 );
 Notify("Daily Checks saved", NotificationType.Success, 2000)
@@ -645,9 +634,12 @@ Refresh(DT_DailyChecks);
 Refresh(DT_ManagerMessages);
 Set(gblToday, Today());
 Set(gblWeekStart, DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Saturday) - 1), Days));
+Set(gblMessage,
+    First(Sort(Filter(DT_ManagerMessages, ActiveUntil >= gblToday), Created, SortOrder.Descending))
+);
 ClearCollect(colRosterToday,
     AddColumns(
-        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work"),
-        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
+        Filter(DT_Rota, ShiftDate = gblToday) As r,
+        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = r.Email)
     )
 )

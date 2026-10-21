@@ -13,21 +13,20 @@ ClearCollect(colPages,
     AddColumns(
         RenameColumns(
             ShowColumns(
-                Filter('Site Pages', !IsBlank(TreePath)),
+                Filter('Site Pages', TreeSort <> ""),
                 "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
-                "Service", "Name"
+                "Service", "{FilenameWithExtension}"
             ),
-            "Name", "FileName"
+            "{FilenameWithExtension}", "FileName"
         ),
         "Depth", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
     )
 );
 ClearCollect(colServices,
-    SortByColumns(Filter(DT_Services, IsActive), "SortOrder", Ascending)
+    SortByColumns(Filter(DT_Services, IsActive), "SortOrder", SortOrder.Ascending)
 );
 If(IsBlank(gblService), Set(gblService, First(colServices).Code));
-ClearCollect(colExpanded, ShowColumns(Filter(colPages, Depth = 0), "ID"));
-Set(gblSearch, "")
+ClearCollect(colExpanded, ShowColumns(Filter(colPages, Depth = 0), "ID"))
 
 ---
 
@@ -41,7 +40,7 @@ Set(gblSearch, "")
 
 ### lbl_Docs_Subtitle.Text
 
-CountRows(Filter(colPages, Service = gblService)) & " pages in this service"
+CountRows(Filter(colPages, Service.Value = gblService)) & " pages in this service"
 
 ---
 // --------------------------------------------------------------------------
@@ -83,20 +82,15 @@ Set(gblService, ThisItem.Code)
 
 "Search page titles"
 
-### txt_Docs_Search.OnChange
-
-Set(gblSearch, Self.Text)
-
----
-
-
 ### ico_Docs_ClearSearch.Visible
 
-!IsBlank(gblSearch)
+!IsBlank(txt_Docs_Search.Text)
 
 ### ico_Docs_ClearSearch.OnSelect
+// Wlasciwosc Text kontrolki przelicza sie na biezaco, wiec drzewo filtruje sie
+// w trakcie pisania bez zadnego OnChange ani zmiennej posredniczacej.
 
-Reset(txt_Docs_Search); Set(gblSearch, "")
+Reset(txt_Docs_Search)
 
 ---
 // --------------------------------------------------------------------------
@@ -110,17 +104,17 @@ Reset(txt_Docs_Search); Set(gblSearch, "")
 
 SortByColumns(
     Filter(colPages As p,
-        p.Service = gblService,
-        If(IsBlank(gblSearch),
+        p.Service.Value = gblService,
+        If(IsBlank(txt_Docs_Search.Text),
             p.Depth = 0 ||
             CountRows(
                 Filter(colExpanded As e, e.ID <> p.ID && "/" & e.ID & "/" in p.TreePath)
             ) = p.Depth,
-            gblSearch in p.Title
+            txt_Docs_Search.Text in p.Title
         )
     ),
     "TreeSort",
-    Ascending
+    SortOrder.Ascending
 )
 
 ---
@@ -133,7 +127,7 @@ SortByColumns(
 
 ### ico_Tree_Chevron.Visible
 
-CountRows(Filter(colPages, ParentPageId = ThisItem.ID)) > 0 && IsBlank(gblSearch)
+CountRows(Filter(colPages, ParentPageId = ThisItem.ID)) > 0 && IsBlank(txt_Docs_Search.Text)
 
 ### ico_Tree_Chevron.Rotation
 
@@ -193,9 +187,9 @@ ClearCollect(colExpanded, ShowColumns(Filter(colPages, Depth = 0), "ID"))
 
 FirstN(
     SortByColumns(
-        Filter('Site Pages', Service = gblService, !IsBlank(TreePath)),
+        Filter('Site Pages', Service.Value = gblService, TreeSort <> ""),
         "Modified",
-        Descending
+        SortOrder.Descending
     ),
     8
 )
@@ -210,11 +204,11 @@ ThisItem.Title
 
 ### lbl_Recent_Meta.Text
 
-Text(ThisItem.Modified, "dd mmm, hh:mm") & " · " & ThisItem.'Modified By'.DisplayName
+Text(ThisItem.Modified, "dd mmm, HH:mm") & " · " & ThisItem.'Modified By'.DisplayName
 
 ### lbl_Recent_Title.OnSelect
 
-Launch(gblSiteUrl & "/SitePages/" & ThisItem.Name, {}, LaunchTarget.New)
+Launch(gblSiteUrl & "/SitePages/" & ThisItem.'{FilenameWithExtension}', {}, LaunchTarget.New)
 
 ---
 // --------------------------------------------------------------------------
@@ -230,16 +224,16 @@ ClearCollect(colPages,
     AddColumns(
         RenameColumns(
             ShowColumns(
-                Filter('Site Pages', !IsBlank(TreePath)),
+                Filter('Site Pages', TreeSort <> ""),
                 "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
-                "Service", "Name"
+                "Service", "{FilenameWithExtension}"
             ),
-            "Name", "FileName"
+            "{FilenameWithExtension}", "FileName"
         ),
         "Depth", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
     )
 );
 ClearCollect(colServices,
-    SortByColumns(Filter(DT_Services, IsActive), "SortOrder", Ascending)
+    SortByColumns(Filter(DT_Services, IsActive), "SortOrder", SortOrder.Ascending)
 );
 Notify("Refreshed", NotificationType.Success, 1500)

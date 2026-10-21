@@ -1,6 +1,7 @@
 // ===========================================================================
 // 04 — NEW PAGE DIALOG (na ekranie scr_Docs)
-// Wymaga podlaczonych flow: NewDocPage i RefreshTree
+// Wymaga podlaczonych flow: NowaStrona i OdswiezDrzewo (nazwy musza byc DOKLADNIE
+// takie, jak nazwy flow w Power Automate - Power Apps bierze je z nazwy wyswietlanej)
 // (lewy pasek -> Power Automate -> Add flow).
 // ===========================================================================
 
@@ -75,14 +76,14 @@ colServices
 
 ### drp_NewPage_Service.Default
 
-LookUp(colServices, Code = gblService)
+LookUp(colServices, Code = gblService).Title
 
 ---
 
 
 ### drp_NewPage_Category.Items
 
-Distinct(Filter(colPages, Service = gblService && !IsBlank(Category)), Category)
+Distinct(Filter(colPages, Service.Value = gblService && !IsBlank(Category.Value)), Category.Value)
 
 ---
 // --------------------------------------------------------------------------
@@ -92,7 +93,7 @@ Distinct(Filter(colPages, Service = gblService && !IsBlank(Category)), Category)
 
 ### gal_NewPage_Parent.Items
 
-SortByColumns(Filter(colPages, Service = gblService), "TreeSort", Ascending)
+SortByColumns(Filter(colPages, Service.Value = gblService), "TreeSort", SortOrder.Ascending)
 
 ---
 
@@ -161,24 +162,24 @@ If(IsBlank(gblParentId) || IsBlank(Trim(txt_NewPage_Title.Text)),
 
 Set(gblCreating, true);
 Set(gblCreateResult,
-    NewDocPage.Run(
+    NowaStrona.Run(
         Trim(txt_NewPage_Title.Text),
         Text(gblParentId),
-        drp_NewPage_Service.Selected.Code,
-        Coalesce(drp_NewPage_Category.Selected.Value, "")
+        LookUp(colServices, Title = drp_NewPage_Service.Selected.Title).Code,
+        Coalesce(drp_NewPage_Category.Selected.Result, "")
     )
 );
-RefreshTree.Run();
+OdswiezDrzewo.Run();
 Refresh('Site Pages');
 ClearCollect(colPages,
     AddColumns(
         RenameColumns(
             ShowColumns(
-                Filter('Site Pages', !IsBlank(TreePath)),
+                Filter('Site Pages', TreeSort <> ""),
                 "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
-                "Service", "Name"
+                "Service", "{FilenameWithExtension}"
             ),
-            "Name", "FileName"
+            "{FilenameWithExtension}", "FileName"
         ),
         "Depth", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
     )
@@ -186,7 +187,12 @@ ClearCollect(colPages,
 Set(gblCreating, false);
 Set(gblNewPage, false);
 Notify("Page created", NotificationType.Success, 3000);
-Launch(gblSiteUrl & Mid(gblCreateResult.address, Find("/SitePages/", gblCreateResult.address)), {}, LaunchTarget.New)
+// Gdy flow nie zwroci adresu, nie probujemy otwierac pustego odnosnika.
+With({a: gblCreateResult.adres},
+    If(!IsBlank(a),
+        Launch(gblSiteUrl & Mid(a, Find("/SitePages/", a)), {}, LaunchTarget.New)
+    )
+)
 
 ---
 

@@ -34,6 +34,7 @@ Set(gblEditMessage, false);
 Set(gblNewPage, false);
 Set(gblCreating, false);
 Set(gblIsManager, false);
+Set(gblMessage, Blank());
 
 // PODMIEN na adres swojej witryny, bez ukosnika na koncu
 Set(gblSiteUrl, "<ADRES-WITRYNY>")
