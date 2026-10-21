@@ -13,6 +13,8 @@ w osobnym bloku: potrojne klikniecie zaznacza cala linie, Ctrl+C kopiuje.
 | 3 | [03-BudujMape.md](03-BudujMape.md) | po kroku 2, gdy serwis jest jeden; przy wielu zastepuje go krok 4 | ~1 min |
 | 4 | [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md) | **utrzymanie** — po kazdej nowej/usunietej/przeniesionej stronie | ~2 min |
 | 5 | [05-NowaStrona.md](05-NowaStrona.md) | wywolywany z aplikacji przy dodawaniu strony | kilka sekund |
+| 6 | [06-KolejnySerwis.md](06-KolejnySerwis.md) | migracja drugiej i kazdej nastepnej przestrzeni | jak kroki 1–2 |
+| ! | [98-ResetMigracji.md](98-ResetMigracji.md) | czyszczenie przed migracja od zera | 10 min |
 | ! | [99-NaprawHierarchie.md](99-NaprawHierarchie.md) | awaryjnie, gdy hierarchia w mapie migracji zostanie nadpisana | ~5 min |
 
 Kroki 1–3 to migracja jednorazowa. Krok 4 to jedyne, co trzeba uruchamiac recznie
@@ -32,22 +34,25 @@ Te same we wszystkich sciagach. Wypelnij raz i trzymaj pod reka.
 ## Migracja kolejnego serwisu
 
 Ten sam komplet flow obsluguje kazda nastepna przestrzen Confluence.
-Przy drugim i kolejnym serwisie:
+Pelna procedura z przykladem: [06-KolejnySerwis.md](06-KolejnySerwis.md).
 
-1. dopisz wiersz w `DT_Services` (nazwa + krotki `Code`, np. `SRV2`)
-2. dodaj ten kod do wyborow kolumny `Service` w bibliotece Site Pages
-3. rozpakuj nowy eksport do osobnego folderu
-4. zaladuj `DT_MigrationMap` z kroku 0, wypelniajac kolumne `Service` nowym kodem
-5. w krokach 1 i 2 podmien `<EKSPORT>` i `<SERWIS>`, reszta zostaje bez zmian
-6. uruchom kroki 1, 2 i 4
+W skrocie: wiersz w `DT_Services`, nowy wybor w kolumnie `Service`, osobny
+folder eksportu, wiersze w liscie migracyjnej z kodem serwisu, podmiana
+`<EKSPORT>` i `<SERWIS>` w krokach 1 i 2, na koniec krok 4 zamiast 3.
 
-Nic sie nie nadpisze, bo:
+## Co zostaje po migracji
 
-- nazwy plikow stron zaczynaja sie od kodu serwisu, wiec dwie strony `Home Page`
-  z roznych przestrzeni to dwa rozne pliki
-- krok 1 bierze tylko wiersze z `MigrationStatus eq 'Pending'` **i** biezacym serwisem
-- krok 2 liczy drzewo i linki osobno dla kazdego serwisu
-- krok 4 grupuje mape po serwisach: kazdy dostaje wlasny korzen i wlasne sekcje
+| Rzecz | Potrzebna pozniej? |
+|---|---|
+| `SiteAssets/DocMedia/attachments/` | **tak, zawsze** — tu wskazuja obrazy w tresci stron |
+| biblioteka Site Pages z kolumnami | **tak** — zrodlo prawdy dla drzewa i aplikacji |
+| folder eksportu HTML | tak, dopoki chcesz moc przebudowac tresc krokiem 2 |
+| `DT_MigrationMap` | do krokow 1–3; potem slad historyczny |
+| `drzewo.txt` | ratunek przy uszkodzonej hierarchii (krok 99) |
+| `attachments` wewnatrz eksportu | nie — kopia dziala juz w `DocMedia` |
+| `index.html` | nie — zastepuje go `drzewo.txt` |
+
+Szczegoly i uzasadnienie: [98-ResetMigracji.md](98-ResetMigracji.md), sekcja D.
 
 ## Zasady wspolne
 
