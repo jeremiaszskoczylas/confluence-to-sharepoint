@@ -3,6 +3,12 @@
 Komplet sciag do zbudowania w Power Automate. Kazda wartosc do wklejenia jest
 w osobnym bloku: potrojne klikniecie zaznacza cala linie, Ctrl+C kopiuje.
 
+## Zacznij tutaj
+
+[PRZEWODNIK.md](PRZEWODNIK.md) — caly proces w jednym ciagu: migracja od zera,
+kolejny serwis, utrzymanie, z czasami i kontrola po kazdym kroku. Pliki ponizej
+to szczegolowe sciagi do poszczegolnych krokow.
+
 ## Kolejnosc
 
 | # | Plik | Kiedy | Czas |

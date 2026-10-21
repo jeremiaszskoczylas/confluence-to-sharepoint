@@ -17,7 +17,9 @@ w plikach do kopiowania.
 
 ## Flow-y
 
-Komplet sciag do Power Automate jest w katalogu [flows/](flows/) —
+Caly proces w jednym ciagu: [flows/PRZEWODNIK.md](flows/PRZEWODNIK.md).
+
+Komplet szczegolowych sciag do Power Automate jest w katalogu [flows/](flows/) —
 zacznij od [flows/README.md](flows/README.md), ktory podaje kolejnosc
 i trzy wartosci do podmiany.
 
