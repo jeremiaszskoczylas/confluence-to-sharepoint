@@ -4,9 +4,13 @@ Tworzy strone-mape od zera: korzen w sekcji zwyklej, kazda galaz jako natywna
 sekcja zwijana SharePointa. Ta sama droga co tworzenie stron w kroku 1,
 wiec format jest sprawdzony.
 
-Zrodlem jest `DT_MigrationMap`. Po migracji do odswiezania mapy sluzy
-[04-OdswiezDrzewo.md](04-OdswiezDrzewo.md), ktory czyta biblioteke Site Pages
-i obejmuje takze strony zalozone recznie.
+Zrodlem jest `DT_MigrationMap`, a mapa obejmuje **jeden serwis** — ten podany
+w polu `serwis`. To wystarcza zaraz po pierwszej migracji, gdy serwis jest jeden.
+
+**Przy dwoch i wiecej serwisach uzywaj [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md).**
+Tamten czyta biblioteke Site Pages, grupuje strony po kolumnie `Service`
+i buduje jedna mape ze wszystkimi serwisami naraz, kazdy pod wlasnym naglowkiem.
+Obejmuje tez strony zalozone recznie. Krok 3 jest wtedy zbedny.
 
 ---
 ## PODMIEN
@@ -15,6 +19,7 @@ i obejmuje takze strony zalozone recznie.
 |---|---|
 | `<WITRYNA>` | pelna sciezka witryny, np. `/teams/Dzial/podwitryna` — bez domeny, bez ukosnika na koncu |
 | `<MAPA>` | docelowa nazwa pliku strony, np. `Documentation-Map.aspx` |
+| `<SERWIS>` | kod serwisu z `DT_Services`, kolumna `Code` |
 
 ## Uwaga
 
@@ -44,6 +49,10 @@ string(body('GetAll')?['value'])
 witryna (tekst) — Z UKOSNIKIEM NA KONCU:
 ```
 <WITRYNA>/
+```
+serwis (tekst) — kod serwisu, ktorego mapa ma dotyczyc:
+```
+<SERWIS>
 ```
 
 ## 4. Plan — Data Operation → Compose
@@ -156,5 +165,8 @@ Body: PUSTE
 ## Zasady
 
 - Kazdy bieg tworzy NOWA strone i nadpisuje `<MAPA>` (flags=1). Reczne edycje mapy przepadaja.
+- Mapa z tego flow pokazuje **tylko jeden serwis**. Uruchomiony dla drugiego serwisu
+  nadpisze mape pierwszego, bo cel jest ten sam plik. Przy wielu serwisach
+  przejdz na krok 4.
 - Galezie sa natywnymi sekcjami zwijanymi SharePointa (zwiniete). Korzen zostaje widoczny.
   Nic nie trzeba klikac po biegu - format potwierdzony testem A/B/C/D z 2026-09-23.

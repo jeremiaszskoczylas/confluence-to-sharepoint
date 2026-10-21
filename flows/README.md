@@ -10,7 +10,7 @@ w osobnym bloku: potrojne klikniecie zaznacza cala linie, Ctrl+C kopiuje.
 | 0 | [00-przygotowanie.md](00-przygotowanie.md) | raz, przed wszystkim | 1–2 h |
 | 1 | [01-MigratePages.md](01-MigratePages.md) | raz, tworzy strony | ~10 min biegu |
 | 2 | [02-RemapLinks.md](02-RemapLinks.md) | po migracji, potem przy kazdej zmianie parsera | 30–40 min biegu |
-| 3 | [03-BudujMape.md](03-BudujMape.md) | po kroku 2 | ~1 min |
+| 3 | [03-BudujMape.md](03-BudujMape.md) | po kroku 2, gdy serwis jest jeden; przy wielu zastepuje go krok 4 | ~1 min |
 | 4 | [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md) | **utrzymanie** — po kazdej nowej/usunietej/przeniesionej stronie | ~2 min |
 | 5 | [05-NowaStrona.md](05-NowaStrona.md) | wywolywany z aplikacji przy dodawaniu strony | kilka sekund |
 | ! | [99-NaprawHierarchie.md](99-NaprawHierarchie.md) | awaryjnie, gdy hierarchia w mapie migracji zostanie nadpisana | ~5 min |
