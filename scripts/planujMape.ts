@@ -98,7 +98,11 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
       const n = policz(r.Id);
       if (n > naj) { naj = n; korzen = r; }
     }
-    if (korzen === undefined || naj < 2) {
+    // Jedna strona bez rodzica = korzen, nawet gdy nie ma jeszcze dzieci
+    // (swiezo zalozony serwis, przestrzen z jedna strona). Przy kilku
+    // kandydatach wygrywa ten z poddrzewem, a reszta idzie do sierot.
+    if (bezRodzica.length === 1) { korzen = bezRodzica[0]; naj = policz(bezRodzica[0].Id); }
+    else if (korzen === undefined || naj < 2) {
       for (const r of bezRodzica) { sieroty.push(r); }
       continue;
     }
