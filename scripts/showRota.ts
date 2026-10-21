@@ -11,7 +11,7 @@ function main(wb: ExcelScript.Workbook): string {
 
   const ark = wb.getActiveWorksheet();
   const zakres = ark.getUsedRange();
-  if (zakres === undefined) { return out.join("\n") + "\n\n== AKTYWNY ARKUSZ JEST PUSTY =="; }
+  if (!zakres) { return out.join("\n") + "\n\n== AKTYWNY ARKUSZ JEST PUSTY =="; }
 
   out.push("");
   out.push("== AKTYWNY ARKUSZ: " + ark.getName() + " ==");

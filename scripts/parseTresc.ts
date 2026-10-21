@@ -139,7 +139,10 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
     const gdzie = h.indexOf("<h2>1. ");
     h = gdzie >= 0 ? h.substring(0, gdzie) + w + h.substring(gdzie) : w + h;
   }
-  const gRe = /<p[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*([\s\S]*?)<\/p>\s*<span[^>]*class="cloak[\s"][^>]*>/gi;
+  // Etykieta nie moze wyjsc poza swoj akapit — (?!<\/p>) zatrzymuje ja na koncu <p>.
+  // Miedzy akapitem a cloakiem dopuszczamy puste znaczniki, bo czyszczenie
+  // pustych elementow dzieje sie dopiero pozniej.
+  const gRe = /<p[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*((?:[^<]|<(?!\/p>))*)<\/p>(?:\s|<p[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/p>|<div[^>]*><\/div>)*<span[^>]*class="cloak[\s"][^>]*>/gi;
   let wyn = "";
   let poz = 0;
   let wTab = false;
@@ -193,7 +196,7 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
       '</small></td></tr></table>');
   h = h.replace(/(href|src)="(?:\.\.\/)+[^"]*?attachments\//gi, '$1="' + base);
   h = h.replace(/(href|src)="attachments\//gi, '$1="' + base);
-  h = h.replace(/href="[^"]*?(\d+)\.html"/gi, 'href="{{CONF:$1}}"');
+  h = h.replace(/href="(?!https?:)[^"]*?(\d+)\.html"/gi, 'href="{{CONF:$1}}"');
   h = h.replace(/href="(\/confluence\/display\/~[^"]*|index\.html)"/gi, 'href="#"');
   h = h.replace(/<input[^>]*>/gi, "&#9744; ");
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");

@@ -35,13 +35,24 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
     if (sa !== sb) { return sa - sb; }
     return a.Title < b.Title ? -1 : (a.Title > b.Title ? 1 : 0);
   };
-  const kids = (id: number) => rows.filter(r => rodzic(r) === id).sort(porzadek);
+  // Dziecko musi byc w tym samym serwisie co rodzic. Bez tego strona z innego
+  // serwisu wchodzi w cudze drzewo i dostaje sciezke biegnaca przez obcy korzen.
+  const serwisById: { [k: string]: string } = {};
+  for (const r of rows) { serwisById[String(r.Id)] = serwisOf(r); }
+  const kids = (id: number) => rows.filter(r =>
+    rodzic(r) === id && serwisOf(r) === serwisById[String(id)]
+  ).sort(porzadek);
 
   const bezNr = (t: string) => t.replace(/^\d+\.\s*/, "");
-  const pad = (n: number) => ("00000" + String(n)).slice(-5);
+  const pad = (n: number) => {
+    let s = String(n);
+    while (s.length < 9) { s = "0" + s; }
+    return s;
+  };
   const url = (r: W) => (r.FileRef === undefined || r.FileRef === null ? "" : r.FileRef);
-  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const link = (r: W) => '<a href="' + url(r) + '">' + esc(r.Title) + "</a>";
+  const esc = (s: string) => String(s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const link = (r: W) => '<a href="' + esc(url(r)) + '">' + esc(r.Title) + "</a>";
 
   interface P {
     id: number; title: string; service: string; treePath: string; treeSort: string;
@@ -123,6 +134,14 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
 
   if (korzeni === 0) {
     return '{"blad":"nie znaleziono korzenia drzewa - czy strony maja wypelnione ParentPageId?"}';
+  }
+  // Strony w cyklu (A wskazuje B, B wskazuje A) nie maja rodzica rownego 0,
+  // wiec nie trafiaja do bezRodzica, a z korzenia sa nieosiagalne. Bez tego
+  // przepadalyby po cichu: ani w drzewie, ani w mapie, ani w liczniku.
+  const wDrzewie: { [k: string]: boolean } = {};
+  for (const x of pages) { wDrzewie[String(x.id)] = true; }
+  for (const r of rows) {
+    if (wDrzewie[String(r.Id)] !== true && sieroty.indexOf(r) < 0) { sieroty.push(r); }
   }
   if (sieroty.length > 0) {
     const posort = sieroty.sort(porzadek);
