@@ -42,14 +42,14 @@ Set(gblColorLine, RGBA(0, 0, 0, 0.09));
 
 Set(gblUser, User());
 Set(gblToday, Today());
-Set(gblWeekStart, DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), Days));
+Set(gblWeekStart, DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Saturday) - 1), Days));
 Set(gblScreen, "Home");
 Set(gblEditMessage, false);
 Set(gblIsManager, false)
 ```
 
 `gblIsManager` zostaje na `false` — role wlaczymy pozniej, opis na koncu
-[03-home.md](03-home.md). `gblWeekStart` to poniedzialek biezacego tygodnia,
+[03-home.md](03-home.md). `gblWeekStart` to **sobota** rozpoczynajaca biezacy tydzien Daily Checks,
 uzywany przy raportach.
 
 **Uruchom OnStart teraz:** trzy kropki przy `App` → **Run OnStart**. Po kazdej
@@ -136,16 +136,16 @@ If(gblScreen = "Docs", RGBA(255,255,255,0.18), RGBA(255,255,255,0))
 **btn_Nav_Games** — Y `210`, Text `"Gierki"`,
 OnSelect:
 ```
-Set(gblScreen, "Gry"); Navigate(scr_Games)
+Set(gblScreen, "Games"); Navigate(scr_Games)
 ```
 Fill:
 ```
-If(gblScreen = "Gry", RGBA(255,255,255,0.18), RGBA(255,255,255,0))
+If(gblScreen = "Games", RGBA(255,255,255,0.18), RGBA(255,255,255,0))
 ```
 
 ### Stopka paska: kto jest zalogowany
 
-**Insert** → **Media** → **Image**, nazwa `imgblUser`:
+**Insert** → **Media** → **Image**, nazwa `img_Nav_Me`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -169,7 +169,7 @@ chwili przy pierwszym uruchomieniu.
 
 ### Kopiowanie paska na pozostale ekrany
 
-Zaznacz w drzewie `rec_Nav_Bg`, `lbl_Nav_Logo`, trzy przyciski, `imgblUser`, `lbl_Nav_Me`
+Zaznacz w drzewie `rec_Nav_Bg`, `lbl_Nav_Logo`, trzy przyciski, `img_Nav_Me`, `lbl_Nav_Me`
 (Ctrl i klikanie) → Ctrl+C → wejdz na `scr_Docs` → Ctrl+V. To samo na `scr_Games`.
 
 ## F. Obszar tresci

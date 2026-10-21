@@ -33,7 +33,7 @@ Najpierw wstawiasz prostokat, potem na nim kontrolki.
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| Text | `Text(gblToday, "dddd, d mmmm yyyy", "pl-PL")` |
+| Text | `Text(gblToday, "dddd, d mmmm yyyy", "en-GB")` |
 | X / Y | `248` / `62` |
 | Width / Height | `600` / `24` |
 | Color | `gblColorMuted` |
@@ -87,7 +87,7 @@ With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
 HtmlText:
 ```
 With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
-    If(IsBlank(m), "<p style='color:#605E5C'>Manager nie zostawil dzis zadnej wiadomosci.</p>", m.Tresc)
+    If(IsBlank(m), "<p style='color:#605E5C'>Manager nie zostawil dzis zadnej wiadomosci.</p>", gblMessage.Body)
 )
 ```
 
@@ -135,7 +135,7 @@ OnSelect:
 Patch(DT_ManagerMessages, Defaults(DT_ManagerMessages),
     {
         Title: txt_Msg_Title.Text,
-        Tresc: "<p>" & Substitute(txt_Msg_Body.Text, Char(10), "</p><p>") & "</p>",
+        Body: "<p>" & Substitute(txt_Msg_Body.Text, Char(10), "</p><p>") & "</p>",
         IsImportant: tgl_Msg_Important.Value,
         ActiveUntil: DateAdd(gblToday, 7, Days)
     }
@@ -160,18 +160,18 @@ najnowszy aktywny wpis.
 
 ### Karta i naglowek
 
-**Rectangle** `rec_Home_RosterCard`: X `248`, Y `240`, Width `560`, Height `420`,
+**Rectangle** `rec_Home_RosterCard`: X `248`, Y `240`, Width `560`, Height `460`,
 Fill `gblColorPanel`, BorderThickness `1`, BorderColor `RGBA(0,0,0,0.08)`.
 
 **Text label** `lbl_Home_RosterTitle`: X `272`, Y `256`, Width `400`, Height `28`,
 Size `16`, FontWeight `FontWeight.Semibold`, Text:
 ```
-"Kto dzis pracuje (" & CountRows(Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Praca")) & ")"
+"Kto dzis pracuje (" & CountRows(Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work")) & ")"
 ```
 
 **Text label** `lbl_Home_RosterLegend`: X `272`, Y `282`, Width `520`, Height `20`,
 Size `11`, Color `gblColorFaint`,
-Text `"Raporty tygodnia:  S starty  ·  M midy  ·  E endy"`
+Text wg pliku formul (`lbl_Home_RosterLegend`)
 
 ### Galeria
 
@@ -189,7 +189,7 @@ Items — do grafiku dnia doklejamy deklaracje raportow z biezacego tygodnia:
 ```
 AddColumns(
     SortByColumns(Filter(DT_Rota, ShiftDate = gblToday), "Title", Ascending),
-    "Rap", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
+    "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
 )
 ```
 
@@ -210,13 +210,13 @@ kontrolki **do srodka** szablonu.
 | Width / Height | `48` / `48` |
 | ImagePosition | `ImagePosition.Fill` |
 
-**Text label** `lbl_Roster_Name`: X `68`, Y `8`, Width `260`, Height `24`,
+**Text label** `lbl_Roster_Name`: X `68`, Y `8`, Width `225`, Height `24`,
 FontWeight `FontWeight.Semibold`, Text `ThisItem.Title`
 
-**Text label** `lbl_Roster_Hours`: X `68`, Y `32`, Width `260`, Height `22`,
+**Text label** `lbl_Roster_Hours`: X `68`, Y `32`, Width `225`, Height `22`,
 Size `11`, Color `gblColorMuted`, Text:
 ```
-If(ThisItem.ShiftType = "Praca", ThisItem.StartTime & " - " & ThisItem.EndTime, ThisItem.ShiftType)
+If(ThisItem.ShiftType = "Work", ThisItem.StartTime & " - " & ThisItem.EndTime, ThisItem.ShiftType)
 ```
 
 ### Plakietki Daily Checks w wierszu
@@ -229,30 +229,30 @@ Trzy male etykiety obok siebie. Kazda ma **Height** `26`, **Width** `26`,
 | Kontrolka | X | Text |
 |---|---|---|
 | `lbl_Roster_ChkS` | `300` | `"S"` |
-| `lbl_Roster_ChkT` | `330` | `"M"` |
+| `lbl_Roster_ChkT` | `330` | `"T"` |
 | `lbl_Roster_ChkE` | `360` | `"E"` |
 
 Dla `lbl_Roster_ChkS`:
 
 Fill:
 ```
-If(ThisItem.Rap.Starts, gblColorAccentSoft, gblColorPanel)
+If(ThisItem.Checks.Starts, gblColorAccentSoft, gblColorPanel)
 ```
 Color:
 ```
-If(ThisItem.Rap.Starts, gblColorAccentDark, RGBA(182,182,188,1))
+If(ThisItem.Checks.Starts, gblColorAccentDark, RGBA(182,182,188,1))
 ```
 BorderColor:
 ```
-If(ThisItem.Rap.Starts, RGBA(200,16,46,0.4), gblColorLine)
+If(ThisItem.Checks.Starts, RGBA(200,16,46,0.4), gblColorLine)
 ```
 Tooltip:
 ```
-If(ThisItem.Rap.Starts, ThisItem.Title & " robi starty", ThisItem.Title & " nie robi startow")
+If(ThisItem.Checks.Starts, ThisItem.Title & " robi starty", ThisItem.Title & " nie robi startow")
 ```
 
 Dla `lbl_Roster_ChkT` i `lbl_Roster_ChkE` te same cztery formuly, podmieniajac
-`ThisItem.Rap.Starts` na `ThisItem.Rap.Throughout` oraz `ThisItem.Rap.End`.
+`ThisItem.Checks.Starts` na `ThisItem.Checks.Throughout` oraz `ThisItem.Checks.End`.
 
 Pusty `Rap` (brak deklaracji) daje `false` w kazdym warunku, wiec wszystkie trzy
 plakietki sa wygaszone — od razu widac, kto jeszcze nic nie wybral.
@@ -276,7 +276,7 @@ With(
         p: LookUp(DT_Breaks, BreakDate = gblToday && Title = ThisItem.Email)
     },
     If(
-        ThisItem.ShiftType <> "Praca", ThisItem.ShiftType,
+        ThisItem.ShiftType <> "Work", ThisItem.ShiftType,
         !IsBlank(p) && teraz >= p.StartTime && teraz < p.EndTime, "Na przerwie " & p.StartTime,
         teraz >= ThisItem.StartTime && teraz < ThisItem.EndTime, "W pracy",
         "Po godzinach"
@@ -292,7 +292,7 @@ With(
         p: LookUp(DT_Breaks, BreakDate = gblToday && Title = ThisItem.Email)
     },
     If(
-        ThisItem.ShiftType <> "Praca", gblColorMuted,
+        ThisItem.ShiftType <> "Work", gblColorMuted,
         !IsBlank(p) && teraz >= p.StartTime && teraz < p.EndTime, gblColorAccent,
         teraz >= ThisItem.StartTime && teraz < ThisItem.EndTime, gblColorText,
         gblColorMuted
@@ -313,8 +313,8 @@ Najpierw wspolna kolekcja. Zaznacz `scr_Home` → **OnVisible**:
 ```
 ClearCollect(colRosterToday,
     AddColumns(
-        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Praca"),
-        "Rap", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
+        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work"),
+        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
     )
 )
 ```
@@ -367,7 +367,7 @@ Concat(
 ) & " — ktos z dzisiejszej zmiany musi je przejac"
 ```
 
-Liczone sa tylko osoby z `ShiftType = "Praca"`, wiec urlop czy chorobowe nie zasłaniaja
+Liczone sa tylko osoby z `ShiftType = "Work"`, wiec urlop czy chorobowe nie zasłaniaja
 luki. Kto ma raporty w tym tygodniu, ale dzis nie pracuje, pojawi sie w swoim dniu.
 
 ---
@@ -377,7 +377,7 @@ luki. Kto ma raporty w tym tygodniu, ale dzis nie pracuje, pojawi sie w swoim dn
 Trzy typowe godziny jako przyciski plus pole na dowolna wlasna godzine.
 Przerwa zawsze trwa godzine, koniec liczy sie sam.
 
-**Rectangle** `rec_Home_BreakCard`: X `830`, Y `240`, Width `512`, Height `240`,
+**Rectangle** `rec_Home_BreakCard`: X `830`, Y `240`, Width `512`, Height `248`,
 Fill `gblColorPanel`, BorderThickness `1`, BorderColor `gblColorLine`.
 
 **Text label** `lbl_Home_BreakTitle`: X `854`, Y `256`, Width `400`, Height `28`,
@@ -425,7 +425,7 @@ Jedna osoba ma jedna przerwe dziennie: ponowny zapis nadpisuje poprzednia.
 ---
 ## E. Moje Daily Checks
 
-**Rectangle** `rec_Home_ChecksCard`: X `830`, Y `500`, Width `512`, Height `200`,
+**Rectangle** `rec_Home_ChecksCard`: X `830`, Y `500`, Width `512`, Height `262`,
 Fill `gblColorPanel`, BorderThickness `1`, BorderColor `gblColorLine`.
 
 **Text label** `lbl_Home_ChecksTitle`: X `854`, Y `516`, Width `460`, Height `28`,
@@ -452,7 +452,7 @@ dla **biezacego tygodnia**, czyli od ostatniej soboty. W sobote rano wiersza
 jeszcze nie ma, wiec wszystkie trzy startuja wylaczone — to jest cotygodniowy
 reset, o ktory chodzilo. Stare wiersze zostaja w liscie jako historia.
 
-**Button** `btn_Checks_Save`: X `1136`, Y `660`, Width `186`, Height `44`,
+**Button** `btn_Checks_Save`: X `1136`, Y `706`, Width `186`, Height `44`,
 Fill `gblColorAccent`. Jego `OnSelect` zapisuje wiersz i od razu przebudowuje
 kolekcje `colRosterToday`, zeby plakietki w liscie obsady odswiezyly sie
 bez przeladowania ekranu.

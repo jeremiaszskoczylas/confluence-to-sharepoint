@@ -12,6 +12,11 @@ Drzewo czyta biblioteke Site Pages na zywo — zadnego flow do odswiezania
 nie trzeba. SortOrder i wciecia biora sie z kolumn `ParentPageId`, `TreePath`
 i `SortOrder`, ktore przelicza [flow 04](../flows/04-OdswiezDrzewo.md).
 
+> **Zanim otworzysz ten ekran pierwszy raz, uruchom
+> [flow 04-OdswiezDrzewo](../flows/04-OdswiezDrzewo.md).** Krok 2 migracji zapisuje
+> `TreePath`, ale dopiero krok 4 przelicza calosc dla biblioteki i uzupelnia strony
+> zalozone recznie. Bez tego drzewo pokaze same korzenie, a chevrony nie beda reagowac.
+
 Wszystko na `scr_Docs`, obszar tresci od X = `248`.
 
 ---
@@ -50,7 +55,7 @@ ClearCollect(colPages,
     )
 );
 ClearCollect(colServices, SortByColumns(Filter(DT_Services, IsActive), "SortOrder", Ascending));
-If(IsBlank(gblService), Set(gblService, First(colServices).Kod));
+If(IsBlank(gblService), Set(gblService, First(colServices).Code));
 ClearCollect(colExpanded,
     ShowColumns(Filter(colPages, Depth = 0), "ID")
 );
@@ -92,10 +97,10 @@ W szablonie galerii:
 | Text | `ThisItem.Title` |
 | X / Y | `0` / `0` |
 | Width / Height | `152` / `40` |
-| Fill | `If(gblService = ThisItem.Kod, gblColorAccent, RGBA(0,0,0,0))` |
-| Color | `If(gblService = ThisItem.Kod, RGBA(255,255,255,1), gblColorText)` |
+| Fill | `If(gblService = ThisItem.Code, gblColorAccent, RGBA(0,0,0,0))` |
+| Color | `If(gblService = ThisItem.Code, RGBA(255,255,255,1), gblColorText)` |
 | BorderThickness | `0` |
-| OnSelect | `Set(gblService, ThisItem.Kod)` |
+| OnSelect | `Set(gblService, ThisItem.Code)` |
 
 Przy jednym serwisie widac jedna zakladke. Kolejne dochodza same po dopisaniu
 wierszy do `DT_Services` i ustawieniu kolumny `Service` na stronach.
@@ -235,10 +240,10 @@ ClearCollect(colExpanded, ShowColumns(Filter(colPages, Depth = 0), "ID"))
 
 ## G. Odswiezenie po zmianach w SharePoincie
 
-**Icon** → **Reload**, nazwa `ico_Docs_Refresh`: X `1300`, Y `30`, Width/Height `28`,
+**Icon** → **Reload**, nazwa `ico_Docs_Refresh`: X `1140`, Y `32`, Width/Height `28`,
 Color `gblColorMuted`, OnSelect:
 ```
-Refresh('Site Pages'); Refresh(DT_Services); Select(Parent)
+// pelna formula: formuly/03-dokumentacja.txt, naglowek ico_Docs_Refresh.OnSelect
 ```
 
 Zamiast `Select(Parent)` mozesz przejsc na inny ekran i wrocic — chodzi o to,

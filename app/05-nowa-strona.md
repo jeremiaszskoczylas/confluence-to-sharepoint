@@ -95,7 +95,7 @@ Text `"Serwis"`
 Items `colServices`, Value `"Title"`,
 Default:
 ```
-LookUp(colServices, Kod = gblService)
+LookUp(colServices, Code = gblService)
 ```
 
 **Text label**: X `693`, Y `256`, Size `11`, FontWeight `FontWeight.Semibold`,
@@ -189,7 +189,7 @@ Set(gblCreateResult,
     NewDocPage.Run(
         Trim(txt_NewPage_Title.Text),
         Text(gblParentId),
-        drp_NewPage_Service.Selected.Kod,
+        drp_NewPage_Service.Selected.Code,
         Coalesce(drp_NewPage_Category.Selected.Value, "")
     )
 );

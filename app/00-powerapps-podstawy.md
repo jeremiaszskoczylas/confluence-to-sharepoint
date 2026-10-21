@@ -102,7 +102,7 @@ zeby odwolac sie do pola biezacego wiersza. To odpowiednik `Apply to each`,
 tylko dla wygladu.
 
 **Zmienna globalna** — `Set(gblToday, Today())`. Widoczna na wszystkich ekranach.
-Nasze zmienne maja prefiks `g`.
+Nasze zmienne maja prefiks `gbl` (patrz [KONWENCJE.md](KONWENCJE.md)).
 
 **Kolekcja** — tabela trzymana w pamieci aplikacji:
 `ClearCollect(colStrony, ...)`. Uzywamy jej, gdy dane trzeba przeliczyc raz
@@ -199,6 +199,15 @@ e-mail w `DT_Rota` jest prawdziwy.
 
 **Galeria jest pusta, choc lista ma dane.** Sprawdz `Items` — czy filtr nie
 odcina wszystkiego (np. `Data = gblToday`, a w liscie nie ma dzisiejszej daty).
+
+**„Incompatible types for comparison" przy filtrze.** Kolumna typu **Wybor**
+(Choice) w SharePoincie to w Power Apps **rekord**, nie tekst. Zawsze piszesz
+`Kolumna.Value`, np. `ShiftType.Value = "Work"`, nigdy `ShiftType = "Work"`.
+To najczestsza przyczyna czerwonych formul w tej aplikacji.
+
+**Ostrzezenie „deprecated" przy nazwach kolumn w cudzyslowach.** W nowszych
+aplikacjach Power Fx woli identyfikatory zamiast tekstow w `AddColumns`
+czy `SortByColumns`. To ostrzezenie, nie blad — formuly dzialaja.
 
 **Nie wiem, gdzie wkleic formule.** Naglowek w pliku formul ma postac
 `### nazwaKontrolki.Wlasciwosc` — zaznacz te kontrolke w drzewie, wybierz
