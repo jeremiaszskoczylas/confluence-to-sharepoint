@@ -202,7 +202,11 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   h = h.replace(/<h2/gi, "<hr><h2");
   h = h.replace(/^\s*<hr>/, "");
   if (linki !== undefined && linki !== null && linki.length > 1) {
-    const L: { [k: string]: string } = JSON.parse(linki) as { [k: string]: string };
+    // Uszkodzone mapowanie nie moze wywrocic calego biegu: bez niego strona
+    // powstanie z placeholderami {{CONF:id}}, ktore widac i da sie poprawic.
+    let L: { [k: string]: string } = {};
+    try { L = JSON.parse(linki) as { [k: string]: string }; }
+    catch { L = {}; }
     h = h.replace(/href="\{\{CONF:(\d+)\}\}"/g,
       (m: string, id: string) => 'href="' + (L[id] !== undefined ? L[id] : "#") + '"');
     h = h.replace(/href="https?:\/\/[^"]*\/display\/[^\/"]+\/([^"#?]+)[^"]*"/gi,
