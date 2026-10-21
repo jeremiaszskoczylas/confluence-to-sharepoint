@@ -31,7 +31,21 @@ Site Pages → ustawienia kolumny `Service` → dopisz wybor `SWB`.
 Bez tego krok 1 wywali sie przy zapisie metadanych: SharePoint odrzuca
 wartosc spoza listy wyborow.
 
-### 3. Pliki eksportu
+### 3. Wybory w kolumnie Category
+
+Krok 2 zapisuje `Category` wyliczona z galezi najwyzszego poziomu nowego serwisu.
+SharePoint odrzuca wartosc spoza listy wyborow, wiec bez tego **kazda iteracja**
+kroku 2 skonczy sie bledem.
+
+Nazwy galezi poznasz dopiero po zaladowaniu listy migracyjnej (punkt 5):
+to wiersze `DT_MigrationMap` z `Depth` rownym 1, dla nowego serwisu.
+Tytuly wpisujesz **bez numeru porzadkowego**: `01. Call Handling` w Confluence
+daje wybor `Call Handling`.
+
+Kolejnosc jest wiec taka: punkty 1, 2, 4, 5, potem wracasz tutaj i dopiero
+uruchamiasz krok 2 migracji.
+
+### 4. Pliki eksportu
 
 1. Wyeksportuj przestrzen Switchboard z Confluence do HTML.
 2. Rozpakuj do **osobnego folderu**, np. `confluence-export/SWB`.
@@ -40,7 +54,7 @@ wartosc spoza listy wyborow.
    `SiteAssets/DocMedia/attachments/`. Podfoldery maja nazwy z identyfikatorow
    stron Confluence, wiec nie nadpisza tych z GMSC.
 
-### 4. Wiersze w liscie migracyjnej
+### 5. Wiersze w liscie migracyjnej
 
 Uruchom flow z kroku 0, sekcja E, z dwiema zmianami:
 
@@ -140,6 +154,7 @@ Przed uruchomieniem kroku 1:
 - [ ] eksport rozpakowany do `confluence-export/SWB`
 - [ ] zalaczniki skopiowane do `DocMedia/attachments/`
 - [ ] `DT_MigrationMap` ma wiersze SWB ze statusem `Pending` i wypelnionym `Service`
+- [ ] kolumna `Category` w Site Pages ma wybory dla galezi Switchboarda
 - [ ] w ściądze kroku 1 podmienione `<EKSPORT>` i `<SERWIS>`
 - [ ] w akcji `OdhaczWMapie` pola poza `Id`, `Title` i statusem sa puste
 

@@ -14,12 +14,23 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
 
   const nazwaMapy = (pomin === undefined || pomin === null ? "" : pomin).toLowerCase();
   const rows: W[] = [];
+  let pozaDokumentacja = 0;
   for (const r of surowe) {
     const plik = (r.FileLeafRef === undefined || r.FileLeafRef === null ? "" : r.FileLeafRef);
     if (nazwaMapy.length > 0 && plik.toLowerCase() === nazwaMapy) { continue; }
     if (r.Id === undefined || r.Id === null) { continue; }
     if (r.Title === undefined || r.Title === null || r.Title.length === 0) { continue; }
+    // Biblioteka Site Pages zawiera takze strony witryny spoza dokumentacji
+    // (Home.aspx, strony zespolu). Do drzewa nalezy tylko to, co ma przypisany
+    // serwis - inaczej mapa konczylaby sie lista systemowych stron SharePointa.
+    if (r.Service === undefined || r.Service === null || String(r.Service).length === 0) {
+      pozaDokumentacja++;
+      continue;
+    }
     rows.push(r);
+  }
+  if (rows.length === 0) {
+    return '{"blad":"zadna strona nie ma wypelnionej kolumny Service - ustaw ja na stronach dokumentacji"}';
   }
   const jest: { [k: string]: boolean } = {};
   for (const r of rows) { jest[String(r.Id)] = true; }
@@ -150,6 +161,7 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
     mapa.push(s + "</ul>");
   }
   return JSON.stringify({
-    pages: pages, mapa: mapa, sieroty: sieroty.length, serwisy: korzeni
+    pages: pages, mapa: mapa, sieroty: sieroty.length, serwisy: korzeni,
+    pozaDokumentacja: pozaDokumentacja
   });
 }
