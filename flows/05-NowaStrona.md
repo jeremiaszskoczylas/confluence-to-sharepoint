@@ -2,7 +2,7 @@
 
 Tworzy strone dokumentacji w wybranym miejscu drzewa i zwraca jej adres.
 Wywoluje go przycisk **Nowa strona** w zakladce Dokumentacja
-(patrz [app/04-nowa-strona.md](../app/05-nowa-strona.md)).
+(patrz [app/05-nowa-strona.md](../app/05-nowa-strona.md)).
 
 Podmien `<WITRYNA>`. Nazwy akcji dokladnie jak w naglowkach.
 
