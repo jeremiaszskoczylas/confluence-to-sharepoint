@@ -35,13 +35,14 @@ Top Count (tekst) — na pierwszy bieg `1`, potem `5000`:
 ## 3. Apply to each — Control
 
 Select an output (dyn): **value** z GetPending.
-Akcje 4–10 WEWNATRZ petli.
+Akcje 4–11 WEWNATRZ petli. **Takze akcja 11 OdhaczWMapie** — odwoluje sie do
+`items('Apply_to_each')`, wiec poza petla flow sie nie zapisze.
 
 ## 4. GetHtml — SharePoint → Get file content using path
 
 File Path (fx):
 ```
-concat('/Dashboard_Team/<EKSPORT>/', items('Apply_to_each')?['SourceFile'])
+concat('/<BIBLIOTEKA>/<EKSPORT>/', items('Apply_to_each')?['SourceFile'])
 ```
 
 ## 5. ParsujTresc — Excel Online → Run script

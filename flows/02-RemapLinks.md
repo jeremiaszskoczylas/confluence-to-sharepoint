@@ -75,7 +75,7 @@ Akcje 6–11 WEWNATRZ petli.
 
 File Path (fx):
 ```
-concat('/Dashboard_Team/<EKSPORT>/', items('Apply_to_each')?['file'])
+concat('/<BIBLIOTEKA>/<EKSPORT>/', items('Apply_to_each')?['file'])
 ```
 Przy kolejnym serwisie `<EKSPORT>` wskazuje jego folder eksportu.
 

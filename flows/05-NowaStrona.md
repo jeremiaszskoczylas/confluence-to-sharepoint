@@ -38,7 +38,7 @@ Inputs (fx) — CALE pole, jedna linia:
 concat(triggerBody()['text_2'], '-', replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(trim(triggerBody()['text']), ' ', '-'), '/', ''), '\', ''), ':', ''), '*', ''), '?', ''), '"', ''), '<', ''), '>', ''), '|', ''), '.aspx')
 ```
 
-`text` to `tytul`, `text_2` to `rodzicId`… — **uwaga**, Power Automate numeruje
+**Uwaga na numeracje wejsc.** Power Automate numeruje je
 wejscia w kolejnosci dodania: `text` = tytul, `text_1` = rodzicId,
 `text_2` = serwis, `text_3` = kategoria. Jesli podpowiedzi pokazuja inne nazwy,
 wstaw tokeny z dynamic content zamiast wpisywac je recznie.

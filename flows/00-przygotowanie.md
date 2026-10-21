@@ -15,9 +15,15 @@ Site Pages → Add column. Wszystkie **bez wartosci domyslnej**.
 | `TreeSort` | Jeden wiersz tekstu | klucz sortowania calego drzewa |
 | `Category` | Wybor | galaz najwyzszego poziomu |
 | `DocStatus` | Wybor | `Draft`, `Published`, `Archived` |
+| `Service` | Wybor | kod serwisu; wartosci takie same jak `Code` w `DT_Services` |
+
+W kolumnie `Service` dodaj wybor dla kazdego migrowanego serwisu (ten sam kod,
+co `Code` w `DT_Services`). Przy drugim serwisie dopisujesz kolejny wybor.
 
 W kolumnie `Category` dodaj po jednym wyborze na galaz (tytuly bez numeru
-porzadkowego). Brakujacy wybor = blad przy zapisie metadanych.
+porzadkowego). **Wybory uzupelnisz po sekcji E** — galezie to wiersze
+`DT_MigrationMap` z `Depth` rownym 1. Brakujacy wybor = blad przy zapisie
+metadanych w kroku 2.
 
 ## B. Lista DT_MigrationMap
 
@@ -35,7 +41,21 @@ Nowa lista. Kolumny:
 | `TargetPageId` | Liczba |
 | `TargetUrl` | Jeden wiersz tekstu |
 | `MigratedOn` | Data i godzina |
-| `ErrorMessage` | Wiele wierszy tekstu |
+| `ErrorMessage` | Wiele wierszy tekstu — na razie zadne flow tu nie pisze, pole na przyszla obsluge bledow |
+
+## B2. Lista DT_Services
+
+Katalog serwisow. Z niego bierzesz `<SERWIS>`, a aplikacja robi z niego zakladki.
+
+| Nazwa | Typ |
+|---|---|
+| `Title` | domyslna — nazwa serwisu, np. `GMSC` |
+| `Code` | Jeden wiersz tekstu — krotki kod bez spacji, np. `GMSC` |
+| `SortOrder` | Liczba — 10, 20, 30 |
+| `IsActive` | Tak/Nie |
+
+Zaloz od razu wiersz pierwszego serwisu. `Code` wchodzi w nazwy plikow stron,
+wiec bez spacji i polskich znakow.
 
 ## C. Pliki na miejsce
 
@@ -53,7 +73,7 @@ Kazdy plik z katalogu `scripts/` tego repo wklej jako osobny skrypt w Excel Onli
 |---|---|
 | `parseIndex` | ten krok, punkt E |
 | `parseTresc` | 01-MigratePages, 02-RemapLinks |
-| `planujDrzewo` | 02-RemapLinks |
+| `planujDrzewo` | 02-RemapLinks, 03-BudujMape |
 | `planujMape` | 04-OdswiezDrzewo |
 | `budujMape` | 03-BudujMape, 04-OdswiezDrzewo |
 
@@ -65,7 +85,7 @@ dopiero, gdy beda potrzebne.
 `parseIndex` czyta `index.html` z eksportu i zwraca plaska liste
 `ConfluenceId|ParentConfluenceId|Depth|Tytul|Plik`, po jednym wierszu na strone.
 
-Flow pomocniczy, cztery akcje:
+Flow pomocniczy, piec akcji:
 
 **1. Trigger** — Manually trigger a flow
 
@@ -73,7 +93,7 @@ Flow pomocniczy, cztery akcje:
 
 File Path (tekst):
 ```
-/Dashboard_Team/<EKSPORT>/index.html
+/<BIBLIOTEKA>/<EKSPORT>/index.html
 ```
 
 **3. Drzewo** — Excel Online → Run script
@@ -122,8 +142,23 @@ Service (tekst) — kod migrowanego serwisu:
 <SERWIS>
 ```
 
-Zapisz wynik akcji `Drzewo` takze jako plik `drzewo.txt` w bibliotece — przyda sie,
-gdyby trzeba bylo odtworzyc hierarchie ([99-NaprawHierarchie.md](99-NaprawHierarchie.md)).
+**5. ZapiszDrzewo** — SharePoint → Create file   (POZA petla, na koncu)
+
+Zapisuje plaska liste hierarchii na dysk. To jedyne zrodlo dla kroku 99,
+gdyby hierarchia w mapie kiedys zostala nadpisana.
+
+Folder Path (tekst):
+```
+/<BIBLIOTEKA>/Reports
+```
+File Name (tekst) — przy kolejnych serwisach dopisz kod, np. `drzewo-SWB.txt`:
+```
+drzewo.txt
+```
+File Content (fx):
+```
+body('Drzewo')?['result']
+```
 
 ## F. Strona mapy
 

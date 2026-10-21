@@ -46,7 +46,7 @@ Uruchom flow z kroku 0, sekcja E, z dwiema zmianami:
 
 - `GetIndex` → sciezka do **nowego** `index.html`:
   ```
-  /Dashboard_Team/confluence-export/SWB/index.html
+  /<BIBLIOTEKA>/confluence-export/SWB/index.html
   ```
 - akcja `Dodaj` → pole `Service`:
   ```
@@ -55,7 +55,8 @@ Uruchom flow z kroku 0, sekcja E, z dwiema zmianami:
 
 Wiersze GMSC zostaja nietkniete, bo flow tylko **dopisuje** nowe.
 
-Zapisz tez wynik akcji `Drzewo` jako `drzewo-SWB.txt` — osobny plik na serwis.
+W akcji `ZapiszDrzewo` zmien **File Name** na `drzewo-SWB.txt`, zeby nie nadpisac
+pliku GMSC. Kazdy serwis ma wlasny plik hierarchii.
 
 Kontrola: w `DT_MigrationMap` sa teraz wiersze obu serwisow, a nowe maja
 `Service` = `SWB` i `MigrationStatus` = `Pending`.

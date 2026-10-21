@@ -72,7 +72,7 @@ W galezi **If yes**: Control → **Terminate**, Status `Failed`, Message (fx):
 ```
 outputs('Plan')?['blad']
 ```
-Galaz If no: pusta. Akcje 6–11 dodaj PONIZEJ warunku.
+Galaz If no: pusta. Akcje 6–12 dodaj PONIZEJ warunku.
 
 ## 6. Apply to each — Control
 
@@ -122,6 +122,24 @@ fragmenty (fx):
 ```
 string(outputs('Plan')?['mapa'])
 ```
+
+## 8a. StopGdyERR — Control → Condition   (PRZED CreatePage)
+
+Drugi bezpiecznik, tym razem na wynik `budujMape`. Bez niego komunikat bledu
+zostalby zapisany jako tresc mapy, a `RenamePage` nadpisalby dzialajaca strone.
+Tak stracilismy mape we wrzesniu.
+
+Lewa strona (fx):
+```
+startsWith(body('BudujMape')?['result'], 'ERR')
+```
+is equal to: `true`
+
+W galezi **If yes**: Control → **Terminate**, Status `Failed`, Message (fx):
+```
+body('BudujMape')?['result']
+```
+Galaz If no: pusta. Akcje 9–12 dodaj PONIZEJ tego warunku.
 
 ## 9. CreatePage — Send an HTTP request to SharePoint
 
@@ -196,7 +214,7 @@ Body: PUSTE
 2. Page details (albo widok listy Site Pages) → ustaw:
    - `ParentPageId` = **Id strony nadrzednej** (kolumna `ID` w widoku listy)
    - `DocStatus` = `Published`
-   - `ConfluencePageId` zostaw puste — to nie jest strona z migracji
+   - `ConfluencePageId` = `0` — oznacza strone spoza migracji
 3. Uruchom ten flow. Reszta kolumn i mapa uzupelnia sie same.
 
 Sciezka nadrzedna i blok „Podstrony" w TRESCI stron pochodza z kroku 2 i dotycza

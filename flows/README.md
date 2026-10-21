@@ -20,7 +20,7 @@ w osobnym bloku: potrojne klikniecie zaznacza cala linie, Ctrl+C kopiuje.
 Kroki 1–3 to migracja jednorazowa. Krok 4 to jedyne, co trzeba uruchamiac recznie
 pozniej; krok 5 odpala sie sam z aplikacji.
 
-## Trzy wartosci do podmiany
+## Wartosci do podmiany
 
 Te same we wszystkich sciagach. Wypelnij raz i trzymaj pod reka.
 
@@ -30,6 +30,7 @@ Te same we wszystkich sciagach. Wypelnij raz i trzymaj pod reka.
 | `<EKSPORT>` | folder rozpakowanego eksportu w bibliotece plikow | `confluence-export/NAZWA` |
 | `<MAPA>` | nazwa pliku strony-mapy z paska adresu | `Documentation-Map.aspx` |
 | `<SERWIS>` | kod serwisu z listy `DT_Services`, kolumna `Code` | `GMSC` |
+| `<BIBLIOTEKA>` | biblioteka plikow, w ktorej lezy eksport | `Dashboard_Team` |
 
 ## Migracja kolejnego serwisu
 

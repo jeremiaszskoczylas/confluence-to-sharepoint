@@ -10,7 +10,7 @@ z wpisanym 0 w polu ParentConfluenceId).
 
 | Placeholder | Na co |
 |---|---|
-| `<DRZEWO>` | sciezka do drzewo.txt w bibliotece, np. `/Dashboard_Team/Reports/drzewo.txt` |
+| `<DRZEWO>` | sciezka do drzewo.txt w bibliotece, np. `/<BIBLIOTEKA>/Reports/drzewo.txt` |
 
 ---
 
@@ -54,6 +54,18 @@ Top Count (tekst):
 ```
 1
 ```
+
+## 5b. CzyZnaleziono — Control → Condition
+
+Wiersz z `drzewo.txt`, ktorego nie ma juz w mapie, dalby puste `Id` i przerwal petle.
+
+Lewa strona (fx):
+```
+empty(body('SzukajWiersz')?['value'])
+```
+is equal to: `false`
+
+Akcje 6 wstaw w galezi **If yes**.
 
 ## 6. Popraw — SharePoint → Update item
 
