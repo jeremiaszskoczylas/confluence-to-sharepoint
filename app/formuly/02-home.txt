@@ -1,0 +1,449 @@
+// ===========================================================================
+// 02 — EKRAN GLOWNY (scrHome)
+// Kolejnosc wklejania: OnVisible ekranu, potem kontrolki od gory ekranu.
+// ===========================================================================
+
+
+### scrHome.OnVisible
+// Lista osob z dzisiejszej zmiany z doklejonymi deklaracjami raportow.
+// Te sama formule wklej na koncu OnSelect przycisku btnRaportyZapisz
+// oraz ikony icoOdswiez.
+
+ClearCollect(colDzis,
+    AddColumns(
+        Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca"),
+        "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+    )
+)
+
+---
+
+
+### lblTytulHome.Text
+
+"Czesc, " & First(Split(gJa.FullName, " ")).Value & "!"
+
+---
+
+
+### lblData.Text
+
+Text(gDzis, "dddd, d mmmm yyyy", "pl-PL")
+
+---
+// --------------------------------------------------------------------------
+// KOMUNIKAT MANAGERA
+// --------------------------------------------------------------------------
+
+
+### recKomPasek.Fill
+
+If(LookUp(DT_ManagerMessages, AktywnyDo >= gDzis, Wazne), gKolorAkcent, gKolorPasek)
+
+---
+
+
+### lblKomTytul.Text
+
+With({m: LookUp(DT_ManagerMessages, AktywnyDo >= gDzis)},
+    If(IsBlank(m), "Brak komunikatow", m.Title)
+)
+
+---
+
+
+### htmKomTresc.HtmlText
+
+With({m: LookUp(DT_ManagerMessages, AktywnyDo >= gDzis)},
+    If(IsBlank(m),
+        "<p style='color:#68686E'>Manager nie zostawil dzis zadnej wiadomosci.</p>",
+        m.Tresc
+    )
+)
+
+---
+
+
+### btnEdytujKom.OnSelect
+
+Set(gEdycjaKom, true)
+
+---
+
+
+### btnEdytujKom.Visible
+
+gManager
+
+---
+
+
+### btnKomZapisz.OnSelect
+
+Patch(DT_ManagerMessages, Defaults(DT_ManagerMessages),
+    {
+        Title: txtKomTytul.Text,
+        Tresc: "<p>" & Substitute(txtKomTresc.Text, Char(10), "</p><p>") & "</p>",
+        Wazne: tglKomWazne.Value,
+        AktywnyDo: DateAdd(gDzis, 7, Days)
+    }
+);
+Set(gEdycjaKom, false);
+Reset(txtKomTytul);
+Reset(txtKomTresc);
+Notify("Komunikat zapisany", NotificationType.Success, 2000)
+
+---
+
+
+### btnKomAnuluj.OnSelect
+
+Set(gEdycjaKom, false)
+
+---
+// --------------------------------------------------------------------------
+// KTO DZIS PRACUJE
+// --------------------------------------------------------------------------
+
+
+### lblObsadaTytul.Text
+
+"Kto dzis pracuje (" & CountRows(Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca")) & ")"
+
+---
+
+
+### lblObsadaLegenda.Text
+
+"Raporty tygodnia:  S starty  ·  M midy  ·  E endy"
+
+---
+
+
+### galObsada.Items
+
+AddColumns(
+    SortByColumns(Filter(DT_Rota, Data = gDzis), "Title", Ascending),
+    "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+)
+
+---
+
+
+### imgOsoba.Image
+// wewnatrz galerii galObsada
+
+Office365Users.UserPhotoV2(ThisItem.Email)
+
+---
+
+
+### lblOsobaImie.Text
+
+ThisItem.Title
+
+---
+
+
+### lblOsobaGodziny.Text
+
+If(ThisItem.Rodzaj = "Praca", ThisItem.OdGodz & " - " & ThisItem.DoGodz, ThisItem.Rodzaj)
+
+---
+
+
+### lblRapS.Fill
+
+If(ThisItem.Rap.Starty, gKolorAkcentTlo, gKolorPanel)
+
+### lblRapS.Color
+
+If(ThisItem.Rap.Starty, gKolorAkcentCiemny, RGBA(182, 182, 188, 1))
+
+### lblRapS.BorderColor
+
+If(ThisItem.Rap.Starty, RGBA(200, 16, 46, 0.4), gKolorLinia)
+
+### lblRapS.Tooltip
+
+If(ThisItem.Rap.Starty, ThisItem.Title & " robi starty", ThisItem.Title & " nie robi startow")
+
+---
+
+
+### lblRapM.Fill
+
+If(ThisItem.Rap.Midy, gKolorAkcentTlo, gKolorPanel)
+
+### lblRapM.Color
+
+If(ThisItem.Rap.Midy, gKolorAkcentCiemny, RGBA(182, 182, 188, 1))
+
+### lblRapM.BorderColor
+
+If(ThisItem.Rap.Midy, RGBA(200, 16, 46, 0.4), gKolorLinia)
+
+### lblRapM.Tooltip
+
+If(ThisItem.Rap.Midy, ThisItem.Title & " robi midy", ThisItem.Title & " nie robi midow")
+
+---
+
+
+### lblRapE.Fill
+
+If(ThisItem.Rap.Endy, gKolorAkcentTlo, gKolorPanel)
+
+### lblRapE.Color
+
+If(ThisItem.Rap.Endy, gKolorAkcentCiemny, RGBA(182, 182, 188, 1))
+
+### lblRapE.BorderColor
+
+If(ThisItem.Rap.Endy, RGBA(200, 16, 46, 0.4), gKolorLinia)
+
+### lblRapE.Tooltip
+
+If(ThisItem.Rap.Endy, ThisItem.Title & " robi endy", ThisItem.Title & " nie robi endow")
+
+---
+
+
+### lblOsobaStatus.Text
+
+With(
+    {
+        teraz: Text(Now(), "[$-en-US]HH:mm"),
+        p: LookUp(DT_Breaks, Data = gDzis && Title = ThisItem.Email)
+    },
+    If(
+        ThisItem.Rodzaj <> "Praca", ThisItem.Rodzaj,
+        !IsBlank(p) && teraz >= p.OdGodz && teraz < p.DoGodz, "Na przerwie " & p.OdGodz,
+        teraz >= ThisItem.OdGodz && teraz < ThisItem.DoGodz, "W pracy",
+        "Po godzinach"
+    )
+)
+
+---
+
+
+### lblOsobaStatus.Color
+
+With(
+    {
+        teraz: Text(Now(), "[$-en-US]HH:mm"),
+        p: LookUp(DT_Breaks, Data = gDzis && Title = ThisItem.Email)
+    },
+    If(
+        ThisItem.Rodzaj <> "Praca", gKolorSzary,
+        !IsBlank(p) && teraz >= p.OdGodz && teraz < p.DoGodz, gKolorAkcent,
+        teraz >= ThisItem.OdGodz && teraz < ThisItem.DoGodz, gKolorTekst,
+        gKolorSzary
+    )
+)
+
+---
+
+
+### lblPokrycie.Text
+// Kto z obecnych robi dzis ktore raporty
+
+"Dzis na zmianie —  S: " &
+Coalesce(Concat(Filter(colDzis, Rap.Starty), First(Split(Title, " ")).Value, ", "), "nikt") &
+"   M: " &
+Coalesce(Concat(Filter(colDzis, Rap.Midy), First(Split(Title, " ")).Value, ", "), "nikt") &
+"   E: " &
+Coalesce(Concat(Filter(colDzis, Rap.Endy), First(Split(Title, " ")).Value, ", "), "nikt")
+
+---
+
+
+### lblLuka.Visible
+
+CountRows(Filter(colDzis, Rap.Starty)) = 0 ||
+CountRows(Filter(colDzis, Rap.Midy)) = 0 ||
+CountRows(Filter(colDzis, Rap.Endy)) = 0
+
+---
+
+
+### lblLuka.Text
+
+"Dzis nikt nie robi: " &
+Concat(
+    Filter(
+        Table(
+            {n: "starty", ile: CountRows(Filter(colDzis, Rap.Starty))},
+            {n: "midy",   ile: CountRows(Filter(colDzis, Rap.Midy))},
+            {n: "endy",   ile: CountRows(Filter(colDzis, Rap.Endy))}
+        ),
+        ile = 0
+    ),
+    n, ", "
+) & " — ktos z dzisiejszej zmiany musi je przejac"
+
+---
+// --------------------------------------------------------------------------
+// MOJA PRZERWA
+// --------------------------------------------------------------------------
+
+
+### drpPrzerwa.Items
+
+["10:00", "11:00", "12:00", "13:00", "14:00", "15:00"]
+
+---
+
+
+### drpPrzerwa.Default
+
+With({p: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email)},
+    If(IsBlank(p), "12:00", p.OdGodz)
+)
+
+---
+
+
+### lblPrzerwaDo.Text
+
+"do " & Text(Value(Left(drpPrzerwa.Selected.Value, 2)) + 1, "00") & ":00"
+
+---
+
+
+### btnPrzerwaZapisz.OnSelect
+
+With(
+    {
+        ist: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email),
+        od: drpPrzerwa.Selected.Value,
+        koniec: Text(Value(Left(drpPrzerwa.Selected.Value, 2)) + 1, "00") & ":00"
+    },
+    If(IsBlank(ist),
+        Patch(DT_Breaks, Defaults(DT_Breaks),
+            {
+                Title: gJa.Email,
+                Osoba: {
+                    '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedUser",
+                    Claims: "i:0#.f|membership|" & gJa.Email,
+                    DisplayName: gJa.FullName,
+                    Email: gJa.Email
+                },
+                Data: gDzis,
+                OdGodz: od,
+                DoGodz: koniec
+            }
+        ),
+        Patch(DT_Breaks, ist, {OdGodz: od, DoGodz: koniec})
+    )
+);
+Notify("Przerwa zapisana", NotificationType.Success, 2000)
+
+---
+
+
+### lblPrzerwaInfo.Text
+
+With({p: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email)},
+    If(IsBlank(p),
+        "Nie masz jeszcze zapisanej przerwy",
+        "Zapisana: " & p.OdGodz & " - " & p.DoGodz
+    )
+)
+
+---
+// --------------------------------------------------------------------------
+// MOJE RAPORTY
+// --------------------------------------------------------------------------
+
+
+### lblRaportyTytul.Text
+
+"Moje raporty (tydzien od " & Text(gPoniedzialek, "dd.mm") & ")"
+
+---
+
+
+### tglStarty.Default
+
+With({r: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
+    !IsBlank(r) && r.Starty
+)
+
+### tglMidy.Default
+
+With({r: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
+    !IsBlank(r) && r.Midy
+)
+
+### tglEndy.Default
+
+With({r: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
+    !IsBlank(r) && r.Endy
+)
+
+---
+
+
+### lblIleStarty.Text
+
+CountRows(Filter(DT_Reports, TydzienOd = gPoniedzialek, Starty)) & " osob w zespole"
+
+### lblIleMidy.Text
+
+CountRows(Filter(DT_Reports, TydzienOd = gPoniedzialek, Midy)) & " osob w zespole"
+
+### lblIleEndy.Text
+
+CountRows(Filter(DT_Reports, TydzienOd = gPoniedzialek, Endy)) & " osob w zespole"
+
+---
+
+
+### btnRaportyZapisz.OnSelect
+
+With({ist: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
+    If(IsBlank(ist),
+        Patch(DT_Reports, Defaults(DT_Reports),
+            {
+                Title: gJa.Email,
+                Osoba: {
+                    '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedUser",
+                    Claims: "i:0#.f|membership|" & gJa.Email,
+                    DisplayName: gJa.FullName,
+                    Email: gJa.Email
+                },
+                TydzienOd: gPoniedzialek,
+                Starty: tglStarty.Value,
+                Midy: tglMidy.Value,
+                Endy: tglEndy.Value
+            }
+        ),
+        Patch(DT_Reports, ist,
+            {Starty: tglStarty.Value, Midy: tglMidy.Value, Endy: tglEndy.Value})
+    )
+);
+ClearCollect(colDzis,
+    AddColumns(
+        Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca"),
+        "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+    )
+);
+Notify("Zapisane", NotificationType.Success, 2000)
+
+---
+
+
+### icoOdswiez.OnSelect
+
+Refresh(DT_Rota);
+Refresh(DT_Breaks);
+Refresh(DT_Reports);
+Refresh(DT_ManagerMessages);
+Set(gDzis, Today());
+ClearCollect(colDzis,
+    AddColumns(
+        Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca"),
+        "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+    )
+)

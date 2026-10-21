@@ -1,0 +1,197 @@
+// ===========================================================================
+// 04 — OKNO DODAWANIA STRONY (na ekranie scrDocs)
+// Wymaga podlaczonych flow: NowaStrona i OdswiezDrzewo
+// (lewy pasek -> Power Automate -> Add flow).
+// ===========================================================================
+
+
+### btnNowaStrona.OnSelect
+// przycisk "+ Nowa strona" w naglowku ekranu
+
+Set(gNowaStrona, true);
+Set(gRodzic, Blank());
+Reset(txtNowyTytul)
+
+---
+
+
+### icoNowaZamknij.OnSelect
+
+Set(gNowaStrona, false)
+
+---
+
+
+### btnNowaAnuluj.OnSelect
+
+Set(gNowaStrona, false)
+
+---
+
+
+### lblPodgladAdresu.Text
+// pokazuje, jak bedzie wygladal adres strony
+
+"Adres: /SitePages/" & gSerwis & "-" &
+Substitute(
+    Substitute(
+        Substitute(Trim(txtNowyTytul.Text), " ", "-"),
+        "/", ""
+    ),
+    "?", ""
+) & ".aspx"
+
+---
+
+
+### drpNowySerwis.Items
+
+colSerwisy
+
+### drpNowySerwis.Default
+
+LookUp(colSerwisy, Kod = gSerwis)
+
+---
+
+
+### drpNowaKategoria.Items
+
+Distinct(Filter(colStrony, Service = gSerwis && !IsBlank(Category)), Category)
+
+---
+// --------------------------------------------------------------------------
+// WYBOR MIEJSCA W DRZEWIE
+// --------------------------------------------------------------------------
+
+
+### galRodzic.Items
+
+SortByColumns(Filter(colStrony, Service = gSerwis), "TreeSort", Ascending)
+
+---
+
+
+### recRodzicTlo.Fill
+// wewnatrz galerii galRodzic
+
+If(gRodzic = ThisItem.ID, gKolorAkcentTlo, gKolorPanel)
+
+---
+
+
+### lblRodzic.X
+
+12 + ThisItem.Poziom * 20
+
+### lblRodzic.Text
+
+ThisItem.Title
+
+### lblRodzic.FontWeight
+
+If(gRodzic = ThisItem.ID, FontWeight.Semibold, FontWeight.Normal)
+
+### lblRodzic.OnSelect
+
+Set(gRodzic, ThisItem.ID)
+
+---
+
+
+### lblRodzicZnacznik.Text
+
+If(gRodzic = ThisItem.ID, "rodzic", "")
+
+---
+
+
+### lblPodgladMiejsca.Text
+
+If(IsBlank(gRodzic),
+    "Zaznacz strone nadrzedna na liscie powyzej",
+    "Trafi tutaj:  " & LookUp(colStrony, ID = gRodzic).Title &
+    "  >  " & If(IsBlank(txtNowyTytul.Text), "(tytul)", txtNowyTytul.Text)
+)
+
+---
+// --------------------------------------------------------------------------
+// UTWORZENIE STRONY
+// --------------------------------------------------------------------------
+
+
+### btnNowaUtworz.DisplayMode
+
+If(IsBlank(gRodzic) || IsBlank(Trim(txtNowyTytul.Text)),
+    DisplayMode.Disabled,
+    DisplayMode.Edit
+)
+
+---
+
+
+### btnNowaUtworz.OnSelect
+// Kolejnosc: utworz strone -> przelicz drzewo -> odswiez kolekcje -> otworz strone.
+// Przeliczenie drzewa trwa kilkanascie sekund, stad wskaznik gTworze.
+
+Set(gTworze, true);
+Set(gWynik,
+    NowaStrona.Run(
+        Trim(txtNowyTytul.Text),
+        Text(gRodzic),
+        drpNowySerwis.Selected.Kod,
+        Coalesce(drpNowaKategoria.Selected.Value, "")
+    )
+);
+OdswiezDrzewo.Run();
+Refresh('Site Pages');
+ClearCollect(colStrony,
+    AddColumns(
+        RenameColumns(
+            ShowColumns(
+                Filter('Site Pages', !IsBlank(TreePath)),
+                "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
+                "Service", "Name"
+            ),
+            "Name", "Plik"
+        ),
+        "Poziom", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
+    )
+);
+Set(gTworze, false);
+Set(gNowaStrona, false);
+Notify("Strona utworzona", NotificationType.Success, 3000);
+Launch(gWitrynaUrl & Mid(gWynik.adres, Find("/SitePages/", gWynik.adres)), {}, LaunchTarget.New)
+
+---
+
+
+### lblTworze.Visible
+
+gTworze
+
+### lblTworze.Text
+
+"Tworze strone i przeliczam drzewo..."
+
+---
+// --------------------------------------------------------------------------
+// WIDOCZNOSC OKNA — wklej w kazda kontrolke okna
+// --------------------------------------------------------------------------
+
+
+### recNowaTlo.Visible
+### recNowa.Visible
+### lblNowaTytul.Visible
+### lblNowaOpis.Visible
+### icoNowaZamknij.Visible
+### txtNowyTytul.Visible
+### lblPodgladAdresu.Visible
+### drpNowySerwis.Visible
+### drpNowaKategoria.Visible
+### galRodzic.Visible
+### lblPodgladMiejsca.Visible
+### btnNowaAnuluj.Visible
+### btnNowaUtworz.Visible
+
+gNowaStrona

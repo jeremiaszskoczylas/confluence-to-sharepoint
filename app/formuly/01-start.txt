@@ -1,0 +1,103 @@
+// ===========================================================================
+// 01 — START APLIKACJI
+// Wklejasz w obiekt App (najwyzsza pozycja w drzewie po lewej).
+// Po kazdej zmianie: trzy kropki przy App -> Run OnStart.
+// ===========================================================================
+
+
+### App.OnStart
+
+Set(gKolorTlo, RGBA(244, 244, 245, 1));
+Set(gKolorPanel, RGBA(255, 255, 255, 1));
+Set(gKolorAkcent, RGBA(200, 16, 46, 1));
+Set(gKolorAkcentCiemny, RGBA(142, 11, 34, 1));
+Set(gKolorAkcentTlo, RGBA(251, 233, 236, 1));
+Set(gKolorPasek, RGBA(35, 35, 38, 1));
+Set(gKolorTekst, RGBA(28, 28, 30, 1));
+Set(gKolorSzary, RGBA(104, 104, 110, 1));
+Set(gKolorSzaryJasny, RGBA(134, 134, 141, 1));
+Set(gKolorLinia, RGBA(0, 0, 0, 0.09));
+
+Set(gJa, User());
+Set(gDzis, Today());
+Set(gPoniedzialek, DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), Days));
+Set(gEkran, "Home");
+Set(gEdycjaKom, false);
+Set(gNowaStrona, false);
+Set(gTworze, false);
+Set(gManager, false);
+
+// PODMIEN na adres swojej witryny, bez ukosnika na koncu
+Set(gWitrynaUrl, "<ADRES-WITRYNY>")
+
+---
+
+
+### App.OnStart — wariant z rolami managerow (dopiero gdy beda potrzebne)
+// Zastap ostatnia linia Set(gManager, false) tym blokiem.
+// Wymaga konektora Office 365 Groups (standardowy) i identyfikatora grupy.
+
+Set(gManager,
+    !IsEmpty(
+        Filter(
+            Office365Groups.ListGroupMembers("<ID-GRUPY-MANAGEROW>").value,
+            mail = gJa.Email
+        )
+    )
+)
+
+---
+
+
+### btnNavHome.OnSelect
+
+Set(gEkran, "Home"); Navigate(scrHome)
+
+---
+
+
+### btnNavHome.Fill
+
+If(gEkran = "Home", RGBA(255, 255, 255, 0.18), RGBA(255, 255, 255, 0))
+
+---
+
+
+### btnNavDocs.OnSelect
+
+Set(gEkran, "Docs"); Navigate(scrDocs)
+
+---
+
+
+### btnNavDocs.Fill
+
+If(gEkran = "Docs", RGBA(255, 255, 255, 0.18), RGBA(255, 255, 255, 0))
+
+---
+
+
+### btnNavGry.OnSelect
+
+Set(gEkran, "Gry"); Navigate(scrGry)
+
+---
+
+
+### btnNavGry.Fill
+
+If(gEkran = "Gry", RGBA(255, 255, 255, 0.18), RGBA(255, 255, 255, 0))
+
+---
+
+
+### imgJa.Image
+
+Office365Users.UserPhotoV2(gJa.Email)
+
+---
+
+
+### lblJa.Text
+
+gJa.FullName

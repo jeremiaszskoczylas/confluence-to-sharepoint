@@ -1,7 +1,12 @@
-# 2 — Ekran glowny
+# 3 — Ekran glowny
 
 Cztery bloki: komunikat managera na gorze, obsada dnia po lewej, moja przerwa
 i raporty po prawej.
+
+> **Formuly do tego kroku:** [formuly/02-home.txt](formuly/02-home.txt)
+> Otworz w widoku **Raw**, szukaj naglowka `### nazwaKontrolki.Wlasciwosc`
+> (Ctrl+F) i kopiuj blok pod nim. Pierwszy raz w Power Apps?
+> Zacznij od [00-powerapps-podstawy.md](00-powerapps-podstawy.md).
 
 Wszystko na `scrHome`, obszar tresci zaczyna sie od X = `248`.
 
@@ -548,4 +553,4 @@ Set(gManager, !IsEmpty(
 
 Konektor Office 365 Groups jest standardowy. Samo ukrycie przycisku nie chroni
 danych — zapis do listy ogranicza sie uprawnieniami listy
-(patrz [00-listy.md](00-listy.md), sekcja `DT_ManagerMessages`).
+(patrz [01-listy.md](01-listy.md), sekcja `DT_ManagerMessages`).

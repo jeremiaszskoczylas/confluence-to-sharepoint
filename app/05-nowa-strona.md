@@ -1,8 +1,13 @@
-# 4 — Dodawanie nowej strony dokumentacji
+# 5 — Dodawanie nowej strony dokumentacji
 
 Przycisk w zakladce Dokumentacja otwiera okno: tytul, serwis, kategoria
 i wybor miejsca w drzewie. Po zatwierdzeniu strona powstaje w SharePoincie
 i otwiera sie do edycji.
+
+> **Formuly do tego kroku:** [formuly/04-nowa-strona.txt](formuly/04-nowa-strona.txt)
+> Otworz w widoku **Raw**, szukaj naglowka `### nazwaKontrolki.Wlasciwosc`
+> (Ctrl+F) i kopiuj blok pod nim. Pierwszy raz w Power Apps?
+> Zacznij od [00-powerapps-podstawy.md](00-powerapps-podstawy.md).
 
 Wymaga dwoch flow: [05-NowaStrona](../flows/05-NowaStrona.md) oraz
 [04-OdswiezDrzewo](../flows/04-OdswiezDrzewo.md) z triggerem Power Apps.
@@ -214,7 +219,7 @@ wiec komunikat jest potrzebny.
 
 Zeby nowa strona pojawila sie w drzewie bez przelaczania ekranow, dopisz
 na koncu OnSelect przycisku **Utworz strone** cala formule z sekcji B pliku
-[03-dokumentacja.md](03-dokumentacja.md) (ta, ktora buduje `colStrony`).
+[04-dokumentacja.md](04-dokumentacja.md) (ta, ktora buduje `colStrony`).
 
 ---
 
@@ -236,4 +241,4 @@ Kazdy, kto moze otworzyc aplikacje, moze utworzyc strone. Flow dziala
 w kontekscie osoby klikajacej, wiec zapis i tak podlega uprawnieniom
 biblioteki Site Pages. Jesli tworzenie ma byc ograniczone do czesci zespolu,
 ustaw `Visible` przycisku na zmienna roli (jak `gManager` w
-[02-home.md](02-home.md)) i ogranicz zapis w samej bibliotece.
+[03-home.md](03-home.md)) i ogranicz zapis w samej bibliotece.

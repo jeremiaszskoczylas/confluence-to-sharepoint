@@ -1,7 +1,12 @@
-# 3 — Ekran dokumentacji
+# 4 — Ekran dokumentacji
 
 Zakladki serwisow, rozwijane drzewo stron, wyszukiwarka. Klikniecie tytulu
 otwiera strone SharePoint w nowej karcie.
+
+> **Formuly do tego kroku:** [formuly/03-dokumentacja.txt](formuly/03-dokumentacja.txt)
+> Otworz w widoku **Raw**, szukaj naglowka `### nazwaKontrolki.Wlasciwosc`
+> (Ctrl+F) i kopiuj blok pod nim. Pierwszy raz w Power Apps?
+> Zacznij od [00-powerapps-podstawy.md](00-powerapps-podstawy.md).
 
 Drzewo czyta biblioteke Site Pages na zywo — zadnego flow do odswiezania
 nie trzeba. Kolejnosc i wciecia biora sie z kolumn `ParentPageId`, `TreePath`

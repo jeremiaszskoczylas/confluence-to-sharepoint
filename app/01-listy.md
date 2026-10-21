@@ -1,4 +1,4 @@
-# 0 — Listy SharePoint pod dashboard
+# 1 — Listy SharePoint pod dashboard
 
 Zakladasz raz, w tej samej witrynie co dokumentacja. Wszystkie kolumny
 **bez wartosci domyslnej**, chyba ze napisano inaczej.

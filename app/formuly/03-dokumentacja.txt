@@ -1,0 +1,230 @@
+// ===========================================================================
+// 03 — EKRAN DOKUMENTACJI (scrDocs)
+// Najpierw OnVisible ekranu, potem kontrolki.
+// ===========================================================================
+
+
+### scrDocs.OnVisible
+// Wczytuje strony z biblioteki Site Pages i dolicza glebokosc w drzewie.
+// Te sama formule wklej na koncu OnSelect ikony icoOdswiezDocs
+// oraz przycisku btnNowaUtworz (plik 04).
+
+ClearCollect(colStrony,
+    AddColumns(
+        RenameColumns(
+            ShowColumns(
+                Filter('Site Pages', !IsBlank(TreePath)),
+                "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
+                "Service", "Name"
+            ),
+            "Name", "Plik"
+        ),
+        "Poziom", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
+    )
+);
+ClearCollect(colSerwisy,
+    SortByColumns(Filter(DT_Services, Aktywny), "Kolejnosc", Ascending)
+);
+If(IsBlank(gSerwis), Set(gSerwis, First(colSerwisy).Kod));
+ClearCollect(colRozwiniete, ShowColumns(Filter(colStrony, Poziom = 0), "ID"));
+Set(gSzukaj, "")
+
+---
+
+
+### lblDocsTytul.Text
+
+"Dokumentacja"
+
+---
+
+
+### lblDocsPodtytul.Text
+
+CountRows(Filter(colStrony, Service = gSerwis)) & " stron w tym serwisie"
+
+---
+// --------------------------------------------------------------------------
+// ZAKLADKI SERWISOW
+// --------------------------------------------------------------------------
+
+
+### galSerwisy.Items
+
+colSerwisy
+
+---
+
+
+### btnSerwis.Text
+// wewnatrz galerii galSerwisy
+
+ThisItem.Title
+
+### btnSerwis.Fill
+
+If(gSerwis = ThisItem.Kod, gKolorAkcent, RGBA(0, 0, 0, 0))
+
+### btnSerwis.Color
+
+If(gSerwis = ThisItem.Kod, RGBA(255, 255, 255, 1), gKolorTekst)
+
+### btnSerwis.OnSelect
+
+Set(gSerwis, ThisItem.Kod)
+
+---
+// --------------------------------------------------------------------------
+// WYSZUKIWARKA
+// --------------------------------------------------------------------------
+
+
+### txtSzukaj.OnChange
+
+Set(gSzukaj, Self.Text)
+
+---
+
+
+### icoCzysc.Visible
+
+!IsBlank(gSzukaj)
+
+### icoCzysc.OnSelect
+
+Reset(txtSzukaj); Set(gSzukaj, "")
+
+---
+// --------------------------------------------------------------------------
+// DRZEWO
+// --------------------------------------------------------------------------
+
+
+### galDrzewo.Items
+// Wiersz widoczny, gdy jest korzeniem albo gdy WSZYSCY jego przodkowie
+// sa rozwinieci. Przy wpisanej frazie drzewo splaszcza sie do wynikow.
+
+SortByColumns(
+    Filter(colStrony As s,
+        s.Service = gSerwis,
+        If(IsBlank(gSzukaj),
+            s.Poziom = 0 ||
+            CountRows(
+                Filter(colRozwiniete As r, r.ID <> s.ID && "/" & r.ID & "/" in s.TreePath)
+            ) = s.Poziom,
+            gSzukaj in s.Title
+        )
+    ),
+    "TreeSort",
+    Ascending
+)
+
+---
+
+
+### icoChevron.X
+// wewnatrz galerii galDrzewo
+
+8 + ThisItem.Poziom * 24
+
+### icoChevron.Visible
+
+CountRows(Filter(colStrony, ParentPageId = ThisItem.ID)) > 0 && IsBlank(gSzukaj)
+
+### icoChevron.Rotation
+
+If(ThisItem.ID in colRozwiniete.ID, 90, 0)
+
+### icoChevron.OnSelect
+
+If(ThisItem.ID in colRozwiniete.ID,
+    Remove(colRozwiniete, LookUp(colRozwiniete, ID = ThisItem.ID)),
+    Collect(colRozwiniete, {ID: ThisItem.ID})
+)
+
+---
+
+
+### lblStrona.X
+
+34 + ThisItem.Poziom * 24
+
+### lblStrona.Text
+
+ThisItem.Title
+
+### lblStrona.OnSelect
+
+Launch(gWitrynaUrl & "/SitePages/" & ThisItem.Plik, {}, LaunchTarget.New)
+
+---
+
+
+### btnRozwin.OnSelect
+
+ClearCollect(colRozwiniete, ShowColumns(colStrony, "ID"))
+
+---
+
+
+### btnZwin.OnSelect
+
+ClearCollect(colRozwiniete, ShowColumns(Filter(colStrony, Poziom = 0), "ID"))
+
+---
+// --------------------------------------------------------------------------
+// OSTATNIO ZMIENIONE (opcjonalna galeria obok drzewa)
+// --------------------------------------------------------------------------
+
+
+### galOstatnie.Items
+
+FirstN(
+    SortByColumns(Filter('Site Pages', Service = gSerwis, !IsBlank(TreePath)), "Modified", Descending),
+    8
+)
+
+---
+
+
+### lblOstatniaTytul.Text
+// wewnatrz galerii galOstatnie
+
+ThisItem.Title
+
+### lblOstatniaInfo.Text
+
+Text(ThisItem.Modified, "dd.mm, hh:mm") & " · " & ThisItem.'Modified By'.DisplayName
+
+### lblOstatniaTytul.OnSelect
+
+Launch(gWitrynaUrl & "/SitePages/" & ThisItem.Name, {}, LaunchTarget.New)
+
+---
+// --------------------------------------------------------------------------
+// ODSWIEZANIE
+// --------------------------------------------------------------------------
+
+
+### icoOdswiezDocs.OnSelect
+// Refresh pobiera dane z SharePointa, ClearCollect przebudowuje kolekcje.
+
+Refresh('Site Pages');
+Refresh(DT_Services);
+ClearCollect(colStrony,
+    AddColumns(
+        RenameColumns(
+            ShowColumns(
+                Filter('Site Pages', !IsBlank(TreePath)),
+                "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
+                "Service", "Name"
+            ),
+            "Name", "Plik"
+        ),
+        "Poziom", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
+    )
+);
+ClearCollect(colSerwisy,
+    SortByColumns(Filter(DT_Services, Aktywny), "Kolejnosc", Ascending)
+);
+Notify("Odswiezone", NotificationType.Success, 1500)

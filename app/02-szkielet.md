@@ -1,7 +1,12 @@
-# 1 — Szkielet aplikacji
+# 2 — Szkielet aplikacji
 
 Aplikacja, polaczenia, motyw, nawigacja. Po tym kroku masz puste ekrany
 z dzialajacym menu — tresc dokladasz w krokach 2 i 3.
+
+> **Formuly do tego kroku:** [formuly/01-start.txt](formuly/01-start.txt)
+> Otworz w widoku **Raw**, szukaj naglowka `### nazwaKontrolki.Wlasciwosc`
+> (Ctrl+F) i kopiuj blok pod nim. Pierwszy raz w Power Apps?
+> Zacznij od [00-powerapps-podstawy.md](00-powerapps-podstawy.md).
 
 ## A. Zalozenie aplikacji
 
@@ -44,7 +49,7 @@ Set(gManager, false)
 ```
 
 `gManager` zostaje na `false` — role wlaczymy pozniej, opis na koncu
-[02-home.md](02-home.md). `gPoniedzialek` to poniedzialek biezacego tygodnia,
+[03-home.md](03-home.md). `gPoniedzialek` to poniedzialek biezacego tygodnia,
 uzywany przy raportach.
 
 **Uruchom OnStart teraz:** trzy kropki przy `App` → **Run OnStart**. Po kazdej

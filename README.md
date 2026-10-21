@@ -9,8 +9,11 @@ bez rejestracji aplikacji w Entra ID.
 
 ## Dashboard (Power Apps)
 
-Instrukcje budowy aplikacji sa w katalogu [app/](app/) —
-listy SharePoint, szkielet, ekran glowny i drzewo dokumentacji.
+Instrukcje budowy aplikacji sa w katalogu [app/](app/). Jesli nie budowales
+wczesniej aplikacji w Power Apps, zacznij od
+[app/00-powerapps-podstawy.md](app/00-powerapps-podstawy.md) — poradnik dla osoby,
+ktora zna Power Automate. Kod formul lezy osobno w [app/formuly/](app/formuly/),
+w plikach do kopiowania.
 
 ## Flow-y
 

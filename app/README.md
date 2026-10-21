@@ -7,13 +7,21 @@ Wszystko na standardowych konektorach: SharePoint, Office 365 Users, Office 365 
 
 | # | Plik | Co powstaje | Czas |
 |---|---|---|---|
-| 0 | [00-listy.md](00-listy.md) | listy SharePoint i kolumna `Service` | 40 min |
-| 1 | [01-szkielet.md](01-szkielet.md) | aplikacja, nawigacja, motyw, zmienne startowe | 45 min |
-| 2 | [02-home.md](02-home.md) | ekran glowny: obsada z raportami, przerwy, komunikat | 2–3 h |
-| 3 | [03-dokumentacja.md](03-dokumentacja.md) | drzewo dokumentacji z zakladkami serwisow | 1–2 h |
-| 4 | [04-nowa-strona.md](04-nowa-strona.md) | dodawanie strony w wybranym miejscu drzewa | 1 h |
+| 0 | [00-powerapps-podstawy.md](00-powerapps-podstawy.md) | **przeczytaj najpierw** — Power Apps dla osoby z Power Automate | 15 min czytania |
+| 1 | [01-listy.md](01-listy.md) | listy SharePoint i kolumna `Service` | 40 min |
+| 2 | [02-szkielet.md](02-szkielet.md) | aplikacja, nawigacja, kolory, zmienne | 45 min |
+| 3 | [03-home.md](03-home.md) | ekran glowny: obsada z raportami, przerwy, komunikat | 2–3 h |
+| 4 | [04-dokumentacja.md](04-dokumentacja.md) | drzewo dokumentacji z zakladkami serwisow | 1–2 h |
+| 5 | [05-nowa-strona.md](05-nowa-strona.md) | dodawanie strony w wybranym miejscu drzewa | 1 h |
 
 Gierki i role dokladamy pozniej — szkielet jest na nie przygotowany.
+
+## Formuly osobno
+
+Caly kod formul lezy w [formuly/](formuly/), po jednym pliku na obszar aplikacji,
+w formacie `### nazwaKontrolki.Wlasciwosc` + blok do skopiowania. Otwierasz plik
+przyciskiem **Raw**, szukasz naglowka (Ctrl+F), kopiujesz. Instrukcje mowia, jaka
+kontrolke zalozyc i gdzie ja postawic; tresc formuly bierzesz z pliku obok.
 
 ## Kolory
 
