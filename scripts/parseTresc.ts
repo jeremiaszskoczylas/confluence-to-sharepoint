@@ -201,12 +201,17 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
   h = h.replace(/<h2/gi, "<hr><h2");
   h = h.replace(/^\s*<hr>/, "");
+  // Uszkodzone mapowanie nie moze wywrocic calego biegu. Przy bledzie parsowania
+  // ZOSTAWIAMY placeholdery {{CONF:id}} nietkniete: sa widoczne na stronie i od razu
+  // wiadomo, ze trzeba powtorzyc bieg. Podmiana na "#" nastepuje tylko wtedy, gdy
+  // mapowanie jest poprawne, a danej strony w nim nie ma (nie zostala zmigrowana).
+  let mapaOk = false;
+  let L: { [k: string]: string } = {};
   if (linki !== undefined && linki !== null && linki.length > 1) {
-    // Uszkodzone mapowanie nie moze wywrocic calego biegu: bez niego strona
-    // powstanie z placeholderami {{CONF:id}}, ktore widac i da sie poprawic.
-    let L: { [k: string]: string } = {};
-    try { L = JSON.parse(linki) as { [k: string]: string }; }
-    catch { L = {}; }
+    try { L = JSON.parse(linki) as { [k: string]: string }; mapaOk = true; }
+    catch { mapaOk = false; }
+  }
+  if (mapaOk) {
     h = h.replace(/href="\{\{CONF:(\d+)\}\}"/g,
       (m: string, id: string) => 'href="' + (L[id] !== undefined ? L[id] : "#") + '"');
     h = h.replace(/href="https?:\/\/[^"]*\/display\/[^\/"]+\/([^"#?]+)[^"]*"/gi,
