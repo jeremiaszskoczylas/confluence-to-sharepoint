@@ -8,35 +8,35 @@ i raporty po prawej.
 > (Ctrl+F) i kopiuj blok pod nim. Pierwszy raz w Power Apps?
 > Zacznij od [00-powerapps-podstawy.md](00-powerapps-podstawy.md).
 
-Wszystko na `scrHome`, obszar tresci zaczyna sie od X = `248`.
+Wszystko na `scr_Home`, obszar tresci zaczyna sie od X = `248`.
 
 Powtarzajace sie ustawienia karty (biale tlo z cieniem): **Rectangle** z
-`Fill = gKolorPanel`, `BorderColor = RGBA(0,0,0,0.08)`, `BorderThickness = 1`.
+`Fill = gblColorPanel`, `BorderColor = RGBA(0,0,0,0.08)`, `BorderThickness = 1`.
 Najpierw wstawiasz prostokat, potem na nim kontrolki.
 
 ---
 
 ## A. Naglowek ekranu
 
-**Text label** `lblTytulHome`:
+**Text label** `lbl_Home_Greeting`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| Text | `"Czesc, " & First(Split(gJa.FullName, " ")).Value & "!"` |
+| Text | `"Czesc, " & First(Split(gblUser.FullName, " ")).Value & "!"` |
 | X / Y | `248` / `24` |
 | Width / Height | `600` / `40` |
 | Size | `24` |
 | FontWeight | `FontWeight.Semibold` |
-| Color | `gKolorTekst` |
+| Color | `gblColorText` |
 
-**Text label** `lblData`:
+**Text label** `lbl_Home_Date`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| Text | `Text(gDzis, "dddd, d mmmm yyyy", "pl-PL")` |
+| Text | `Text(gblToday, "dddd, d mmmm yyyy", "pl-PL")` |
 | X / Y | `248` / `62` |
 | Width / Height | `600` / `24` |
-| Color | `gKolorSzary` |
+| Color | `gblColorMuted` |
 
 ---
 
@@ -44,21 +44,21 @@ Najpierw wstawiasz prostokat, potem na nim kontrolki.
 
 ### Karta
 
-**Rectangle** `recKomunikat`: X `248`, Y `100`, Width `1094`, Height `120`,
-Fill `gKolorPanel`, BorderThickness `1`, BorderColor `RGBA(0,0,0,0.08)`.
+**Rectangle** `rec_Home_MsgCard`: X `248`, Y `100`, Width `1094`, Height `120`,
+Fill `gblColorPanel`, BorderThickness `1`, BorderColor `RGBA(0,0,0,0.08)`.
 
 ### Pasek wyroznienia
 
-**Rectangle** `recKomPasek`: X `248`, Y `100`, Width `6`, Height `120`.
+**Rectangle** `rec_Home_MsgBar`: X `248`, Y `100`, Width `6`, Height `120`.
 
 Fill:
 ```
-If(LookUp(DT_ManagerMessages, AktywnyDo >= gDzis, Wazne), gKolorAkcent, gKolorAkcent)
+If(LookUp(DT_ManagerMessages, ActiveUntil >= gblToday, IsImportant), gblColorAccent, gblColorAccent)
 ```
 
 ### Naglowek komunikatu
 
-**Text label** `lblKomTytul`:
+**Text label** `lbl_Home_MsgTitle`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -69,14 +69,14 @@ If(LookUp(DT_ManagerMessages, AktywnyDo >= gDzis, Wazne), gKolorAkcent, gKolorAk
 
 Text:
 ```
-With({m: LookUp(DT_ManagerMessages, AktywnyDo >= gDzis)},
+With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
     If(IsBlank(m), "Brak komunikatow", m.Title)
 )
 ```
 
 ### Tresc komunikatu
 
-**Insert** → **Display** → **HTML text**, nazwa `htmKomTresc`:
+**Insert** → **Display** → **HTML text**, nazwa `htm_Home_MsgBody`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -86,7 +86,7 @@ With({m: LookUp(DT_ManagerMessages, AktywnyDo >= gDzis)},
 
 HtmlText:
 ```
-With({m: LookUp(DT_ManagerMessages, AktywnyDo >= gDzis)},
+With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
     If(IsBlank(m), "<p style='color:#605E5C'>Manager nie zostawil dzis zadnej wiadomosci.</p>", m.Tresc)
 )
 ```
@@ -96,59 +96,59 @@ Zwykla etykieta pokazalaby znaczniki HTML.
 
 ### Przycisk edycji
 
-**Button** `btnEdytujKom`:
+**Button** `btn_Home_EditMsg`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
 | Text | `"Edytuj"` |
 | X / Y | `1222` / `114` |
 | Width / Height | `96` / `32` |
-| Fill | `gKolorAkcent` |
-| Visible | `gManager` |
-| OnSelect | `Set(gEdycjaKom, true)` |
+| Fill | `gblColorAccent` |
+| Visible | `gblIsManager` |
+| OnSelect | `Set(gblEditMessage, true)` |
 
-Na razie `gManager` jest `false`, wiec przycisk jest ukryty. Zeby przetestowac
+Na razie `gblIsManager` jest `false`, wiec przycisk jest ukryty. Zeby przetestowac
 edycje, zmien chwilowo `Visible` na `true`.
 
 ### Okno edycji
 
-**Rectangle** `recEdycjaTlo`: X `0`, Y `0`, Width `Parent.Width`,
-Height `Parent.Height`, Fill `RGBA(0,0,0,0.45)`, Visible `gEdycjaKom`.
+**Rectangle** `rec_Msg_Overlay`: X `0`, Y `0`, Width `Parent.Width`,
+Height `Parent.Height`, Fill `RGBA(0,0,0,0.45)`, Visible `gblEditMessage`.
 
-**Rectangle** `recEdycja`: X `383`, Y `180`, Width `600`, Height `360`,
-Fill `gKolorPanel`, Visible `gEdycjaKom`.
+**Rectangle** `rec_Msg_Dialog`: X `383`, Y `180`, Width `600`, Height `360`,
+Fill `gblColorPanel`, Visible `gblEditMessage`.
 
-**Text input** `txtKomTytul`: X `407`, Y `240`, Width `552`, Height `40`,
-HintText `"Naglowek komunikatu"`, Visible `gEdycjaKom`.
+**Text input** `txt_Msg_Title`: X `407`, Y `240`, Width `552`, Height `40`,
+HintText `"Naglowek komunikatu"`, Visible `gblEditMessage`.
 
-**Text input** `txtKomTresc`: X `407`, Y `292`, Width `552`, Height `140`,
-Mode `TextMode.MultiLine`, HintText `"Tresc"`, Visible `gEdycjaKom`.
+**Text input** `txt_Msg_Body`: X `407`, Y `292`, Width `552`, Height `140`,
+Mode `TextMode.MultiLine`, HintText `"Tresc"`, Visible `gblEditMessage`.
 
-**Toggle** `tglKomWazne`: X `407`, Y `444`, Visible `gEdycjaKom`.
-Obok **Text label** z tekstem `"Oznacz jako wazne"`, Visible `gEdycjaKom`.
+**Toggle** `tgl_Msg_Important`: X `407`, Y `444`, Visible `gblEditMessage`.
+Obok **Text label** z tekstem `"Oznacz jako wazne"`, Visible `gblEditMessage`.
 
-**Button** `btnKomZapisz`: X `727`, Y `492`, Width `110`, Height `36`,
-Text `"Zapisz"`, Fill `gKolorAkcent`, Visible `gEdycjaKom`.
+**Button** `btn_Msg_Save`: X `727`, Y `492`, Width `110`, Height `36`,
+Text `"Zapisz"`, Fill `gblColorAccent`, Visible `gblEditMessage`.
 
 OnSelect:
 ```
 Patch(DT_ManagerMessages, Defaults(DT_ManagerMessages),
     {
-        Title: txtKomTytul.Text,
-        Tresc: "<p>" & Substitute(txtKomTresc.Text, Char(10), "</p><p>") & "</p>",
-        Wazne: tglKomWazne.Value,
-        AktywnyDo: DateAdd(gDzis, 7, Days)
+        Title: txt_Msg_Title.Text,
+        Tresc: "<p>" & Substitute(txt_Msg_Body.Text, Char(10), "</p><p>") & "</p>",
+        IsImportant: tgl_Msg_Important.Value,
+        ActiveUntil: DateAdd(gblToday, 7, Days)
     }
 );
-Set(gEdycjaKom, false);
-Reset(txtKomTytul); Reset(txtKomTresc)
+Set(gblEditMessage, false);
+Reset(txt_Msg_Title); Reset(txt_Msg_Body)
 ```
 
-**Button** `btnKomAnuluj`: X `849`, Y `492`, Width `110`, Height `36`,
-Text `"Anuluj"`, Fill `gKolorSzary`, Visible `gEdycjaKom`,
+**Button** `btn_Msg_Cancel`: X `849`, Y `492`, Width `110`, Height `36`,
+Text `"Anuluj"`, Fill `gblColorMuted`, Visible `gblEditMessage`,
 OnSelect:
 ```
-Set(gEdycjaKom, false)
+Set(gblEditMessage, false)
 ```
 
 Nowy komunikat jest wazny przez 7 dni i przykrywa poprzedni, bo ekran pokazuje
@@ -160,22 +160,22 @@ najnowszy aktywny wpis.
 
 ### Karta i naglowek
 
-**Rectangle** `recObsada`: X `248`, Y `240`, Width `560`, Height `420`,
-Fill `gKolorPanel`, BorderThickness `1`, BorderColor `RGBA(0,0,0,0.08)`.
+**Rectangle** `rec_Home_RosterCard`: X `248`, Y `240`, Width `560`, Height `420`,
+Fill `gblColorPanel`, BorderThickness `1`, BorderColor `RGBA(0,0,0,0.08)`.
 
-**Text label** `lblObsadaTytul`: X `272`, Y `256`, Width `400`, Height `28`,
+**Text label** `lbl_Home_RosterTitle`: X `272`, Y `256`, Width `400`, Height `28`,
 Size `16`, FontWeight `FontWeight.Semibold`, Text:
 ```
-"Kto dzis pracuje (" & CountRows(Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca")) & ")"
+"Kto dzis pracuje (" & CountRows(Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Praca")) & ")"
 ```
 
-**Text label** `lblObsadaLegenda`: X `272`, Y `282`, Width `520`, Height `20`,
-Size `11`, Color `gKolorSzaryJasny`,
+**Text label** `lbl_Home_RosterLegend`: X `272`, Y `282`, Width `520`, Height `20`,
+Size `11`, Color `gblColorFaint`,
 Text `"Raporty tygodnia:  S starty  ·  M midy  ·  E endy"`
 
 ### Galeria
 
-**Insert** → **Gallery** → **Blank vertical**, nazwa `galObsada`:
+**Insert** → **Gallery** → **Blank vertical**, nazwa `gal_Home_Roster`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -188,8 +188,8 @@ Text `"Raporty tygodnia:  S starty  ·  M midy  ·  E endy"`
 Items — do grafiku dnia doklejamy deklaracje raportow z biezacego tygodnia:
 ```
 AddColumns(
-    SortByColumns(Filter(DT_Rota, Data = gDzis), "Title", Ascending),
-    "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+    SortByColumns(Filter(DT_Rota, ShiftDate = gblToday), "Title", Ascending),
+    "Rap", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
 )
 ```
 
@@ -201,7 +201,7 @@ w wierszu widac wtedy trzy wygaszone plakietki.
 Zaznacz galerie, kliknij **Add an item from the insert pane** i wstawiaj
 kontrolki **do srodka** szablonu.
 
-**Image** `imgOsoba`:
+**Image** `img_Roster_Photo`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -210,16 +210,16 @@ kontrolki **do srodka** szablonu.
 | Width / Height | `48` / `48` |
 | ImagePosition | `ImagePosition.Fill` |
 
-**Text label** `lblOsobaImie`: X `68`, Y `8`, Width `260`, Height `24`,
+**Text label** `lbl_Roster_Name`: X `68`, Y `8`, Width `260`, Height `24`,
 FontWeight `FontWeight.Semibold`, Text `ThisItem.Title`
 
-**Text label** `lblOsobaGodziny`: X `68`, Y `32`, Width `260`, Height `22`,
-Size `11`, Color `gKolorSzary`, Text:
+**Text label** `lbl_Roster_Hours`: X `68`, Y `32`, Width `260`, Height `22`,
+Size `11`, Color `gblColorMuted`, Text:
 ```
-If(ThisItem.Rodzaj = "Praca", ThisItem.OdGodz & " - " & ThisItem.DoGodz, ThisItem.Rodzaj)
+If(ThisItem.ShiftType = "Praca", ThisItem.StartTime & " - " & ThisItem.EndTime, ThisItem.ShiftType)
 ```
 
-### Plakietki raportow w wierszu
+### Plakietki Daily Checks w wierszu
 
 Trzy male etykiety obok siebie. Kazda ma **Height** `26`, **Width** `26`,
 **Y** `19`, **Size** `11`, **FontWeight** `FontWeight.Semibold`,
@@ -228,38 +228,38 @@ Trzy male etykiety obok siebie. Kazda ma **Height** `26`, **Width** `26`,
 
 | Kontrolka | X | Text |
 |---|---|---|
-| `lblRapS` | `300` | `"S"` |
-| `lblRapM` | `330` | `"M"` |
-| `lblRapE` | `360` | `"E"` |
+| `lbl_Roster_ChkS` | `300` | `"S"` |
+| `lbl_Roster_ChkT` | `330` | `"M"` |
+| `lbl_Roster_ChkE` | `360` | `"E"` |
 
-Dla `lblRapS`:
+Dla `lbl_Roster_ChkS`:
 
 Fill:
 ```
-If(ThisItem.Rap.Starty, gKolorAkcentTlo, gKolorPanel)
+If(ThisItem.Rap.Starts, gblColorAccentSoft, gblColorPanel)
 ```
 Color:
 ```
-If(ThisItem.Rap.Starty, gKolorAkcentCiemny, RGBA(182,182,188,1))
+If(ThisItem.Rap.Starts, gblColorAccentDark, RGBA(182,182,188,1))
 ```
 BorderColor:
 ```
-If(ThisItem.Rap.Starty, RGBA(200,16,46,0.4), gKolorLinia)
+If(ThisItem.Rap.Starts, RGBA(200,16,46,0.4), gblColorLine)
 ```
 Tooltip:
 ```
-If(ThisItem.Rap.Starty, ThisItem.Title & " robi starty", ThisItem.Title & " nie robi startow")
+If(ThisItem.Rap.Starts, ThisItem.Title & " robi starty", ThisItem.Title & " nie robi startow")
 ```
 
-Dla `lblRapM` i `lblRapE` te same cztery formuly, podmieniajac
-`ThisItem.Rap.Starty` na `ThisItem.Rap.Midy` oraz `ThisItem.Rap.Endy`.
+Dla `lbl_Roster_ChkT` i `lbl_Roster_ChkE` te same cztery formuly, podmieniajac
+`ThisItem.Rap.Starts` na `ThisItem.Rap.Throughout` oraz `ThisItem.Rap.End`.
 
 Pusty `Rap` (brak deklaracji) daje `false` w kazdym warunku, wiec wszystkie trzy
 plakietki sa wygaszone — od razu widac, kto jeszcze nic nie wybral.
 
 ### Status
 
-**Text label** `lblOsobaStatus` — status wyliczany z grafiku i przerw:
+**Text label** `lbl_Roster_Status` — status wyliczany z grafiku i przerw:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -273,12 +273,12 @@ Text:
 With(
     {
         teraz: Text(Now(), "[$-en-US]HH:mm"),
-        p: LookUp(DT_Breaks, Data = gDzis && Title = ThisItem.Email)
+        p: LookUp(DT_Breaks, BreakDate = gblToday && Title = ThisItem.Email)
     },
     If(
-        ThisItem.Rodzaj <> "Praca", ThisItem.Rodzaj,
-        !IsBlank(p) && teraz >= p.OdGodz && teraz < p.DoGodz, "Na przerwie " & p.OdGodz,
-        teraz >= ThisItem.OdGodz && teraz < ThisItem.DoGodz, "W pracy",
+        ThisItem.ShiftType <> "Praca", ThisItem.ShiftType,
+        !IsBlank(p) && teraz >= p.StartTime && teraz < p.EndTime, "Na przerwie " & p.StartTime,
+        teraz >= ThisItem.StartTime && teraz < ThisItem.EndTime, "W pracy",
         "Po godzinach"
     )
 )
@@ -289,13 +289,13 @@ Color:
 With(
     {
         teraz: Text(Now(), "[$-en-US]HH:mm"),
-        p: LookUp(DT_Breaks, Data = gDzis && Title = ThisItem.Email)
+        p: LookUp(DT_Breaks, BreakDate = gblToday && Title = ThisItem.Email)
     },
     If(
-        ThisItem.Rodzaj <> "Praca", gKolorSzary,
-        !IsBlank(p) && teraz >= p.OdGodz && teraz < p.DoGodz, gKolorAkcent,
-        teraz >= ThisItem.OdGodz && teraz < ThisItem.DoGodz, gKolorTekst,
-        gKolorSzary
+        ThisItem.ShiftType <> "Praca", gblColorMuted,
+        !IsBlank(p) && teraz >= p.StartTime && teraz < p.EndTime, gblColorAccent,
+        teraz >= ThisItem.StartTime && teraz < ThisItem.EndTime, gblColorText,
+        gblColorMuted
     )
 )
 ```
@@ -303,52 +303,52 @@ With(
 Porownujemy godziny jako tekst w formacie `HH:mm`, dlatego w `DT_Rota`
 godziny musza byc zapisane dwucyfrowo: `08:00`, nie `8:00`.
 
-### Stopka karty: pokrycie raportow na dzis
+### Stopka karty: pokrycie Daily Checks na dzis
 
 Najwazniejsza informacja na tej karcie. Jesli osoba z endami ma w czwartek wolne,
 to w czwartek **wszystkie** plakietki E sa szare — znaczy, ze ktos z obecnych musi
 te endy przejac. Stopka nazywa to wprost, zeby nie trzeba bylo liczyc wzrokiem.
 
-Najpierw wspolna kolekcja. Zaznacz `scrHome` → **OnVisible**:
+Najpierw wspolna kolekcja. Zaznacz `scr_Home` → **OnVisible**:
 ```
-ClearCollect(colDzis,
+ClearCollect(colRosterToday,
     AddColumns(
-        Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca"),
-        "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Praca"),
+        "Rap", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
     )
 )
 ```
 
-Dopisz te sama formule na koncu OnSelect przycisku `btnRaportyZapisz`
+Dopisz te sama formule na koncu OnSelect przycisku `btn_Checks_Save`
 oraz ikony odswiezania, zeby stopka nadazala za zmianami.
 
-**Text label** `lblPokrycie`: X `272`, Y `628`, Width `420`, Height `24`,
-Size `11`, Color `gKolorSzary`, Text:
+**Text label** `lbl_Home_Coverage`: X `272`, Y `628`, Width `420`, Height `24`,
+Size `11`, Color `gblColorMuted`, Text:
 ```
 "Dzis na zmianie —  S: " &
-Coalesce(Concat(Filter(colDzis, Rap.Starty), First(Split(Title, " ")).Value, ", "), "nikt") &
+Coalesce(Concat(Filter(colRosterToday, Rap.Starts), First(Split(Title, " ")).Value, ", "), "nikt") &
 "   M: " &
-Coalesce(Concat(Filter(colDzis, Rap.Midy), First(Split(Title, " ")).Value, ", "), "nikt") &
+Coalesce(Concat(Filter(colRosterToday, Rap.Throughout), First(Split(Title, " ")).Value, ", "), "nikt") &
 "   E: " &
-Coalesce(Concat(Filter(colDzis, Rap.Endy), First(Split(Title, " ")).Value, ", "), "nikt")
+Coalesce(Concat(Filter(colRosterToday, Rap.End), First(Split(Title, " ")).Value, ", "), "nikt")
 ```
 
-**Text label** `lblLuka` — ostrzezenie, widoczne tylko gdy czegos brakuje:
+**Text label** `lbl_Home_Gap` — ostrzezenie, widoczne tylko gdy czegos brakuje:
 
 | Wlasciwosc | Wartosc |
 |---|---|
 | X / Y | `272` / `652` |
 | Width / Height | `520` / `36` |
 | Size | `11` |
-| Color | `gKolorAkcentCiemny` |
-| Fill | `gKolorAkcentTlo` |
+| Color | `gblColorAccentDark` |
+| Fill | `gblColorAccentSoft` |
 | Visible | patrz nizej |
 
 Visible:
 ```
-CountRows(Filter(colDzis, Rap.Starty)) = 0 ||
-CountRows(Filter(colDzis, Rap.Midy)) = 0 ||
-CountRows(Filter(colDzis, Rap.Endy)) = 0
+CountRows(Filter(colRosterToday, Rap.Starts)) = 0 ||
+CountRows(Filter(colRosterToday, Rap.Throughout)) = 0 ||
+CountRows(Filter(colRosterToday, Rap.End)) = 0
 ```
 
 Text:
@@ -357,9 +357,9 @@ Text:
 Concat(
     Filter(
         Table(
-            {n: "starty", ile: CountRows(Filter(colDzis, Rap.Starty))},
-            {n: "midy",   ile: CountRows(Filter(colDzis, Rap.Midy))},
-            {n: "endy",   ile: CountRows(Filter(colDzis, Rap.Endy))}
+            {n: "starty", ile: CountRows(Filter(colRosterToday, Rap.Starts))},
+            {n: "midy",   ile: CountRows(Filter(colRosterToday, Rap.Throughout))},
+            {n: "endy",   ile: CountRows(Filter(colRosterToday, Rap.End))}
         ),
         ile = 0
     ),
@@ -367,163 +367,108 @@ Concat(
 ) & " — ktos z dzisiejszej zmiany musi je przejac"
 ```
 
-Liczone sa tylko osoby z `Rodzaj = "Praca"`, wiec urlop czy chorobowe nie zasłaniaja
+Liczone sa tylko osoby z `ShiftType = "Praca"`, wiec urlop czy chorobowe nie zasłaniaja
 luki. Kto ma raporty w tym tygodniu, ale dzis nie pracuje, pojawi sie w swoim dniu.
 
 ---
 
 ## D. Moja przerwa
 
-**Rectangle** `recPrzerwa`: X `830`, Y `240`, Width `512`, Height `200`,
-Fill `gKolorPanel`, BorderThickness `1`, BorderColor `RGBA(0,0,0,0.08)`.
+Trzy typowe godziny jako przyciski plus pole na dowolna wlasna godzine.
+Przerwa zawsze trwa godzine, koniec liczy sie sam.
 
-**Text label** `lblPrzerwaTytul`: X `854`, Y `256`, Width `400`, Height `28`,
-Size `16`, FontWeight `FontWeight.Semibold`, Text `"Moja przerwa dzisiaj"`
+**Rectangle** `rec_Home_BreakCard`: X `830`, Y `240`, Width `512`, Height `240`,
+Fill `gblColorPanel`, BorderThickness `1`, BorderColor `gblColorLine`.
 
-**Dropdown** `drpPrzerwa`: X `854`, Y `300`, Width `220`, Height `40`.
+**Text label** `lbl_Home_BreakTitle`: X `854`, Y `256`, Width `400`, Height `28`,
+Size `16`, FontWeight `FontWeight.Semibold`.
 
-Items:
-```
-["10:00","11:00","12:00","13:00","14:00","15:00"]
-```
+### Wybor godziny
 
-Default:
-```
-With({p: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email)},
-    If(IsBlank(p), "12:00", p.OdGodz)
-)
-```
+Cztery przyciski w rzedzie, kazdy Height `44`, Y `300`:
 
-**Text label** `lblPrzerwaDo`: X `1086`, Y `300`, Width `160`, Height `40`,
-Color `gKolorSzary`, Text:
-```
-"do " & Text(Value(Left(drpPrzerwa.Selected.Value, 2)) + 1, "00") & ":00"
-```
+| Kontrolka | X | Width |
+|---|---|---|
+| `btn_Break_12` | `854` | `86` |
+| `btn_Break_13` | `948` | `86` |
+| `btn_Break_14` | `1042` | `86` |
+| `btn_Break_Other` | `1136` | `110` |
 
-**Button** `btnPrzerwaZapisz`: X `854`, Y `360`, Width `160`, Height `40`,
-Text `"Zapisz przerwe"`, Fill `gKolorAkcent`.
+Formuly `Text`, `OnSelect`, `Fill` i `Color` kazdego przycisku sa w pliku formul.
+Wybrana godzine trzyma zmienna lokalna `loc_BreakStart`, a `loc_BreakCustom`
+mowi, czy uzytkownik wpisuje wlasna pore.
 
-OnSelect:
-```
-With(
-    {
-        ist: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email),
-        od: drpPrzerwa.Selected.Value,
-        do: Text(Value(Left(drpPrzerwa.Selected.Value, 2)) + 1, "00") & ":00"
-    },
-    If(IsBlank(ist),
-        Patch(DT_Breaks, Defaults(DT_Breaks),
-            {
-                Title: gJa.Email,
-                Osoba: {
-                    '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedUser",
-                    Claims: "i:0#.f|membership|" & gJa.Email,
-                    DisplayName: gJa.FullName,
-                    Email: gJa.Email
-                },
-                Data: gDzis,
-                OdGodz: od,
-                DoGodz: do
-            }
-        ),
-        Patch(DT_Breaks, ist, {OdGodz: od, DoGodz: do})
-    )
-);
-Notify("Przerwa zapisana", NotificationType.Success, 2000)
-```
+**Text input** `txt_Break_Custom`: X `854`, Y `352`, Width `150`, Height `44`.
+Widoczny tylko po klikniecu **Other time**. Przyjmuje godzine w formacie
+`HH:MM`; dopoki wpis jest niepoprawny, przycisk zapisu jest nieaktywny,
+a pod polem pojawia sie podpowiedz.
 
-**Text label** `lblPrzerwaInfo`: X `1030`, Y `360`, Width `290`, Height `40`,
-Size `11`, Color `gKolorSzary`, Text:
-```
-With({p: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email)},
-    If(IsBlank(p), "Nie masz jeszcze zapisanej przerwy",
-        "Zapisana: " & p.OdGodz & " - " & p.DoGodz)
-)
-```
+**Text label** `lbl_Break_CustomError`: X `1014`, Y `352`, Width `300`, Height `44`,
+Size `11`, Color `gblColorAccentDark`.
 
-Jedna osoba ma jedna przerwe dziennie — ponowny zapis nadpisuje poprzednia.
+**Text label** `lbl_Break_End`: X `854`, Y `404`, Width `160`, Height `24`,
+Size `12`, Color `gblColorMuted` — pokazuje godzine zakonczenia.
+
+### Zapis
+
+**Button** `btn_Break_Save`: X `1136`, Y `404`, Width `186`, Height `44`,
+Fill `gblColorAccent`, Color bialy.
+
+**Text label** `lbl_Break_Saved`: X `854`, Y `436`, Width `280`, Height `24`,
+Size `11`, Color `gblColorMuted`.
+
+**Text label** `lbl_Break_Others`: X `854`, Y `458`, Width `460`, Height `24`,
+Size `11`, Color `gblColorFaint` — kto jeszcze ma przerwe o tej samej porze.
+
+Jedna osoba ma jedna przerwe dziennie: ponowny zapis nadpisuje poprzednia.
 
 ---
+## E. Moje Daily Checks
 
-## E. Raporty w tym tygodniu
+**Rectangle** `rec_Home_ChecksCard`: X `830`, Y `500`, Width `512`, Height `200`,
+Fill `gblColorPanel`, BorderThickness `1`, BorderColor `gblColorLine`.
 
-**Rectangle** `recRaporty`: X `830`, Y `460`, Width `512`, Height `200`,
-Fill `gKolorPanel`, BorderThickness `1`, BorderColor `RGBA(0,0,0,0.08)`.
+**Text label** `lbl_Home_ChecksTitle`: X `854`, Y `516`, Width `460`, Height `28`,
+Size `16`, FontWeight `FontWeight.Semibold`.
 
-**Text label** `lblRaportyTytul`: X `854`, Y `476`, Width `460`, Height `28`,
-Size `16`, FontWeight `FontWeight.Semibold`, Text:
-```
-"Moje raporty (tydzien od " & Text(gPoniedzialek, "dd.mm") & ")"
-```
+**Text label** `lbl_Home_ChecksReset`: X `854`, Y `542`, Width `300`, Height `20`,
+Size `11`, Color `gblColorFaint`, Text `"Resets every Saturday"`.
 
-Trzy przelaczniki. **Insert** → **Input** → **Toggle**.
+### Trzy przelaczniki
 
-| Kontrolka | X | Y | Default |
+**Insert** → **Input** → **Toggle**.
+
+| Kontrolka | Y | Etykieta obok (X `914`) | Licznik (X `1060`) |
 |---|---|---|---|
-| `tglStarty` | `854` | `520` | patrz nizej |
-| `tglMidy` | `854` | `562` | patrz nizej |
-| `tglEndy` | `854` | `604` | patrz nizej |
+| `tgl_Checks_Starts` | `576` | `"Starts"` | `lbl_Checks_CountStarts` |
+| `tgl_Checks_Throughout` | `618` | `"Throughout"` | `lbl_Checks_CountThroughout` |
+| `tgl_Checks_End` | `660` | `"End"` | `lbl_Checks_CountEnd` |
 
-Default dla `tglStarty`:
-```
-With({r: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
-    !IsBlank(r) && r.Starty
-)
-```
-Dla `tglMidy` i `tglEndy` tak samo, zmieniajac `r.Starty` na `r.Midy` i `r.Endy`.
+Wszystkie przelaczniki X `854`. Etykiety i liczniki: Height `24`, liczniki
+dodatkowo Size `11`, Color `gblColorMuted`, Width `260`.
 
-Obok kazdego przelacznika **Text label** (X `914`, ta sama wysokosc, Width `120`):
-teksty `"Starty"`, `"Midy"`, `"Endy"`.
+Wlasciwosc `Default` kazdego przelacznika czyta wiersz z `DT_DailyChecks`
+dla **biezacego tygodnia**, czyli od ostatniej soboty. W sobote rano wiersza
+jeszcze nie ma, wiec wszystkie trzy startuja wylaczone — to jest cotygodniowy
+reset, o ktory chodzilo. Stare wiersze zostaja w liscie jako historia.
 
-**Button** `btnRaportyZapisz`: X `1150`, Y `604`, Width `170`, Height `40`,
-Text `"Zapisz raporty"`, Fill `gKolorAkcent`.
-
-OnSelect:
-```
-With({ist: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
-    If(IsBlank(ist),
-        Patch(DT_Reports, Defaults(DT_Reports),
-            {
-                Title: gJa.Email,
-                Osoba: {
-                    '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedUser",
-                    Claims: "i:0#.f|membership|" & gJa.Email,
-                    DisplayName: gJa.FullName,
-                    Email: gJa.Email
-                },
-                TydzienOd: gPoniedzialek,
-                Starty: tglStarty.Value,
-                Midy: tglMidy.Value,
-                Endy: tglEndy.Value
-            }
-        ),
-        Patch(DT_Reports, ist,
-            {Starty: tglStarty.Value, Midy: tglMidy.Value, Endy: tglEndy.Value})
-    )
-);
-Notify("Zapisane", NotificationType.Success, 2000)
-```
-
-### Licznik przy przelacznikach
-
-Obok kazdego przelacznika **Text label** (X `1030`, ta sama wysokosc co przelacznik,
-Width `290`, Size `11`, Color `gKolorSzary`). Dla startow Text:
-```
-CountRows(Filter(DT_Reports, TydzienOd = gPoniedzialek, Starty)) & " osob w zespole"
-```
-Dla midow i endow tak samo, zmieniajac `Starty` na `Midy` i `Endy`.
+**Button** `btn_Checks_Save`: X `1136`, Y `660`, Width `186`, Height `44`,
+Fill `gblColorAccent`. Jego `OnSelect` zapisuje wiersz i od razu przebudowuje
+kolekcje `colRosterToday`, zeby plakietki w liscie obsady odswiezyly sie
+bez przeladowania ekranu.
 
 ---
-
 ## F. Odswiezanie
 
-**Insert** → **Icon** → **Reload**, nazwa `icoOdswiez`: X `1300`, Y `30`,
-Width / Height `28`, Color `gKolorSzary`.
+**Insert** → **Icon** → **Reload**, nazwa `ico_Home_Refresh`: X `1300`, Y `30`,
+Width / Height `28`, Color `gblColorMuted`.
 
 OnSelect:
 ```
-Refresh(DT_Rota); Refresh(DT_Breaks); Refresh(DT_Reports); Refresh(DT_ManagerMessages);
-Set(gDzis, Today())
+// pelna formula w formuly/02-home.txt, naglowek ico_Home_Refresh.OnSelect
+Refresh(DT_Rota); Refresh(DT_Breaks); Refresh(DT_DailyChecks); Refresh(DT_ManagerMessages);
+Set(gblToday, Today());
+Set(gblWeekStart, DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Saturday) - 1), Days))
 ```
 
 ---
@@ -533,7 +478,7 @@ Set(gDzis, Today())
 1. **Alt + klik** → widac liste osob z dzisiejszej daty, ze zdjeciami i statusem
 2. wybierz godzine przerwy → **Zapisz przerwe** → w `DT_Breaks` pojawia sie wiersz,
    a status przy twoim nazwisku zmienia sie w godzinach przerwy
-3. przestaw przelaczniki raportow → **Zapisz raporty** → wiersz w `DT_Reports`
+3. przestaw przelaczniki Daily Checks → **Save Daily Checks** → wiersz w `DT_DailyChecks`
 4. przy kazdej osobie widac trzy plakietki S, M, E — wypelnione oznaczaja raporty,
    ktore ta osoba robi w tym tygodniu
 5. gdy nikt z obecnych nie ma danego raportu, pod lista zapala sie ostrzezenie;
@@ -542,12 +487,12 @@ Set(gDzis, Today())
 
 ## H. Role managera (do zrobienia pozniej)
 
-Teraz `gManager` jest na sztywno `false`. Docelowo: zaloz grupe SharePoint
+Teraz `gblIsManager` jest na sztywno `false`. Docelowo: zaloz grupe SharePoint
 `GMSC Managers`, a w `App.OnStart` ustaw:
 
 ```
-Set(gManager, !IsEmpty(
-    Filter(Office365Groups.ListGroupMembers("<ID-GRUPY>").value, mail = gJa.Email)
+Set(gblIsManager, !IsEmpty(
+    Filter(Office365Groups.ListGroupMembers("<ID-GRUPY>").value, mail = gblUser.Email)
 ))
 ```
 

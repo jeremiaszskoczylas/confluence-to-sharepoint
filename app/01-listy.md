@@ -3,35 +3,43 @@
 Zakladasz raz, w tej samej witrynie co dokumentacja. Wszystkie kolumny
 **bez wartosci domyslnej**, chyba ze napisano inaczej.
 
-Skrot: lista → **New** → **List** → nazwa z naglowka → potem **Add column**.
+Nazwy list i kolumn sa po angielsku — patrz [KONWENCJE.md](KONWENCJE.md).
+Trzymaj sie ich dokladnie, bo formuly odwoluja sie do nich po nazwie.
+
+Skrot: **New** → **List** → nazwa z naglowka → potem **Add column**.
 
 ---
 
-## DT_Rota — kto pracuje danego dnia
+## DT_Rota — grafik zmian
 
-Docelowo zasilana z pliku `rota`. Na teraz wypelnisz recznie kilkoma wierszami,
-zeby bylo co pokazac na ekranie.
+Docelowo zasilana ze skoroszytu `rota` skryptem (patrz
+[06-rota.md](06-rota.md)). Na teraz wypelnij recznie kilkoma wierszami.
 
 | Kolumna | Typ | Uwagi |
 |---|---|---|
 | `Title` | domyslna | imie i nazwisko, np. `Jan Kowalski` |
-| `Email` | Jeden wiersz tekstu | sluzbowy, po nim laczymy zdjecie z Teams |
-| `Data` | Data (bez godziny) | dzien zmiany |
-| `OdGodz` | Jeden wiersz tekstu | `08:00` — tekst, nie czas; prostsze w porownaniach |
-| `DoGodz` | Jeden wiersz tekstu | `16:00` |
-| `Rodzaj` | Wybor | `Praca`, `Urlop`, `Chorobowe`, `Szkolenie` |
+| `Email` | Jeden wiersz tekstu | sluzbowy; po nim laczymy zdjecie z Teams |
+| `ShiftDate` | Data (bez godziny) | dzien zmiany |
+| `StartTime` | Jeden wiersz tekstu | `08:00` — tekst, nie czas |
+| `EndTime` | Jeden wiersz tekstu | `16:00` |
+| `ShiftType` | Wybor | `Work`, `Leave`, `Sick`, `Training` |
 
-Dane przykladowe (wpisz 4–6 wierszy, w tym dzisiejsza date i rozne godziny):
+Godziny zapisuj **dwucyfrowo**: `08:00`, nie `8:00`. Porownania robimy
+na tekscie, wiec `8:00` wypadnie w zlym miejscu.
+
+Dane przykladowe — wpisz 4–6 wierszy z dzisiejsza data:
 
 ```
-Jan Kowalski   | jan.kowalski@...   | dzis | 08:00 | 16:00 | Praca
-Anna Nowak     | anna.nowak@...     | dzis | 10:00 | 18:00 | Praca
-Piotr Wisniew. | piotr.w@...        | dzis | 06:00 | 14:00 | Praca
-Maria Lewand.  | maria.l@...        | dzis |       |       | Urlop
+Jan Kowalski    | jan.kowalski@...  | dzis | 08:00 | 16:00 | Work
+Anna Nowak      | anna.nowak@...    | dzis | 10:00 | 18:00 | Work
+Piotr Wisniewski| piotr.w@...       | dzis | 06:00 | 14:00 | Work
+Maria Lewandow. | maria.l@...       | dzis |       |       | Leave
 ```
 
-W kolumnie `Email` wpisz **prawdziwe adresy osob z zespolu** — inaczej nie zaciagna
+W `Email` wpisz **prawdziwe adresy osob z zespolu** — inaczej nie zaciagna
 sie zdjecia profilowe.
+
+**Indeks:** ustawienia listy → Indexed columns → dodaj indeks na `ShiftDate`.
 
 ---
 
@@ -39,31 +47,36 @@ sie zdjecia profilowe.
 
 | Kolumna | Typ | Uwagi |
 |---|---|---|
-| `Title` | domyslna | wpisujemy tu email osoby (pole wymagane, wykorzystujemy je) |
-| `Osoba` | Osoba lub grupa | kto rezerwuje |
-| `Data` | Data (bez godziny) | |
-| `OdGodz` | Jeden wiersz tekstu | `12:00` |
-| `DoGodz` | Jeden wiersz tekstu | `13:00` |
+| `Title` | domyslna | wpisujemy tu adres e-mail (pole wymagane, wykorzystujemy je) |
+| `Person` | Osoba lub grupa | kto rezerwuje |
+| `BreakDate` | Data (bez godziny) | |
+| `StartTime` | Jeden wiersz tekstu | `12:00` |
+| `EndTime` | Jeden wiersz tekstu | `13:00` |
 
-Przerwa trwa godzine, wiec `DoGodz` liczy aplikacja — nie wpisujesz recznie.
+Przerwa trwa godzine. Aplikacja daje trzy przyciski na typowe pory
+(12:00, 13:00, 14:00) oraz pole **Other time**, gdzie mozna wpisac dowolna
+godzine rozpoczecia — koniec liczy sie sam.
 
-**Indeks:** ustawienia listy → Indexed columns → dodaj indeks na `Data`.
-Bez tego przy kilkuset wierszach pojawi sie ostrzezenie o delegowaniu.
+**Indeks:** dodaj indeks na `BreakDate`.
 
 ---
 
-## DT_Reports — raporty na tydzien
+## DT_DailyChecks — Daily Checks na tydzien
 
 | Kolumna | Typ | Uwagi |
 |---|---|---|
-| `Title` | domyslna | email osoby |
-| `Osoba` | Osoba lub grupa | |
-| `TydzienOd` | Data (bez godziny) | poniedzialek danego tygodnia |
-| `Starty` | Tak/Nie | |
-| `Midy` | Tak/Nie | |
-| `Endy` | Tak/Nie | |
+| `Title` | domyslna | adres e-mail osoby |
+| `Person` | Osoba lub grupa | |
+| `WeekStart` | Data (bez godziny) | **sobota** rozpoczynajaca tydzien |
+| `Starts` | Tak/Nie | |
+| `Throughout` | Tak/Nie | |
+| `End` | Tak/Nie | |
 
-Jeden wiersz na osobe na tydzien. Aplikacja go zaklada albo aktualizuje.
+Jeden wiersz na osobe na tydzien. Tydzien liczy sie od soboty, wiec w sobote
+rano nikt nie ma jeszcze wiersza i wszystkie przelaczniki sa puste — na tym
+polega cotygodniowy reset. Stare wiersze zostaja jako historia.
+
+**Indeks:** dodaj indeks na `WeekStart`.
 
 ---
 
@@ -71,56 +84,64 @@ Jeden wiersz na osobe na tydzien. Aplikacja go zaklada albo aktualizuje.
 
 | Kolumna | Typ | Uwagi |
 |---|---|---|
-| `Title` | domyslna | krotki naglowek, np. `Zmiana grafiku w piatek` |
-| `Tresc` | Wiele wierszy tekstu | **wlacz tekst sformatowany** (Rich text) |
-| `Wazne` | Tak/Nie | wyroznia komunikat kolorem |
-| `AktywnyDo` | Data (bez godziny) | po tej dacie znika z ekranu |
+| `Title` | domyslna | krotki naglowek |
+| `Body` | Wiele wierszy tekstu | **wlacz tekst sformatowany** (Rich text) |
+| `IsImportant` | Tak/Nie | wyroznia komunikat kolorem |
+| `ActiveUntil` | Data (bez godziny) | po tej dacie znika z ekranu |
 
-Aplikacja pokazuje **najnowszy** komunikat, ktorego `AktywnyDo` jeszcze nie minal.
+Aplikacja pokazuje **najnowszy** komunikat, ktorego `ActiveUntil` jeszcze
+nie minal.
 
 **Uprawnienia:** lista → Settings → Permissions for this list → Stop inheriting
-permissions → zostaw `Read` dla zespolu, a `Contribute` nadaj tylko grupie managerow.
-To jedyne miejsce, gdzie uprawnienia naprawde ograniczaja zapis; ukrycie przycisku
+permissions → `Read` dla zespolu, `Contribute` tylko dla grupy managerow.
+To jedyne miejsce, ktore naprawde ogranicza zapis; ukrycie przycisku
 w aplikacji jest tylko kosmetyka.
 
 ---
 
 ## DT_Services — katalog serwisow
 
-Z tej listy powstaja zakladki na ekranie dokumentacji.
+Z tej listy powstaja zakladki dokumentacji **i** wybor serwisu przy migracji.
 
 | Kolumna | Typ | Uwagi |
 |---|---|---|
-| `Title` | domyslna | nazwa widoczna na zakladce, np. `GMSC` |
-| `Kod` | Jeden wiersz tekstu | wartosc zapisywana w kolumnie `Service` stron |
-| `Kolejnosc` | Liczba | 10, 20, 30 — kolejnosc zakladek |
-| `Aktywny` | Tak/Nie | odhaczony = zakladka znika |
+| `Title` | domyslna | nazwa na zakladce, np. `GMSC` |
+| `Code` | Jeden wiersz tekstu | krotki kod, trafia do kolumny `Service` stron i w prefiks nazwy pliku |
+| `SortOrder` | Liczba | 10, 20, 30 — kolejnosc zakladek |
+| `IsActive` | Tak/Nie | odznaczony = zakladka znika |
 
-Na start jeden wiersz: nazwa biezacego serwisu, `Kod` taki sam, `Kolejnosc` 10,
-`Aktywny` zaznaczone.
+`Code` powinien byc krotki i bez spacji — wchodzi w nazwy plikow stron,
+np. `GMSC-Known-Errors.aspx`.
 
----
-
-## Kolumna Service w bibliotece Site Pages
-
-Site Pages → Add column → **Wybor**, nazwa `Service`, jeden wybor na serwis
-(te same wartosci co `Kod` w `DT_Services`).
-
-Potem przypisz istniejace strony do biezacego serwisu hurtem:
-
-1. Site Pages → widok **All Pages** → zaznacz wszystkie strony migrowane
-2. prawy panel szczegolow → `Service` → wybierz wartosc → zapisz
-
-Przy migracji kolejnej przestrzeni Confluence ustawisz te kolumne w kroku
-[01-MigratePages](../flows/01-MigratePages.md) razem z pozostalymi metadanymi,
-a nazwom plikow nadasz prefiks serwisu, zeby sie nie zderzyly
-(np. `GMSC-Home-Page.aspx` i `SRV2-Home-Page.aspx`).
+Na start jeden wiersz: biezacy serwis, `SortOrder` 10, `IsActive` zaznaczone.
 
 ---
 
-## Kontrola przed krokiem 1
+## Kolumny w bibliotece Site Pages
+
+Zakladasz je przy migracji (patrz [flows/00-przygotowanie.md](../flows/00-przygotowanie.md)),
+ale aplikacja z nich korzysta, wiec dla porzadku komplet:
+
+| Kolumna | Typ | Rola |
+|---|---|---|
+| `ConfluencePageId` | Liczba | id strony zrodlowej; 0 = nie z migracji |
+| `ParentPageId` | Liczba | id strony nadrzednej — na tym stoi drzewo |
+| `SortOrder` | Liczba | kolejnosc wsrod rodzenstwa |
+| `TreePath` | Jeden wiersz tekstu | sciezka id, np. `/8/9/11/12/` |
+| `TreeSort` | Jeden wiersz tekstu | klucz sortowania drzewa |
+| `Category` | Wybor | galaz najwyzszego poziomu |
+| `DocStatus` | Wybor | `Draft`, `Published`, `Archived` |
+| `Service` | Wybor | kod serwisu; wartosci takie same jak `Code` w `DT_Services` |
+
+Kolumna `Service` jest **obowiazkowa** od momentu, gdy planujesz migracje
+drugiego serwisu. Bez niej strony z roznych przestrzeni zlewaja sie w jedno
+drzewo.
+
+---
+
+## Kontrola przed krokiem 2
 
 - `DT_Rota` ma kilka wierszy z dzisiejsza data i prawdziwymi adresami e-mail
-- `DT_ManagerMessages` ma jeden przykladowy komunikat z `AktywnyDo` w przyszlosci
-- `DT_Services` ma wiersz biezacego serwisu
+- `DT_ManagerMessages` ma jeden przykladowy komunikat z `ActiveUntil` w przyszlosci
+- `DT_Services` ma wiersz biezacego serwisu z wypelnionym `Code`
 - strony w Site Pages maja wypelniona kolumne `Service`

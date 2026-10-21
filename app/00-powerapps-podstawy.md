@@ -49,7 +49,7 @@ Konsekwencje, ktore zaskakuja na poczatku:
 | zmienna istnieje po kroku „Initialize variable" | zmienna istnieje po wykonaniu `Set(...)`, czyli zwykle po **Run OnStart** |
 | akcje dziala sie po kolei | formuly wygladu nie maja kolejnosci; kolejnosc jest tylko wewnatrz jednego `OnSelect`, gdzie oddzielasz polecenia **srednikiem** |
 | petla „Apply to each" | nie ma petli dla wygladu; galeria sama rysuje wiersz na kazdy rekord |
-| wynik akcji bierzesz z `body('Akcja')` | wynik kontrolki bierzesz z `Nazwa.Wlasciwosc`, np. `txtTytul.Text` |
+| wynik akcji bierzesz z `body('Akcja')` | wynik kontrolki bierzesz z `Nazwa.Wlasciwosc`, np. `txt_NewPage_Title.Text` |
 
 Jedyne miejsce, gdzie myslisz „krokami", to `OnSelect` przycisku: tam polecenia
 wykonuja sie po kolei, rozdzielone srednikiem.
@@ -101,7 +101,7 @@ a ona rysuje ten sam uklad dla kazdego. Wewnatrz galerii piszesz `ThisItem.Tytul
 zeby odwolac sie do pola biezacego wiersza. To odpowiednik `Apply to each`,
 tylko dla wygladu.
 
-**Zmienna globalna** — `Set(gDzis, Today())`. Widoczna na wszystkich ekranach.
+**Zmienna globalna** — `Set(gblToday, Today())`. Widoczna na wszystkich ekranach.
 Nasze zmienne maja prefiks `g`.
 
 **Kolekcja** — tabela trzymana w pamieci aplikacji:
@@ -124,11 +124,11 @@ dodaje nowy wiersz, `Patch(Lista, istniejacyRekord, {...})` zmienia istniejacy.
 ## Jak dodac kontrolke, krok po kroku
 
 Instrukcje w kolejnych plikach pisza skrotem: „**Insert** → **Text label**,
-nazwa `lblTytul`, X `248`, Y `24`, Text `"Czesc"`". Rozwiniecie:
+nazwa `lbl_Home_Greeting`, X `248`, Y `24`, Text `"Czesc"`". Rozwiniecie:
 
 1. **Insert** w lewym pasku → kliknij **Text label**. Kontrolka pojawia sie
    na srodku ekranu z nazwa `Label1`.
-2. W drzewie dwuklik na `Label1` → wpisz `lblTytul` → Enter.
+2. W drzewie dwuklik na `Label1` → wpisz `lbl_Home_Greeting` → Enter.
    **Nazwy musza byc dokladnie takie jak w instrukcji** — inne formuly sie
    do nich odwoluja.
 3. Zaznacz kontrolke. W pasku formuly wybierz z listy wlasciwosc `X`,
@@ -140,7 +140,7 @@ X / Y / Width / Height. Szybciej niz przez pasek formuly.
 
 **Kopiowanie zamiast wstawiania**: gdy potrzebujesz trzeciej podobnej etykiety,
 zaznacz gotowa, Ctrl+C, Ctrl+V i zmien tylko to, co sie rozni. Kopia dostaje
-nazwe `lblTytul_1` — zmien ja na wlasciwa.
+nazwe `lbl_Home_Greeting_1` — zmien ja na wlasciwa.
 
 ---
 
@@ -198,7 +198,7 @@ chwili przy pierwszym uruchomieniu; przy dalszych brakach sprawdz, czy adres
 e-mail w `DT_Rota` jest prawdziwy.
 
 **Galeria jest pusta, choc lista ma dane.** Sprawdz `Items` — czy filtr nie
-odcina wszystkiego (np. `Data = gDzis`, a w liscie nie ma dzisiejszej daty).
+odcina wszystkiego (np. `Data = gblToday`, a w liscie nie ma dzisiejszej daty).
 
 **Nie wiem, gdzie wkleic formule.** Naglowek w pliku formul ma postac
 `### nazwaKontrolki.Wlasciwosc` — zaznacz te kontrolke w drzewie, wybierz

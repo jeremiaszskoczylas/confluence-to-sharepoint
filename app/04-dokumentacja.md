@@ -9,10 +9,10 @@ otwiera strone SharePoint w nowej karcie.
 > Zacznij od [00-powerapps-podstawy.md](00-powerapps-podstawy.md).
 
 Drzewo czyta biblioteke Site Pages na zywo — zadnego flow do odswiezania
-nie trzeba. Kolejnosc i wciecia biora sie z kolumn `ParentPageId`, `TreePath`
+nie trzeba. SortOrder i wciecia biora sie z kolumn `ParentPageId`, `TreePath`
 i `SortOrder`, ktore przelicza [flow 04](../flows/04-OdswiezDrzewo.md).
 
-Wszystko na `scrDocs`, obszar tresci od X = `248`.
+Wszystko na `scr_Docs`, obszar tresci od X = `248`.
 
 ---
 
@@ -22,7 +22,7 @@ Drzewo musi wiedziec, dokad linkowac. Zaznacz **App** → **OnStart** → dopisz
 na koncu (podmien na swoj adres, bez ukosnika na koncu):
 
 ```
-;Set(gWitrynaUrl, "https://TWOJA-DOMENA.sharepoint.com<WITRYNA>")
+;Set(gblSiteUrl, "https://TWOJA-DOMENA.sharepoint.com<WITRYNA>")
 ```
 
 Przyklad calosci po podmianie: `https://firma.sharepoint.com/teams/Dzial/podwitryna`.
@@ -33,10 +33,10 @@ Potem **Run OnStart**.
 
 ## B. Wczytanie stron przy wejsciu na ekran
 
-Zaznacz `scrDocs` → wlasciwosc **OnVisible**:
+Zaznacz `scr_Docs` → wlasciwosc **OnVisible**:
 
 ```
-ClearCollect(colStrony,
+ClearCollect(colPages,
     AddColumns(
         RenameColumns(
             ShowColumns(
@@ -44,21 +44,21 @@ ClearCollect(colStrony,
                 "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
                 "Service", "Name"
             ),
-            "Name", "Plik"
+            "Name", "FileName"
         ),
-        "Poziom", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
+        "Depth", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
     )
 );
-ClearCollect(colSerwisy, SortByColumns(Filter(DT_Services, Aktywny), "Kolejnosc", Ascending));
-If(IsBlank(gSerwis), Set(gSerwis, First(colSerwisy).Kod));
-ClearCollect(colRozwiniete,
-    ShowColumns(Filter(colStrony, Poziom = 0), "ID")
+ClearCollect(colServices, SortByColumns(Filter(DT_Services, IsActive), "SortOrder", Ascending));
+If(IsBlank(gblService), Set(gblService, First(colServices).Kod));
+ClearCollect(colExpanded,
+    ShowColumns(Filter(colPages, Depth = 0), "ID")
 );
-Set(gSzukaj, "")
+Set(gblSearch, "")
 ```
 
 Co to robi: pobiera strony majace wyliczona sciezke drzewa, dolicza kolumne
-`Poziom` (glebokosc z liczby ukosnikow w `TreePath`), wczytuje liste serwisow
+`Depth` (glebokosc z liczby ukosnikow w `TreePath`), wczytuje liste serwisow
 i rozwija korzen kazdego z nich.
 
 Strony bez `TreePath` sa pomijane — to strony spoza drzewa, w tym sama mapa.
@@ -67,16 +67,16 @@ Strony bez `TreePath` sa pomijane — to strony spoza drzewa, w tym sama mapa.
 
 ## C. Naglowek i zakladki serwisow
 
-**Text label** `lblDocsTytul`: X `248`, Y `24`, Width `500`, Height `40`,
+**Text label** `lbl_Docs_Title`: X `248`, Y `24`, Width `500`, Height `40`,
 Size `24`, FontWeight `FontWeight.Semibold`, Text `"Dokumentacja"`
 
 ### Zakladki
 
-**Insert** → **Gallery** → **Blank horizontal**, nazwa `galSerwisy`:
+**Insert** → **Gallery** → **Blank horizontal**, nazwa `gal_Docs_Services`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| Items | `colSerwisy` |
+| Items | `colServices` |
 | X / Y | `248` / `76` |
 | Width / Height | `1094` / `44` |
 | TemplateSize | `160` |
@@ -85,17 +85,17 @@ Size `24`, FontWeight `FontWeight.Semibold`, Text `"Dokumentacja"`
 
 W szablonie galerii:
 
-**Button** `btnSerwis`:
+**Button** `btn_Service_Tab`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
 | Text | `ThisItem.Title` |
 | X / Y | `0` / `0` |
 | Width / Height | `152` / `40` |
-| Fill | `If(gSerwis = ThisItem.Kod, gKolorAkcent, RGBA(0,0,0,0))` |
-| Color | `If(gSerwis = ThisItem.Kod, RGBA(255,255,255,1), gKolorTekst)` |
+| Fill | `If(gblService = ThisItem.Kod, gblColorAccent, RGBA(0,0,0,0))` |
+| Color | `If(gblService = ThisItem.Kod, RGBA(255,255,255,1), gblColorText)` |
 | BorderThickness | `0` |
-| OnSelect | `Set(gSerwis, ThisItem.Kod)` |
+| OnSelect | `Set(gblService, ThisItem.Kod)` |
 
 Przy jednym serwisie widac jedna zakladke. Kolejne dochodza same po dopisaniu
 wierszy do `DT_Services` i ustawieniu kolumny `Service` na stronach.
@@ -104,38 +104,38 @@ wierszy do `DT_Services` i ustawieniu kolumny `Service` na stronach.
 
 ## D. Wyszukiwarka
 
-**Text input** `txtSzukaj`:
+**Text input** `txt_Docs_Search`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
 | X / Y | `248` / `136` |
 | Width / Height | `420` / `40` |
 | HintText | `"Szukaj w tytulach stron"` |
-| OnChange | `Set(gSzukaj, txtSzukaj.Text)` |
+| OnChange | `Set(gblSearch, txt_Docs_Search.Text)` |
 
 Zeby wyniki pojawialy sie w trakcie pisania, ustaw zamiast tego:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| OnChange | `Set(gSzukaj, Self.Text)` |
+| OnChange | `Set(gblSearch, Self.Text)` |
 
-**Icon** → **Cancel**, nazwa `icoCzysc`: X `628`, Y `146`, Width/Height `20`,
-Visible `!IsBlank(gSzukaj)`, OnSelect:
+**Icon** → **Cancel**, nazwa `ico_Docs_ClearSearch`: X `628`, Y `146`, Width/Height `20`,
+Visible `!IsBlank(gblSearch)`, OnSelect:
 ```
-Reset(txtSzukaj); Set(gSzukaj, "")
+Reset(txt_Docs_Search); Set(gblSearch, "")
 ```
 
-**Text label** `lblLicznik`: X `690`, Y `136`, Width `300`, Height `40`,
-Color `gKolorSzary`, Size `11`, Text:
+**Text label** `lbl_Docs_Subtitle`: X `690`, Y `136`, Width `300`, Height `40`,
+Color `gblColorMuted`, Size `11`, Text:
 ```
-CountRows(Filter(colStrony, Service = gSerwis)) & " stron w tym serwisie"
+CountRows(Filter(colPages, Service = gblService)) & " stron w tym serwisie"
 ```
 
 ---
 
 ## E. Drzewo
 
-**Insert** → **Gallery** → **Blank vertical**, nazwa `galDrzewo`:
+**Insert** → **Gallery** → **Blank vertical**, nazwa `gal_Docs_Tree`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -148,14 +148,14 @@ Items — **cala formula**:
 
 ```
 SortByColumns(
-    Filter(colStrony As s,
-        s.Service = gSerwis,
-        If(IsBlank(gSzukaj),
-            s.Poziom = 0 ||
+    Filter(colPages As s,
+        s.Service = gblService,
+        If(IsBlank(gblSearch),
+            s.Depth = 0 ||
             CountRows(
-                Filter(colRozwiniete As r, r.ID <> s.ID && "/" & r.ID & "/" in s.TreePath)
-            ) = s.Poziom,
-            gSzukaj in s.Title
+                Filter(colExpanded As r, r.ID <> s.ID && "/" & r.ID & "/" in s.TreePath)
+            ) = s.Depth,
+            gblSearch in s.Title
         )
     ),
     "TreeSort", Ascending
@@ -163,80 +163,80 @@ SortByColumns(
 ```
 
 Jak to dziala: przy pustej wyszukiwarce wiersz jest widoczny, gdy jest korzeniem
-albo gdy **wszyscy** jego przodkowie sa rozwinieci. Liczba przodkow to `Poziom`,
+albo gdy **wszyscy** jego przodkowie sa rozwinieci. Liczba przodkow to `Depth`,
 a sprawdzenie przynaleznosci robi `"/id/" in TreePath`. Przy wpisanym szukaniu
 drzewo splaszcza sie do listy pasujacych tytulow.
 
 ### Zawartosc wiersza
 
-**Icon** → **ChevronRight**, nazwa `icoChevron`:
+**Icon** → **ChevronRight**, nazwa `ico_Tree_Chevron`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| X | `8 + ThisItem.Poziom * 24` |
+| X | `8 + ThisItem.Depth * 24` |
 | Y | `10` |
 | Width / Height | `20` |
-| Color | `gKolorSzary` |
-| Visible | `CountRows(Filter(colStrony, ParentPageId = ThisItem.ID)) > 0 && IsBlank(gSzukaj)` |
-| Rotation | `If(ThisItem.ID in colRozwiniete.ID, 90, 0)` |
+| Color | `gblColorMuted` |
+| Visible | `CountRows(Filter(colPages, ParentPageId = ThisItem.ID)) > 0 && IsBlank(gblSearch)` |
+| Rotation | `If(ThisItem.ID in colExpanded.ID, 90, 0)` |
 
 OnSelect:
 ```
-If(ThisItem.ID in colRozwiniete.ID,
-    Remove(colRozwiniete, LookUp(colRozwiniete, ID = ThisItem.ID)),
-    Collect(colRozwiniete, {ID: ThisItem.ID})
+If(ThisItem.ID in colExpanded.ID,
+    Remove(colExpanded, LookUp(colExpanded, ID = ThisItem.ID)),
+    Collect(colExpanded, {ID: ThisItem.ID})
 )
 ```
 
-**Text label** `lblStrona`:
+**Text label** `lbl_Tree_Page`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| X | `34 + ThisItem.Poziom * 24` |
+| X | `34 + ThisItem.Depth * 24` |
 | Y | `8` |
 | Width | `700` |
 | Height | `24` |
 | Text | `ThisItem.Title` |
-| Color | `gKolorAkcent` |
-| Underline po najechaniu | ustaw **HoverColor** na `gKolorTekst` |
-| OnSelect | `Launch(gWitrynaUrl & "/SitePages/" & ThisItem.Plik, {}, LaunchTarget.New)` |
+| Color | `gblColorAccent` |
+| Underline po najechaniu | ustaw **HoverColor** na `gblColorText` |
+| OnSelect | `Launch(gblSiteUrl & "/SitePages/" & ThisItem.FileName, {}, LaunchTarget.New)` |
 
-**Text label** `lblSciezkaStrony` — pomocniczo, numer poziomu i kategoria:
+**Text label** `lbl_Tree_Meta` — pomocniczo, numer poziomu i kategoria:
 
 | Wlasciwosc | Wartosc |
 |---|---|
 | X / Y | `800` / `8` |
 | Width / Height | `280` / `24` |
 | Size | `10` |
-| Color | `gKolorSzary` |
+| Color | `gblColorMuted` |
 | Align | `Align.Right` |
-| Text | `If(IsBlank(gSzukaj), "", "poziom " & ThisItem.Poziom + 1)` |
+| Text | `If(IsBlank(gblSearch), "", "poziom " & ThisItem.Depth + 1)` |
 
-**Rectangle** `recWierszLinia` (cienka linia pod wierszem): X `0`, Y `39`,
+**Rectangle** `rec_Tree_RowLine` (cienka linia pod wierszem): X `0`, Y `39`,
 Width `Parent.TemplateWidth`, Height `1`, Fill `RGBA(0,0,0,0.06)`.
 
 ---
 
 ## F. Rozwin i zwin wszystko
 
-**Button** `btnRozwin`: X `1010`, Y `136`, Width `150`, Height `40`,
-Text `"Rozwin wszystko"`, Fill `gKolorSzary`, OnSelect:
+**Button** `btn_Docs_ExpandAll`: X `1010`, Y `136`, Width `150`, Height `40`,
+Text `"Rozwin wszystko"`, Fill `gblColorMuted`, OnSelect:
 ```
-ClearCollect(colRozwiniete, ShowColumns(colStrony, "ID"))
+ClearCollect(colExpanded, ShowColumns(colPages, "ID"))
 ```
 
-**Button** `btnZwin`: X `1172`, Y `136`, Width `150`, Height `40`,
-Text `"Zwin wszystko"`, Fill `gKolorSzary`, OnSelect:
+**Button** `btn_Docs_CollapseAll`: X `1172`, Y `136`, Width `150`, Height `40`,
+Text `"Zwin wszystko"`, Fill `gblColorMuted`, OnSelect:
 ```
-ClearCollect(colRozwiniete, ShowColumns(Filter(colStrony, Poziom = 0), "ID"))
+ClearCollect(colExpanded, ShowColumns(Filter(colPages, Depth = 0), "ID"))
 ```
 
 ---
 
 ## G. Odswiezenie po zmianach w SharePoincie
 
-**Icon** → **Reload**, nazwa `icoOdswiezDocs`: X `1300`, Y `30`, Width/Height `28`,
-Color `gKolorSzary`, OnSelect:
+**Icon** → **Reload**, nazwa `ico_Docs_Refresh`: X `1300`, Y `30`, Width/Height `28`,
+Color `gblColorMuted`, OnSelect:
 ```
 Refresh('Site Pages'); Refresh(DT_Services); Select(Parent)
 ```
@@ -262,7 +262,7 @@ a nie na id z Confluence.
 ## I. Co dalej
 
 - **Ostatnio zmienione** — dodatkowa galeria obok drzewa:
-  `FirstN(SortByColumns(Filter('Site Pages', Service = gSerwis), "Modified", Descending), 8)`
+  `FirstN(SortByColumns(Filter('Site Pages', Service = gblService), "Modified", Descending), 8)`
 - **Ulubione** — kolumna `IsImportant` w Site Pages plus filtr w zakladce
 - **Wyszukiwanie w tresci**, nie tylko w tytulach, wymaga flow z `_api/search/query`;
   drzewo zostaje bez zmian, dochodzi osobny ekran wynikow

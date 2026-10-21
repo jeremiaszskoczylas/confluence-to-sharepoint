@@ -31,6 +31,7 @@ Nowa lista. Kolumny:
 | `Depth` | Liczba |
 | `SourceFile` | Jeden wiersz tekstu |
 | `MigrationStatus` | Wybor: `Pending`, `PageCreated`, `LinksRemapped`, `Failed` |
+| `Service` | Jeden wiersz tekstu — kod serwisu, ten sam co `Code` w `DT_Services` |
 | `TargetPageId` | Liczba |
 | `TargetUrl` | Jeden wiersz tekstu |
 | `MigratedOn` | Data i godzina |
@@ -115,6 +116,10 @@ trim(split(item(), '|')[4])
 MigrationStatus Value (lista):
 ```
 Pending
+```
+Service (tekst) — kod migrowanego serwisu:
+```
+<SERWIS>
 ```
 
 Zapisz wynik akcji `Drzewo` takze jako plik `drzewo.txt` w bibliotece — przyda sie,

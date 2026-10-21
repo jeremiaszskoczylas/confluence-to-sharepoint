@@ -1,15 +1,15 @@
 // ===========================================================================
-// 03 — EKRAN DOKUMENTACJI (scrDocs)
+// 03 — DOCUMENTATION SCREEN (scr_Docs)
 // Najpierw OnVisible ekranu, potem kontrolki.
 // ===========================================================================
 
 
-### scrDocs.OnVisible
-// Wczytuje strony z biblioteki Site Pages i dolicza glebokosc w drzewie.
-// Te sama formule wklej na koncu OnSelect ikony icoOdswiezDocs
-// oraz przycisku btnNowaUtworz (plik 04).
+### scr_Docs.OnVisible
+// Strony z biblioteki Site Pages plus wyliczona glebokosc w drzewie.
+// Te sama formule wklej tez w ico_Docs_Refresh.OnSelect
+// oraz na koncu btn_NewPage_Create.OnSelect (plik 04).
 
-ClearCollect(colStrony,
+ClearCollect(colPages,
     AddColumns(
         RenameColumns(
             ShowColumns(
@@ -17,102 +17,106 @@ ClearCollect(colStrony,
                 "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
                 "Service", "Name"
             ),
-            "Name", "Plik"
+            "Name", "FileName"
         ),
-        "Poziom", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
+        "Depth", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
     )
 );
-ClearCollect(colSerwisy,
-    SortByColumns(Filter(DT_Services, Aktywny), "Kolejnosc", Ascending)
+ClearCollect(colServices,
+    SortByColumns(Filter(DT_Services, IsActive), "SortOrder", Ascending)
 );
-If(IsBlank(gSerwis), Set(gSerwis, First(colSerwisy).Kod));
-ClearCollect(colRozwiniete, ShowColumns(Filter(colStrony, Poziom = 0), "ID"));
-Set(gSzukaj, "")
+If(IsBlank(gblService), Set(gblService, First(colServices).Code));
+ClearCollect(colExpanded, ShowColumns(Filter(colPages, Depth = 0), "ID"));
+Set(gblSearch, "")
 
 ---
 
 
-### lblDocsTytul.Text
+### lbl_Docs_Title.Text
 
-"Dokumentacja"
+"Documentation"
 
 ---
 
 
-### lblDocsPodtytul.Text
+### lbl_Docs_Subtitle.Text
 
-CountRows(Filter(colStrony, Service = gSerwis)) & " stron w tym serwisie"
+CountRows(Filter(colPages, Service = gblService)) & " pages in this service"
 
 ---
 // --------------------------------------------------------------------------
-// ZAKLADKI SERWISOW
+// SERVICE TABS
 // --------------------------------------------------------------------------
 
 
-### galSerwisy.Items
+### gal_Docs_Services.Items
 
-colSerwisy
+colServices
 
 ---
 
 
-### btnSerwis.Text
-// wewnatrz galerii galSerwisy
+### btn_Service_Tab.Text
+// wewnatrz galerii gal_Docs_Services
 
 ThisItem.Title
 
-### btnSerwis.Fill
+### btn_Service_Tab.Fill
 
-If(gSerwis = ThisItem.Kod, gKolorAkcent, RGBA(0, 0, 0, 0))
+If(gblService = ThisItem.Code, gblColorAccent, RGBA(0, 0, 0, 0))
 
-### btnSerwis.Color
+### btn_Service_Tab.Color
 
-If(gSerwis = ThisItem.Kod, RGBA(255, 255, 255, 1), gKolorTekst)
+If(gblService = ThisItem.Code, RGBA(255, 255, 255, 1), gblColorText)
 
-### btnSerwis.OnSelect
+### btn_Service_Tab.OnSelect
 
-Set(gSerwis, ThisItem.Kod)
-
----
-// --------------------------------------------------------------------------
-// WYSZUKIWARKA
-// --------------------------------------------------------------------------
-
-
-### txtSzukaj.OnChange
-
-Set(gSzukaj, Self.Text)
-
----
-
-
-### icoCzysc.Visible
-
-!IsBlank(gSzukaj)
-
-### icoCzysc.OnSelect
-
-Reset(txtSzukaj); Set(gSzukaj, "")
+Set(gblService, ThisItem.Code)
 
 ---
 // --------------------------------------------------------------------------
-// DRZEWO
+// SEARCH
 // --------------------------------------------------------------------------
 
 
-### galDrzewo.Items
+### txt_Docs_Search.HintText
+
+"Search page titles"
+
+### txt_Docs_Search.OnChange
+
+Set(gblSearch, Self.Text)
+
+---
+
+
+### ico_Docs_ClearSearch.Visible
+
+!IsBlank(gblSearch)
+
+### ico_Docs_ClearSearch.OnSelect
+
+Reset(txt_Docs_Search); Set(gblSearch, "")
+
+---
+// --------------------------------------------------------------------------
+// TREE
+// --------------------------------------------------------------------------
+
+
+### gal_Docs_Tree.Items
 // Wiersz widoczny, gdy jest korzeniem albo gdy WSZYSCY jego przodkowie
 // sa rozwinieci. Przy wpisanej frazie drzewo splaszcza sie do wynikow.
 
 SortByColumns(
-    Filter(colStrony As s,
-        s.Service = gSerwis,
-        If(IsBlank(gSzukaj),
-            s.Poziom = 0 ||
+    Filter(colPages As p,
+        p.Service = gblService,
+        If(IsBlank(gblSearch),
+            p.Depth = 0 ||
             CountRows(
-                Filter(colRozwiniete As r, r.ID <> s.ID && "/" & r.ID & "/" in s.TreePath)
-            ) = s.Poziom,
-            gSzukaj in s.Title
+                Filter(colExpanded As e, e.ID <> p.ID && "/" & e.ID & "/" in p.TreePath)
+            ) = p.Depth,
+            gblSearch in p.Title
         )
     ),
     "TreeSort",
@@ -122,96 +126,107 @@ SortByColumns(
 ---
 
 
-### icoChevron.X
-// wewnatrz galerii galDrzewo
+### ico_Tree_Chevron.X
+// wewnatrz galerii gal_Docs_Tree
 
-8 + ThisItem.Poziom * 24
+8 + ThisItem.Depth * 24
 
-### icoChevron.Visible
+### ico_Tree_Chevron.Visible
 
-CountRows(Filter(colStrony, ParentPageId = ThisItem.ID)) > 0 && IsBlank(gSzukaj)
+CountRows(Filter(colPages, ParentPageId = ThisItem.ID)) > 0 && IsBlank(gblSearch)
 
-### icoChevron.Rotation
+### ico_Tree_Chevron.Rotation
 
-If(ThisItem.ID in colRozwiniete.ID, 90, 0)
+If(ThisItem.ID in colExpanded.ID, 90, 0)
 
-### icoChevron.OnSelect
+### ico_Tree_Chevron.OnSelect
 
-If(ThisItem.ID in colRozwiniete.ID,
-    Remove(colRozwiniete, LookUp(colRozwiniete, ID = ThisItem.ID)),
-    Collect(colRozwiniete, {ID: ThisItem.ID})
+If(ThisItem.ID in colExpanded.ID,
+    Remove(colExpanded, LookUp(colExpanded, ID = ThisItem.ID)),
+    Collect(colExpanded, {ID: ThisItem.ID})
 )
 
 ---
 
 
-### lblStrona.X
+### lbl_Tree_Page.X
 
-34 + ThisItem.Poziom * 24
+34 + ThisItem.Depth * 24
 
-### lblStrona.Text
+### lbl_Tree_Page.Text
 
 ThisItem.Title
 
-### lblStrona.OnSelect
+### lbl_Tree_Page.OnSelect
 
-Launch(gWitrynaUrl & "/SitePages/" & ThisItem.Plik, {}, LaunchTarget.New)
-
----
-
-
-### btnRozwin.OnSelect
-
-ClearCollect(colRozwiniete, ShowColumns(colStrony, "ID"))
+Launch(gblSiteUrl & "/SitePages/" & ThisItem.FileName, {}, LaunchTarget.New)
 
 ---
 
 
-### btnZwin.OnSelect
+### btn_Docs_ExpandAll.Text
 
-ClearCollect(colRozwiniete, ShowColumns(Filter(colStrony, Poziom = 0), "ID"))
+"Expand all"
+
+### btn_Docs_ExpandAll.OnSelect
+
+ClearCollect(colExpanded, ShowColumns(colPages, "ID"))
+
+---
+
+
+### btn_Docs_CollapseAll.Text
+
+"Collapse all"
+
+### btn_Docs_CollapseAll.OnSelect
+
+ClearCollect(colExpanded, ShowColumns(Filter(colPages, Depth = 0), "ID"))
 
 ---
 // --------------------------------------------------------------------------
-// OSTATNIO ZMIENIONE (opcjonalna galeria obok drzewa)
+// RECENTLY CHANGED (opcjonalna galeria obok drzewa)
 // --------------------------------------------------------------------------
 
 
-### galOstatnie.Items
+### gal_Docs_Recent.Items
 
 FirstN(
-    SortByColumns(Filter('Site Pages', Service = gSerwis, !IsBlank(TreePath)), "Modified", Descending),
+    SortByColumns(
+        Filter('Site Pages', Service = gblService, !IsBlank(TreePath)),
+        "Modified",
+        Descending
+    ),
     8
 )
 
 ---
 
 
-### lblOstatniaTytul.Text
-// wewnatrz galerii galOstatnie
+### lbl_Recent_Title.Text
+// wewnatrz galerii gal_Docs_Recent
 
 ThisItem.Title
 
-### lblOstatniaInfo.Text
+### lbl_Recent_Meta.Text
 
-Text(ThisItem.Modified, "dd.mm, hh:mm") & " · " & ThisItem.'Modified By'.DisplayName
+Text(ThisItem.Modified, "dd mmm, hh:mm") & " · " & ThisItem.'Modified By'.DisplayName
 
-### lblOstatniaTytul.OnSelect
+### lbl_Recent_Title.OnSelect
 
-Launch(gWitrynaUrl & "/SitePages/" & ThisItem.Name, {}, LaunchTarget.New)
+Launch(gblSiteUrl & "/SitePages/" & ThisItem.Name, {}, LaunchTarget.New)
 
 ---
 // --------------------------------------------------------------------------
-// ODSWIEZANIE
+// REFRESH
 // --------------------------------------------------------------------------
 
 
-### icoOdswiezDocs.OnSelect
-// Refresh pobiera dane z SharePointa, ClearCollect przebudowuje kolekcje.
+### ico_Docs_Refresh.OnSelect
 
 Refresh('Site Pages');
 Refresh(DT_Services);
-ClearCollect(colStrony,
+ClearCollect(colPages,
     AddColumns(
         RenameColumns(
             ShowColumns(
@@ -219,12 +234,12 @@ ClearCollect(colStrony,
                 "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
                 "Service", "Name"
             ),
-            "Name", "Plik"
+            "Name", "FileName"
         ),
-        "Poziom", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
+        "Depth", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
     )
 );
-ClearCollect(colSerwisy,
-    SortByColumns(Filter(DT_Services, Aktywny), "Kolejnosc", Ascending)
+ClearCollect(colServices,
+    SortByColumns(Filter(DT_Services, IsActive), "SortOrder", Ascending)
 );
-Notify("Odswiezone", NotificationType.Success, 1500)
+Notify("Refreshed", NotificationType.Success, 1500)

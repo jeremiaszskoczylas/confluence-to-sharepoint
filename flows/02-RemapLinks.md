@@ -5,7 +5,11 @@ adresy w SharePoincie, dokłada sciezke nadrzedna i blok podstron, wypelnia meta
 drzewa (`ParentPageId`, `TreePath`, `TreeSort`, `SortOrder`, `Category`).
 
 Uruchamiasz po kroku 1 oraz za kazdym razem, gdy zmieni sie `parseTresc`.
-Podmien `<WITRYNA>` i `<EKSPORT>` (patrz [README.md](README.md)).
+Podmien `<WITRYNA>`, `<EKSPORT>` i `<SERWIS>` (patrz [README.md](README.md)).
+
+Flow przetwarza **jeden serwis na raz**. Drzewo, mapowanie linkow i sciezki
+liczone sa tylko z jego stron, wiec linki nie przeciekaja miedzy serwisami,
+a strona glowna jednej przestrzeni nie staje sie rodzicem drugiej.
 Nazwy akcji dokladnie jak w naglowkach.
 
 ---
@@ -41,6 +45,10 @@ witryna (tekst) — Z UKOSNIKIEM NA KONCU:
 ```
 <WITRYNA>/
 ```
+serwis (tekst) — kod serwisu; puste = wszystkie strony (stare zachowanie):
+```
+<SERWIS>
+```
 
 ---
 
@@ -69,6 +77,7 @@ File Path (fx):
 ```
 concat('/Dashboard_Team/<EKSPORT>/', items('Apply_to_each')?['file'])
 ```
+Przy kolejnym serwisie `<EKSPORT>` wskazuje jego folder eksportu.
 
 ---
 

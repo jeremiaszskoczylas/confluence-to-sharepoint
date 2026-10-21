@@ -1,13 +1,19 @@
-function main(wb: ExcelScript.Workbook, dane: string, witryna: string): string {
+function main(wb: ExcelScript.Workbook, dane: string, witryna: string, serwis: string): string {
   interface W {
     Id: number; ID?: number; Title: string; ConfluenceId: number; ParentConfluenceId: number;
-    SourceFile: string; TargetUrl: string; TargetPageId: number;
+    SourceFile: string; TargetUrl: string; TargetPageId: number; Service?: string;
   }
   const surowe: W[] = JSON.parse(dane) as W[];
   for (const r of surowe) {
     if ((r.Id === undefined || r.Id === null) && r.ID !== undefined) { r.Id = r.ID; }
   }
-  const rows: W[] = surowe.filter(r => r.TargetPageId > 0 && r.Id !== undefined);
+  // Gdy podano serwis, bierzemy TYLKO jego strony - dzieki temu drzewo, linki
+  // i mapa kazdego serwisu sa liczone osobno i nie mieszaja sie ze soba.
+  const kod = (serwis === undefined || serwis === null) ? "" : serwis.trim();
+  const rows: W[] = surowe.filter(r =>
+    r.TargetPageId > 0 && r.Id !== undefined &&
+    (kod.length === 0 || (r.Service !== undefined && r.Service !== null && r.Service === kod))
+  );
   const byConf: { [k: string]: W } = {};
   for (const r of rows) { byConf[String(r.ConfluenceId)] = r; }
 

@@ -1,449 +1,653 @@
 // ===========================================================================
-// 02 — EKRAN GLOWNY (scrHome)
-// Kolejnosc wklejania: OnVisible ekranu, potem kontrolki od gory ekranu.
+// 02 — HOME SCREEN (scr_Home)
+// Kolejnosc wklejania: OnVisible ekranu, potem kontrolki od gory.
 // ===========================================================================
 
 
-### scrHome.OnVisible
-// Lista osob z dzisiejszej zmiany z doklejonymi deklaracjami raportow.
-// Te sama formule wklej na koncu OnSelect przycisku btnRaportyZapisz
-// oraz ikony icoOdswiez.
+### scr_Home.OnVisible
+// Dzisiejsza obsada z doklejonymi deklaracjami Daily Checks.
+// Te sama formule wklej tez na koncu btn_Checks_Save.OnSelect
+// oraz ico_Home_Refresh.OnSelect.
 
-ClearCollect(colDzis,
+ClearCollect(colRosterToday,
     AddColumns(
-        Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca"),
-        "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work"),
+        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
     )
 )
 
 ---
 
 
-### lblTytulHome.Text
+### lbl_Home_Greeting.Text
 
-"Czesc, " & First(Split(gJa.FullName, " ")).Value & "!"
+"Hi, " & First(Split(gblUser.FullName, " ")).Value & "!"
 
 ---
 
 
-### lblData.Text
+### lbl_Home_Date.Text
 
-Text(gDzis, "dddd, d mmmm yyyy", "pl-PL")
+Text(gblToday, "dddd, d mmmm yyyy", "en-GB")
 
 ---
 // --------------------------------------------------------------------------
-// KOMUNIKAT MANAGERA
+// MANAGER MESSAGE
 // --------------------------------------------------------------------------
 
 
-### recKomPasek.Fill
+### rec_Home_MsgBar.Fill
 
-If(LookUp(DT_ManagerMessages, AktywnyDo >= gDzis, Wazne), gKolorAkcent, gKolorPasek)
-
----
-
-
-### lblKomTytul.Text
-
-With({m: LookUp(DT_ManagerMessages, AktywnyDo >= gDzis)},
-    If(IsBlank(m), "Brak komunikatow", m.Title)
+If(LookUp(DT_ManagerMessages, ActiveUntil >= gblToday, IsImportant),
+    gblColorAccent,
+    gblColorNav
 )
 
 ---
 
 
-### htmKomTresc.HtmlText
+### lbl_Home_MsgTitle.Text
 
-With({m: LookUp(DT_ManagerMessages, AktywnyDo >= gDzis)},
+With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
+    If(IsBlank(m), "No messages", m.Title)
+)
+
+---
+
+
+### htm_Home_MsgBody.HtmlText
+
+With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
     If(IsBlank(m),
-        "<p style='color:#68686E'>Manager nie zostawil dzis zadnej wiadomosci.</p>",
-        m.Tresc
+        "<p style='color:#68686E'>No message from the manager today.</p>",
+        m.Body
     )
 )
 
 ---
 
 
-### btnEdytujKom.OnSelect
+### lbl_Home_MsgMeta.Text
 
-Set(gEdycjaKom, true)
-
----
-
-
-### btnEdytujKom.Visible
-
-gManager
+With({m: LookUp(DT_ManagerMessages, ActiveUntil >= gblToday)},
+    If(IsBlank(m), "", m.'Created By'.DisplayName & " · " & Text(m.Created, "dd mmm, hh:mm"))
+)
 
 ---
 
 
-### btnKomZapisz.OnSelect
+### btn_Home_EditMsg.Text
+
+"Edit"
+
+### btn_Home_EditMsg.Visible
+
+gblIsManager
+
+### btn_Home_EditMsg.OnSelect
+
+Set(gblEditMessage, true)
+
+---
+
+
+### btn_Msg_Save.Text
+
+"Save"
+
+### btn_Msg_Save.OnSelect
 
 Patch(DT_ManagerMessages, Defaults(DT_ManagerMessages),
     {
-        Title: txtKomTytul.Text,
-        Tresc: "<p>" & Substitute(txtKomTresc.Text, Char(10), "</p><p>") & "</p>",
-        Wazne: tglKomWazne.Value,
-        AktywnyDo: DateAdd(gDzis, 7, Days)
+        Title: txt_Msg_Title.Text,
+        Body: "<p>" & Substitute(txt_Msg_Body.Text, Char(10), "</p><p>") & "</p>",
+        IsImportant: tgl_Msg_Important.Value,
+        ActiveUntil: DateAdd(gblToday, 7, Days)
     }
 );
-Set(gEdycjaKom, false);
-Reset(txtKomTytul);
-Reset(txtKomTresc);
-Notify("Komunikat zapisany", NotificationType.Success, 2000)
+Set(gblEditMessage, false);
+Reset(txt_Msg_Title);
+Reset(txt_Msg_Body);
+Notify("Message saved", NotificationType.Success, 2000)
 
 ---
 
 
-### btnKomAnuluj.OnSelect
+### btn_Msg_Cancel.Text
 
-Set(gEdycjaKom, false)
+"Cancel"
+
+### btn_Msg_Cancel.OnSelect
+
+Set(gblEditMessage, false)
 
 ---
 // --------------------------------------------------------------------------
-// KTO DZIS PRACUJE
+// WHO IS ON SHIFT TODAY
 // --------------------------------------------------------------------------
 
 
-### lblObsadaTytul.Text
+### lbl_Home_RosterTitle.Text
 
-"Kto dzis pracuje (" & CountRows(Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca")) & ")"
-
----
-
-
-### lblObsadaLegenda.Text
-
-"Raporty tygodnia:  S starty  ·  M midy  ·  E endy"
+"On shift today (" & CountRows(Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work")) & ")"
 
 ---
 
 
-### galObsada.Items
+### lbl_Home_RosterLegend.Text
+
+"Daily Checks:  S starts  ·  T throughout  ·  E end"
+
+---
+
+
+### gal_Home_Roster.Items
 
 AddColumns(
-    SortByColumns(Filter(DT_Rota, Data = gDzis), "Title", Ascending),
-    "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+    SortByColumns(Filter(DT_Rota, ShiftDate = gblToday), "Title", Ascending),
+    "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
 )
 
 ---
 
 
-### imgOsoba.Image
-// wewnatrz galerii galObsada
+### img_Roster_Photo.Image
+// wewnatrz galerii gal_Home_Roster
 
 Office365Users.UserPhotoV2(ThisItem.Email)
 
 ---
 
 
-### lblOsobaImie.Text
+### lbl_Roster_Name.Text
 
 ThisItem.Title
 
 ---
 
 
-### lblOsobaGodziny.Text
+### lbl_Roster_Hours.Text
 
-If(ThisItem.Rodzaj = "Praca", ThisItem.OdGodz & " - " & ThisItem.DoGodz, ThisItem.Rodzaj)
+If(ThisItem.ShiftType = "Work",
+    ThisItem.StartTime & " - " & ThisItem.EndTime,
+    ThisItem.ShiftType
+)
+
+---
+// Plakietki Daily Checks. Kazda ma cztery formuly.
+
+
+### lbl_Roster_ChkS.Text
+
+"S"
+
+### lbl_Roster_ChkS.Fill
+
+If(ThisItem.Checks.Starts, gblColorAccentSoft, gblColorPanel)
+
+### lbl_Roster_ChkS.Color
+
+If(ThisItem.Checks.Starts, gblColorAccentDark, RGBA(182, 182, 188, 1))
+
+### lbl_Roster_ChkS.BorderColor
+
+If(ThisItem.Checks.Starts, RGBA(200, 16, 46, 0.4), gblColorLine)
+
+### lbl_Roster_ChkS.Tooltip
+
+ThisItem.Title & If(ThisItem.Checks.Starts, " does starts", " does not do starts")
 
 ---
 
 
-### lblRapS.Fill
+### lbl_Roster_ChkT.Text
 
-If(ThisItem.Rap.Starty, gKolorAkcentTlo, gKolorPanel)
+"T"
 
-### lblRapS.Color
+### lbl_Roster_ChkT.Fill
 
-If(ThisItem.Rap.Starty, gKolorAkcentCiemny, RGBA(182, 182, 188, 1))
+If(ThisItem.Checks.Throughout, gblColorAccentSoft, gblColorPanel)
 
-### lblRapS.BorderColor
+### lbl_Roster_ChkT.Color
 
-If(ThisItem.Rap.Starty, RGBA(200, 16, 46, 0.4), gKolorLinia)
+If(ThisItem.Checks.Throughout, gblColorAccentDark, RGBA(182, 182, 188, 1))
 
-### lblRapS.Tooltip
+### lbl_Roster_ChkT.BorderColor
 
-If(ThisItem.Rap.Starty, ThisItem.Title & " robi starty", ThisItem.Title & " nie robi startow")
+If(ThisItem.Checks.Throughout, RGBA(200, 16, 46, 0.4), gblColorLine)
 
----
+### lbl_Roster_ChkT.Tooltip
 
-
-### lblRapM.Fill
-
-If(ThisItem.Rap.Midy, gKolorAkcentTlo, gKolorPanel)
-
-### lblRapM.Color
-
-If(ThisItem.Rap.Midy, gKolorAkcentCiemny, RGBA(182, 182, 188, 1))
-
-### lblRapM.BorderColor
-
-If(ThisItem.Rap.Midy, RGBA(200, 16, 46, 0.4), gKolorLinia)
-
-### lblRapM.Tooltip
-
-If(ThisItem.Rap.Midy, ThisItem.Title & " robi midy", ThisItem.Title & " nie robi midow")
+ThisItem.Title & If(ThisItem.Checks.Throughout, " does throughout checks", " does not do throughout checks")
 
 ---
 
 
-### lblRapE.Fill
+### lbl_Roster_ChkE.Text
 
-If(ThisItem.Rap.Endy, gKolorAkcentTlo, gKolorPanel)
+"E"
 
-### lblRapE.Color
+### lbl_Roster_ChkE.Fill
 
-If(ThisItem.Rap.Endy, gKolorAkcentCiemny, RGBA(182, 182, 188, 1))
+If(ThisItem.Checks.End, gblColorAccentSoft, gblColorPanel)
 
-### lblRapE.BorderColor
+### lbl_Roster_ChkE.Color
 
-If(ThisItem.Rap.Endy, RGBA(200, 16, 46, 0.4), gKolorLinia)
+If(ThisItem.Checks.End, gblColorAccentDark, RGBA(182, 182, 188, 1))
 
-### lblRapE.Tooltip
+### lbl_Roster_ChkE.BorderColor
 
-If(ThisItem.Rap.Endy, ThisItem.Title & " robi endy", ThisItem.Title & " nie robi endow")
+If(ThisItem.Checks.End, RGBA(200, 16, 46, 0.4), gblColorLine)
+
+### lbl_Roster_ChkE.Tooltip
+
+ThisItem.Title & If(ThisItem.Checks.End, " does end checks", " does not do end checks")
 
 ---
 
 
-### lblOsobaStatus.Text
+### lbl_Roster_Status.Text
 
 With(
     {
-        teraz: Text(Now(), "[$-en-US]HH:mm"),
-        p: LookUp(DT_Breaks, Data = gDzis && Title = ThisItem.Email)
+        now: Text(Now(), "[$-en-US]HH:mm"),
+        brk: LookUp(DT_Breaks, BreakDate = gblToday && Title = ThisItem.Email)
     },
     If(
-        ThisItem.Rodzaj <> "Praca", ThisItem.Rodzaj,
-        !IsBlank(p) && teraz >= p.OdGodz && teraz < p.DoGodz, "Na przerwie " & p.OdGodz,
-        teraz >= ThisItem.OdGodz && teraz < ThisItem.DoGodz, "W pracy",
-        "Po godzinach"
+        ThisItem.ShiftType <> "Work", ThisItem.ShiftType,
+        !IsBlank(brk) && now >= brk.StartTime && now < brk.EndTime, "On break " & brk.StartTime,
+        now >= ThisItem.StartTime && now < ThisItem.EndTime, "Working",
+        "Off shift"
     )
 )
 
 ---
 
 
-### lblOsobaStatus.Color
+### lbl_Roster_Status.Color
 
 With(
     {
-        teraz: Text(Now(), "[$-en-US]HH:mm"),
-        p: LookUp(DT_Breaks, Data = gDzis && Title = ThisItem.Email)
+        now: Text(Now(), "[$-en-US]HH:mm"),
+        brk: LookUp(DT_Breaks, BreakDate = gblToday && Title = ThisItem.Email)
     },
     If(
-        ThisItem.Rodzaj <> "Praca", gKolorSzary,
-        !IsBlank(p) && teraz >= p.OdGodz && teraz < p.DoGodz, gKolorAkcent,
-        teraz >= ThisItem.OdGodz && teraz < ThisItem.DoGodz, gKolorTekst,
-        gKolorSzary
+        ThisItem.ShiftType <> "Work", gblColorMuted,
+        !IsBlank(brk) && now >= brk.StartTime && now < brk.EndTime, gblColorAccent,
+        now >= ThisItem.StartTime && now < ThisItem.EndTime, gblColorText,
+        gblColorMuted
     )
 )
 
 ---
 
 
-### lblPokrycie.Text
-// Kto z obecnych robi dzis ktore raporty
+### lbl_Home_Coverage.Text
+// Kto z obecnych robi dzis ktore Daily Checks
 
-"Dzis na zmianie —  S: " &
-Coalesce(Concat(Filter(colDzis, Rap.Starty), First(Split(Title, " ")).Value, ", "), "nikt") &
-"   M: " &
-Coalesce(Concat(Filter(colDzis, Rap.Midy), First(Split(Title, " ")).Value, ", "), "nikt") &
+"On shift today —  S: " &
+Coalesce(Concat(Filter(colRosterToday, Checks.Starts), First(Split(Title, " ")).Value, ", "), "nobody") &
+"   T: " &
+Coalesce(Concat(Filter(colRosterToday, Checks.Throughout), First(Split(Title, " ")).Value, ", "), "nobody") &
 "   E: " &
-Coalesce(Concat(Filter(colDzis, Rap.Endy), First(Split(Title, " ")).Value, ", "), "nikt")
+Coalesce(Concat(Filter(colRosterToday, Checks.End), First(Split(Title, " ")).Value, ", "), "nobody")
 
 ---
 
 
-### lblLuka.Visible
+### lbl_Home_Gap.Visible
 
-CountRows(Filter(colDzis, Rap.Starty)) = 0 ||
-CountRows(Filter(colDzis, Rap.Midy)) = 0 ||
-CountRows(Filter(colDzis, Rap.Endy)) = 0
+CountRows(Filter(colRosterToday, Checks.Starts)) = 0 ||
+CountRows(Filter(colRosterToday, Checks.Throughout)) = 0 ||
+CountRows(Filter(colRosterToday, Checks.End)) = 0
 
 ---
 
 
-### lblLuka.Text
+### lbl_Home_Gap.Text
 
-"Dzis nikt nie robi: " &
+"Nobody on shift today covers: " &
 Concat(
     Filter(
         Table(
-            {n: "starty", ile: CountRows(Filter(colDzis, Rap.Starty))},
-            {n: "midy",   ile: CountRows(Filter(colDzis, Rap.Midy))},
-            {n: "endy",   ile: CountRows(Filter(colDzis, Rap.Endy))}
+            {n: "starts",     c: CountRows(Filter(colRosterToday, Checks.Starts))},
+            {n: "throughout", c: CountRows(Filter(colRosterToday, Checks.Throughout))},
+            {n: "end",        c: CountRows(Filter(colRosterToday, Checks.End))}
         ),
-        ile = 0
+        c = 0
     ),
     n, ", "
-) & " — ktos z dzisiejszej zmiany musi je przejac"
+) & " — someone on today's shift needs to take them over"
 
 ---
 // --------------------------------------------------------------------------
-// MOJA PRZERWA
+// MY BREAK
 // --------------------------------------------------------------------------
 
 
-### drpPrzerwa.Items
+### lbl_Home_BreakTitle.Text
 
-["10:00", "11:00", "12:00", "13:00", "14:00", "15:00"]
+"My break today"
 
 ---
+// Trzy przyciski typowych godzin. Kazdy ma Text, Fill, Color i OnSelect.
+// loc_BreakStart trzyma wybrana godzine na tym ekranie.
 
 
-### drpPrzerwa.Default
+### scr_Home.OnVisible — dopisek dla przerwy
+// Dopisz na koncu OnVisible ekranu (po ClearCollect colRosterToday):
 
-With({p: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email)},
-    If(IsBlank(p), "12:00", p.OdGodz)
+UpdateContext(
+    {
+        loc_BreakStart:
+            With({b: LookUp(DT_Breaks, BreakDate = gblToday && Title = gblUser.Email)},
+                If(IsBlank(b), "12:00", b.StartTime)
+            ),
+        loc_BreakCustom: false
+    }
 )
 
 ---
 
 
-### lblPrzerwaDo.Text
+### btn_Break_12.Text
 
-"do " & Text(Value(Left(drpPrzerwa.Selected.Value, 2)) + 1, "00") & ":00"
+"12:00"
+
+### btn_Break_12.OnSelect
+
+UpdateContext({loc_BreakStart: "12:00", loc_BreakCustom: false})
+
+### btn_Break_12.Fill
+
+If(loc_BreakStart = "12:00" && !loc_BreakCustom, gblColorAccent, gblColorPanel)
+
+### btn_Break_12.Color
+
+If(loc_BreakStart = "12:00" && !loc_BreakCustom, RGBA(255, 255, 255, 1), gblColorText)
 
 ---
 
 
-### btnPrzerwaZapisz.OnSelect
+### btn_Break_13.Text
+
+"13:00"
+
+### btn_Break_13.OnSelect
+
+UpdateContext({loc_BreakStart: "13:00", loc_BreakCustom: false})
+
+### btn_Break_13.Fill
+
+If(loc_BreakStart = "13:00" && !loc_BreakCustom, gblColorAccent, gblColorPanel)
+
+### btn_Break_13.Color
+
+If(loc_BreakStart = "13:00" && !loc_BreakCustom, RGBA(255, 255, 255, 1), gblColorText)
+
+---
+
+
+### btn_Break_14.Text
+
+"14:00"
+
+### btn_Break_14.OnSelect
+
+UpdateContext({loc_BreakStart: "14:00", loc_BreakCustom: false})
+
+### btn_Break_14.Fill
+
+If(loc_BreakStart = "14:00" && !loc_BreakCustom, gblColorAccent, gblColorPanel)
+
+### btn_Break_14.Color
+
+If(loc_BreakStart = "14:00" && !loc_BreakCustom, RGBA(255, 255, 255, 1), gblColorText)
+
+---
+
+
+### btn_Break_Other.Text
+
+"Other time"
+
+### btn_Break_Other.OnSelect
+
+UpdateContext({loc_BreakCustom: true});
+SetFocus(txt_Break_Custom)
+
+### btn_Break_Other.Fill
+
+If(loc_BreakCustom, gblColorAccent, gblColorPanel)
+
+### btn_Break_Other.Color
+
+If(loc_BreakCustom, RGBA(255, 255, 255, 1), gblColorText)
+
+---
+
+
+### txt_Break_Custom.Visible
+
+loc_BreakCustom
+
+### txt_Break_Custom.HintText
+
+"HH:MM, e.g. 09:30"
+
+### txt_Break_Custom.Format
+
+TextFormat.Text
+
+### txt_Break_Custom.OnChange
+// Przyjmujemy wpis dopiero, gdy ma poprawny format godziny.
+
+If(
+    IsMatch(Self.Text, "^([01][0-9]|2[0-3]):[0-5][0-9]$"),
+    UpdateContext({loc_BreakStart: Self.Text})
+)
+
+---
+
+
+### lbl_Break_CustomError.Visible
+
+loc_BreakCustom &&
+!IsBlank(txt_Break_Custom.Text) &&
+!IsMatch(txt_Break_Custom.Text, "^([01][0-9]|2[0-3]):[0-5][0-9]$")
+
+### lbl_Break_CustomError.Text
+
+"Use the HH:MM format, for example 09:30"
+
+---
+
+
+### lbl_Break_End.Text
+// Koniec przerwy = poczatek + godzina, takze dla wpisu wlasnego
+
+With({s: loc_BreakStart},
+    "until " &
+    Text(Mod(Value(Left(s, 2)) + 1, 24), "00") & ":" & Right(s, 2)
+)
+
+---
+
+
+### btn_Break_Save.Text
+
+"Save break"
+
+### btn_Break_Save.DisplayMode
+
+If(IsMatch(loc_BreakStart, "^([01][0-9]|2[0-3]):[0-5][0-9]$"),
+    DisplayMode.Edit,
+    DisplayMode.Disabled
+)
+
+### btn_Break_Save.OnSelect
 
 With(
     {
-        ist: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email),
-        od: drpPrzerwa.Selected.Value,
-        koniec: Text(Value(Left(drpPrzerwa.Selected.Value, 2)) + 1, "00") & ":00"
+        existing: LookUp(DT_Breaks, BreakDate = gblToday && Title = gblUser.Email),
+        startAt: loc_BreakStart,
+        endAt: Text(Mod(Value(Left(loc_BreakStart, 2)) + 1, 24), "00") & ":" & Right(loc_BreakStart, 2)
     },
-    If(IsBlank(ist),
+    If(IsBlank(existing),
         Patch(DT_Breaks, Defaults(DT_Breaks),
             {
-                Title: gJa.Email,
-                Osoba: {
+                Title: gblUser.Email,
+                Person: {
                     '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedUser",
-                    Claims: "i:0#.f|membership|" & gJa.Email,
-                    DisplayName: gJa.FullName,
-                    Email: gJa.Email
+                    Claims: "i:0#.f|membership|" & gblUser.Email,
+                    DisplayName: gblUser.FullName,
+                    Email: gblUser.Email
                 },
-                Data: gDzis,
-                OdGodz: od,
-                DoGodz: koniec
+                BreakDate: gblToday,
+                StartTime: startAt,
+                EndTime: endAt
             }
         ),
-        Patch(DT_Breaks, ist, {OdGodz: od, DoGodz: koniec})
+        Patch(DT_Breaks, existing, {StartTime: startAt, EndTime: endAt})
     )
 );
-Notify("Przerwa zapisana", NotificationType.Success, 2000)
+Notify("Break saved", NotificationType.Success, 2000)
 
 ---
 
 
-### lblPrzerwaInfo.Text
+### lbl_Break_Saved.Text
 
-With({p: LookUp(DT_Breaks, Data = gDzis && Title = gJa.Email)},
-    If(IsBlank(p),
-        "Nie masz jeszcze zapisanej przerwy",
-        "Zapisana: " & p.OdGodz & " - " & p.DoGodz
+With({b: LookUp(DT_Breaks, BreakDate = gblToday && Title = gblUser.Email)},
+    If(IsBlank(b),
+        "No break saved yet",
+        "Saved: " & b.StartTime & " - " & b.EndTime
+    )
+)
+
+---
+
+
+### lbl_Break_Others.Text
+// Kto jeszcze ma przerwe o tej samej porze
+
+With({same: Filter(DT_Breaks, BreakDate = gblToday, StartTime = loc_BreakStart, Title <> gblUser.Email)},
+    If(IsEmpty(same),
+        "Nobody else at this time",
+        "Also at this time: " & Concat(same, Person.DisplayName, ", ")
     )
 )
 
 ---
 // --------------------------------------------------------------------------
-// MOJE RAPORTY
+// MY DAILY CHECKS
 // --------------------------------------------------------------------------
 
 
-### lblRaportyTytul.Text
+### lbl_Home_ChecksTitle.Text
 
-"Moje raporty (tydzien od " & Text(gPoniedzialek, "dd.mm") & ")"
-
----
-
-
-### tglStarty.Default
-
-With({r: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
-    !IsBlank(r) && r.Starty
-)
-
-### tglMidy.Default
-
-With({r: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
-    !IsBlank(r) && r.Midy
-)
-
-### tglEndy.Default
-
-With({r: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
-    !IsBlank(r) && r.Endy
-)
+"My Daily Checks (week of " & Text(gblWeekStart, "dd mmm") & ")"
 
 ---
 
 
-### lblIleStarty.Text
+### lbl_Home_ChecksReset.Text
 
-CountRows(Filter(DT_Reports, TydzienOd = gPoniedzialek, Starty)) & " osob w zespole"
-
-### lblIleMidy.Text
-
-CountRows(Filter(DT_Reports, TydzienOd = gPoniedzialek, Midy)) & " osob w zespole"
-
-### lblIleEndy.Text
-
-CountRows(Filter(DT_Reports, TydzienOd = gPoniedzialek, Endy)) & " osob w zespole"
+"Resets every Saturday"
 
 ---
 
 
-### btnRaportyZapisz.OnSelect
+### tgl_Checks_Starts.Default
 
-With({ist: LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = gJa.Email)},
-    If(IsBlank(ist),
-        Patch(DT_Reports, Defaults(DT_Reports),
+With({c: LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = gblUser.Email)},
+    !IsBlank(c) && c.Starts
+)
+
+### tgl_Checks_Throughout.Default
+
+With({c: LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = gblUser.Email)},
+    !IsBlank(c) && c.Throughout
+)
+
+### tgl_Checks_End.Default
+
+With({c: LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = gblUser.Email)},
+    !IsBlank(c) && c.End
+)
+
+---
+
+
+### lbl_Checks_CountStarts.Text
+
+CountRows(Filter(DT_DailyChecks, WeekStart = gblWeekStart, Starts)) & " in the team"
+
+### lbl_Checks_CountThroughout.Text
+
+CountRows(Filter(DT_DailyChecks, WeekStart = gblWeekStart, Throughout)) & " in the team"
+
+### lbl_Checks_CountEnd.Text
+
+CountRows(Filter(DT_DailyChecks, WeekStart = gblWeekStart, End)) & " in the team"
+
+---
+
+
+### btn_Checks_Save.Text
+
+"Save Daily Checks"
+
+### btn_Checks_Save.OnSelect
+
+With({existing: LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = gblUser.Email)},
+    If(IsBlank(existing),
+        Patch(DT_DailyChecks, Defaults(DT_DailyChecks),
             {
-                Title: gJa.Email,
-                Osoba: {
+                Title: gblUser.Email,
+                Person: {
                     '@odata.type': "#Microsoft.Azure.Connectors.SharePoint.SPListExpandedUser",
-                    Claims: "i:0#.f|membership|" & gJa.Email,
-                    DisplayName: gJa.FullName,
-                    Email: gJa.Email
+                    Claims: "i:0#.f|membership|" & gblUser.Email,
+                    DisplayName: gblUser.FullName,
+                    Email: gblUser.Email
                 },
-                TydzienOd: gPoniedzialek,
-                Starty: tglStarty.Value,
-                Midy: tglMidy.Value,
-                Endy: tglEndy.Value
+                WeekStart: gblWeekStart,
+                Starts: tgl_Checks_Starts.Value,
+                Throughout: tgl_Checks_Throughout.Value,
+                End: tgl_Checks_End.Value
             }
         ),
-        Patch(DT_Reports, ist,
-            {Starty: tglStarty.Value, Midy: tglMidy.Value, Endy: tglEndy.Value})
+        Patch(DT_DailyChecks, existing,
+            {
+                Starts: tgl_Checks_Starts.Value,
+                Throughout: tgl_Checks_Throughout.Value,
+                End: tgl_Checks_End.Value
+            }
+        )
     )
 );
-ClearCollect(colDzis,
+ClearCollect(colRosterToday,
     AddColumns(
-        Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca"),
-        "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work"),
+        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
     )
 );
-Notify("Zapisane", NotificationType.Success, 2000)
+Notify("Daily Checks saved", NotificationType.Success, 2000)
 
 ---
 
 
-### icoOdswiez.OnSelect
+### ico_Home_Refresh.OnSelect
 
 Refresh(DT_Rota);
 Refresh(DT_Breaks);
-Refresh(DT_Reports);
+Refresh(DT_DailyChecks);
 Refresh(DT_ManagerMessages);
-Set(gDzis, Today());
-ClearCollect(colDzis,
+Set(gblToday, Today());
+Set(gblWeekStart, DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Saturday) - 1), Days));
+ClearCollect(colRosterToday,
     AddColumns(
-        Filter(DT_Rota, Data = gDzis, Rodzaj = "Praca"),
-        "Rap", LookUp(DT_Reports, TydzienOd = gPoniedzialek && Title = Email)
+        Filter(DT_Rota, ShiftDate = gblToday, ShiftType = "Work"),
+        "Checks", LookUp(DT_DailyChecks, WeekStart = gblWeekStart && Title = Email)
     )
 )

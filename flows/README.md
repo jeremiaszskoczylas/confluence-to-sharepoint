@@ -27,6 +27,27 @@ Te same we wszystkich sciagach. Wypelnij raz i trzymaj pod reka.
 | `<WITRYNA>` | sciezka witryny bez domeny i bez ukosnika na koncu | `/sites/nazwa` albo `/teams/Dzial/podwitryna` |
 | `<EKSPORT>` | folder rozpakowanego eksportu w bibliotece plikow | `confluence-export/NAZWA` |
 | `<MAPA>` | nazwa pliku strony-mapy z paska adresu | `Documentation-Map.aspx` |
+| `<SERWIS>` | kod serwisu z listy `DT_Services`, kolumna `Code` | `GMSC` |
+
+## Migracja kolejnego serwisu
+
+Ten sam komplet flow obsluguje kazda nastepna przestrzen Confluence.
+Przy drugim i kolejnym serwisie:
+
+1. dopisz wiersz w `DT_Services` (nazwa + krotki `Code`, np. `SRV2`)
+2. dodaj ten kod do wyborow kolumny `Service` w bibliotece Site Pages
+3. rozpakuj nowy eksport do osobnego folderu
+4. zaladuj `DT_MigrationMap` z kroku 0, wypelniajac kolumne `Service` nowym kodem
+5. w krokach 1 i 2 podmien `<EKSPORT>` i `<SERWIS>`, reszta zostaje bez zmian
+6. uruchom kroki 1, 2 i 4
+
+Nic sie nie nadpisze, bo:
+
+- nazwy plikow stron zaczynaja sie od kodu serwisu, wiec dwie strony `Home Page`
+  z roznych przestrzeni to dwa rozne pliki
+- krok 1 bierze tylko wiersze z `MigrationStatus eq 'Pending'` **i** biezacym serwisem
+- krok 2 liczy drzewo i linki osobno dla kazdego serwisu
+- krok 4 grupuje mape po serwisach: kazdy dostaje wlasny korzen i wlasne sekcje
 
 ## Zasady wspolne
 

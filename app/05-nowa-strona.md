@@ -12,7 +12,7 @@ i otwiera sie do edycji.
 Wymaga dwoch flow: [05-NowaStrona](../flows/05-NowaStrona.md) oraz
 [04-OdswiezDrzewo](../flows/04-OdswiezDrzewo.md) z triggerem Power Apps.
 
-Wszystko na `scrDocs`.
+Wszystko na `scr_Docs`.
 
 ---
 
@@ -21,54 +21,54 @@ Wszystko na `scrDocs`.
 Lewy pasek → **Power Automate** → **Add flow** → wybierz `NowaStrona`,
 potem jeszcze raz → `OdswiezDrzewo`.
 
-Po dodaniu w formulach dostepne sa jako `NowaStrona.Run(...)`
-i `OdswiezDrzewo.Run()`.
+Po dodaniu w formulach dostepne sa jako `NewDocPage.Run(...)`
+i `RefreshTree.Run()`.
 
 ## B. Przycisk otwierajacy
 
-**Button** `btnNowaStrona`:
+**Button** `btn_Docs_NewPage`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
 | Text | `"+ Nowa strona"` |
 | X / Y | `1180` / `24` |
 | Width / Height | `162` / `44` |
-| Fill | `gKolorAkcent` |
-| HoverFill | `gKolorAkcentCiemny` |
+| Fill | `gblColorAccent` |
+| HoverFill | `gblColorAccentDark` |
 | Color | `RGBA(255,255,255,1)` |
 | BorderThickness | `0` |
 
 OnSelect:
 ```
-Set(gNowaStrona, true);
-Set(gRodzic, Blank());
-Reset(txtNowyTytul)
+Set(gblNewPage, true);
+Set(gblParentId, Blank());
+Reset(txt_NewPage_Title)
 ```
 
 ## C. Okno
 
-**Rectangle** `recNowaTlo`: X `0`, Y `0`, Width `Parent.Width`,
-Height `Parent.Height`, Fill `RGBA(28,28,30,0.5)`, Visible `gNowaStrona`.
+**Rectangle** `rec_NewPage_Overlay`: X `0`, Y `0`, Width `Parent.Width`,
+Height `Parent.Height`, Fill `RGBA(28,28,30,0.5)`, Visible `gblNewPage`.
 
-**Rectangle** `recNowa`: X `363`, Y `60`, Width `640`, Height `700`,
-Fill `gKolorPanel`, BorderThickness `1`, BorderColor `gKolorLinia`,
-Visible `gNowaStrona`.
+**Rectangle** `rec_NewPage_Dialog`: X `363`, Y `60`, Width `640`, Height `700`,
+Fill `gblColorPanel`, BorderThickness `1`, BorderColor `gblColorLine`,
+Visible `gblNewPage`.
 
-Wszystkie kontrolki ponizej maja **Visible** = `gNowaStrona`.
+Wszystkie kontrolki ponizej maja **Visible** = `gblNewPage`.
 
 ### Naglowek
 
-**Text label** `lblNowaTytul`: X `387`, Y `82`, Width `500`, Height `30`,
+**Text label** `lbl_NewPage_Title`: X `387`, Y `82`, Width `500`, Height `30`,
 Size `19`, FontWeight `FontWeight.Semibold`, Text `"Nowa strona dokumentacji"`
 
-**Text label** `lblNowaOpis`: X `387`, Y `112`, Width `560`, Height `24`,
-Size `11`, Color `gKolorSzary`,
+**Text label** `lbl_NewPage_Hint`: X `387`, Y `112`, Width `560`, Height `24`,
+Size `11`, Color `gblColorMuted`,
 Text `"Powstanie w SharePoincie i trafi w wybrane miejsce drzewa"`
 
-**Icon** → **Cancel**, `icoNowaZamknij`: X `947`, Y `84`, Width/Height `24`,
-Color `gKolorSzary`, OnSelect:
+**Icon** → **Cancel**, `ico_NewPage_Close`: X `947`, Y `84`, Width/Height `24`,
+Color `gblColorMuted`, OnSelect:
 ```
-Set(gNowaStrona, false)
+Set(gblNewPage, false)
 ```
 
 ### Tytul strony
@@ -76,14 +76,14 @@ Set(gNowaStrona, false)
 **Text label**: X `387`, Y `152`, Size `11`, FontWeight `FontWeight.Semibold`,
 Text `"Tytul strony"`
 
-**Text input** `txtNowyTytul`: X `387`, Y `176`, Width `592`, Height `44`,
+**Text input** `txt_NewPage_Title`: X `387`, Y `176`, Width `592`, Height `44`,
 HintText `"np. Reservation Amendments - wyjatki"`, Default `""`
 
-**Text label** `lblPodgladAdresu`: X `387`, Y `224`, Width `592`, Height `20`,
-Size `10`, Color `gKolorSzaryJasny`, Text:
+**Text label** `lbl_NewPage_Address`: X `387`, Y `224`, Width `592`, Height `20`,
+Size `10`, Color `gblColorFaint`, Text:
 ```
-"Adres: /SitePages/" & gSerwis & "-" &
-Substitute(Substitute(Substitute(Trim(txtNowyTytul.Text), " ", "-"), "/", ""), "?", "") & ".aspx"
+"Adres: /SitePages/" & gblService & "-" &
+Substitute(Substitute(Substitute(Trim(txt_NewPage_Title.Text), " ", "-"), "/", ""), "?", "") & ".aspx"
 ```
 
 ### Serwis i kategoria
@@ -91,20 +91,20 @@ Substitute(Substitute(Substitute(Trim(txtNowyTytul.Text), " ", "-"), "/", ""), "
 **Text label**: X `387`, Y `256`, Size `11`, FontWeight `FontWeight.Semibold`,
 Text `"Serwis"`
 
-**Dropdown** `drpNowySerwis`: X `387`, Y `280`, Width `286`, Height `44`,
-Items `colSerwisy`, Value `"Title"`,
+**Dropdown** `drp_NewPage_Service`: X `387`, Y `280`, Width `286`, Height `44`,
+Items `colServices`, Value `"Title"`,
 Default:
 ```
-LookUp(colSerwisy, Kod = gSerwis)
+LookUp(colServices, Kod = gblService)
 ```
 
 **Text label**: X `693`, Y `256`, Size `11`, FontWeight `FontWeight.Semibold`,
 Text `"Kategoria"`
 
-**Dropdown** `drpNowaKategoria`: X `693`, Y `280`, Width `286`, Height `44`,
+**Dropdown** `drp_NewPage_Category`: X `693`, Y `280`, Width `286`, Height `44`,
 Items:
 ```
-Distinct(Filter(colStrony, Service = gSerwis && !IsBlank(Category)), Category)
+Distinct(Filter(colPages, Service = gblService && !IsBlank(Category)), Category)
 ```
 AllowEmptySelection: `true`
 
@@ -115,90 +115,90 @@ Puste = kategoria zostanie wziеta z rodzica przy nastepnym przeliczeniu drzewa.
 **Text label**: X `387`, Y `340`, Size `11`, FontWeight `FontWeight.Semibold`,
 Text `"Miejsce w drzewie"`
 
-**Gallery** (Blank vertical) `galRodzic`: X `387`, Y `364`, Width `592`,
+**Gallery** (Blank vertical) `gal_NewPage_Parent`: X `387`, Y `364`, Width `592`,
 Height `240`, TemplateSize `40`, TemplatePadding `0`,
-BorderThickness `1`, BorderColor `gKolorLinia`.
+BorderThickness `1`, BorderColor `gblColorLine`.
 
 Items:
 ```
-SortByColumns(Filter(colStrony, Service = gSerwis), "TreeSort", Ascending)
+SortByColumns(Filter(colPages, Service = gblService), "TreeSort", Ascending)
 ```
 
 W szablonie galerii:
 
-**Rectangle** `recRodzicTlo`: X `0`, Y `0`, Width `Parent.TemplateWidth`,
+**Rectangle** `rec_Parent_Row`: X `0`, Y `0`, Width `Parent.TemplateWidth`,
 Height `40`, Fill:
 ```
-If(gRodzic = ThisItem.ID, gKolorAkcentTlo, gKolorPanel)
+If(gblParentId = ThisItem.ID, gblColorAccentSoft, gblColorPanel)
 ```
 
 **Radio** nie jest potrzebne — caly wiersz jest klikalny:
 
-**Text label** `lblRodzic`:
+**Text label** `lbl_Parent_Title`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| X | `12 + ThisItem.Poziom * 20` |
+| X | `12 + ThisItem.Depth * 20` |
 | Y | `8` |
 | Width | `480` |
 | Height | `24` |
 | Text | `ThisItem.Title` |
-| FontWeight | `If(gRodzic = ThisItem.ID, FontWeight.Semibold, FontWeight.Normal)` |
-| OnSelect | `Set(gRodzic, ThisItem.ID)` |
+| FontWeight | `If(gblParentId = ThisItem.ID, FontWeight.Semibold, FontWeight.Normal)` |
+| OnSelect | `Set(gblParentId, ThisItem.ID)` |
 
-**Text label** `lblRodzicZnacznik`: X `500`, Y `8`, Width `80`, Height `24`,
-Size `10`, Color `gKolorAkcentCiemny`, Align `Align.Right`,
+**Text label** `lbl_Parent_Badge`: X `500`, Y `8`, Width `80`, Height `24`,
+Size `10`, Color `gblColorAccentDark`, Align `Align.Right`,
 Text:
 ```
-If(gRodzic = ThisItem.ID, "rodzic", "")
+If(gblParentId = ThisItem.ID, "rodzic", "")
 ```
 
 ### Podglad miejsca
 
-**Text label** `lblPodgladMiejsca`: X `387`, Y `616`, Width `592`, Height `48`,
-Size `11`, Color `gKolorSzary`, Text:
+**Text label** `lbl_NewPage_Preview`: X `387`, Y `616`, Width `592`, Height `48`,
+Size `11`, Color `gblColorMuted`, Text:
 ```
-If(IsBlank(gRodzic),
+If(IsBlank(gblParentId),
     "Zaznacz strone nadrzedna na liscie powyzej",
-    "Trafi tutaj:  " & LookUp(colStrony, ID = gRodzic).Title &
-    "  >  " & If(IsBlank(txtNowyTytul.Text), "(tytul)", txtNowyTytul.Text)
+    "Trafi tutaj:  " & LookUp(colPages, ID = gblParentId).Title &
+    "  >  " & If(IsBlank(txt_NewPage_Title.Text), "(tytul)", txt_NewPage_Title.Text)
 )
 ```
 
 ### Przyciski
 
-**Button** `btnNowaAnuluj`: X `707`, Y `680`, Width `120`, Height `44`,
-Text `"Anuluj"`, Fill `gKolorPanel`, Color `gKolorTekst`,
-BorderThickness `1`, BorderColor `gKolorLinia`, OnSelect:
+**Button** `btn_NewPage_Cancel`: X `707`, Y `680`, Width `120`, Height `44`,
+Text `"Anuluj"`, Fill `gblColorPanel`, Color `gblColorText`,
+BorderThickness `1`, BorderColor `gblColorLine`, OnSelect:
 ```
-Set(gNowaStrona, false)
+Set(gblNewPage, false)
 ```
 
-**Button** `btnNowaUtworz`: X `839`, Y `680`, Width `140`, Height `44`,
-Text `"Utworz strone"`, Fill `gKolorAkcent`,
+**Button** `btn_NewPage_Create`: X `839`, Y `680`, Width `140`, Height `44`,
+Text `"Utworz strone"`, Fill `gblColorAccent`,
 DisplayMode:
 ```
-If(IsBlank(gRodzic) || IsBlank(Trim(txtNowyTytul.Text)),
+If(IsBlank(gblParentId) || IsBlank(Trim(txt_NewPage_Title.Text)),
     DisplayMode.Disabled, DisplayMode.Edit)
 ```
 
 OnSelect — **cala formula**:
 ```
-Set(gTworze, true);
-Set(gWynik,
-    NowaStrona.Run(
-        Trim(txtNowyTytul.Text),
-        Text(gRodzic),
-        drpNowySerwis.Selected.Kod,
-        Coalesce(drpNowaKategoria.Selected.Value, "")
+Set(gblCreating, true);
+Set(gblCreateResult,
+    NewDocPage.Run(
+        Trim(txt_NewPage_Title.Text),
+        Text(gblParentId),
+        drp_NewPage_Service.Selected.Kod,
+        Coalesce(drp_NewPage_Category.Selected.Value, "")
     )
 );
-OdswiezDrzewo.Run();
+RefreshTree.Run();
 Refresh('Site Pages');
-Set(gTworze, false);
-Set(gNowaStrona, false);
+Set(gblCreating, false);
+Set(gblNewPage, false);
 Notify("Strona utworzona", NotificationType.Success, 3000);
-Launch(gWitrynaUrl & Mid(gWynik.adres, Find("/SitePages/", gWynik.adres)), {}, LaunchTarget.New)
+Launch(gblSiteUrl & Mid(gblCreateResult.adres, Find("/SitePages/", gblCreateResult.adres)), {}, LaunchTarget.New)
 ```
 
 Ostatnia linia otwiera nowa strone w nowej karcie, zeby od razu dopisac tresc.
@@ -206,8 +206,8 @@ Jesli wolisz zostac w aplikacji — usun ja.
 
 ### Wskaznik pracy
 
-**Text label** `lblTworze`: X `387`, Y `680`, Width `300`, Height `44`,
-Color `gKolorSzary`, Visible `gTworze`,
+**Text label** `lbl_NewPage_Working`: X `387`, Y `680`, Width `300`, Height `44`,
+Color `gblColorMuted`, Visible `gblCreating`,
 Text `"Tworze strone i przeliczam drzewo..."`
 
 Przeliczenie drzewa trwa kilkanascie sekund przy kilkudziesieciu stronach,
@@ -219,7 +219,7 @@ wiec komunikat jest potrzebny.
 
 Zeby nowa strona pojawila sie w drzewie bez przelaczania ekranow, dopisz
 na koncu OnSelect przycisku **Utworz strone** cala formule z sekcji B pliku
-[04-dokumentacja.md](04-dokumentacja.md) (ta, ktora buduje `colStrony`).
+[04-dokumentacja.md](04-dokumentacja.md) (ta, ktora buduje `colPages`).
 
 ---
 
@@ -240,5 +240,5 @@ i czy zakonczylo sie powodzeniem.
 Kazdy, kto moze otworzyc aplikacje, moze utworzyc strone. Flow dziala
 w kontekscie osoby klikajacej, wiec zapis i tak podlega uprawnieniom
 biblioteki Site Pages. Jesli tworzenie ma byc ograniczone do czesci zespolu,
-ustaw `Visible` przycisku na zmienna roli (jak `gManager` w
+ustaw `Visible` przycisku na zmienna roli (jak `gblIsManager` w
 [03-home.md](03-home.md)) i ogranicz zapis w samej bibliotece.

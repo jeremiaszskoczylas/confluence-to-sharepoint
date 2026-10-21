@@ -3,9 +3,9 @@
 Aplikacja Canvas, uklad szeroki (16:9), otwierana linkiem w przegladarce.
 Wszystko na standardowych konektorach: SharePoint, Office 365 Users, Office 365 Outlook.
 
-## Kolejnosc budowania
+## SortOrder budowania
 
-| # | Plik | Co powstaje | Czas |
+| # | FileName | Co powstaje | Czas |
 |---|---|---|---|
 | 0 | [00-powerapps-podstawy.md](00-powerapps-podstawy.md) | **przeczytaj najpierw** — Power Apps dla osoby z Power Automate | 15 min czytania |
 | 1 | [01-listy.md](01-listy.md) | listy SharePoint i kolumna `Service` | 40 min |
@@ -13,6 +13,10 @@ Wszystko na standardowych konektorach: SharePoint, Office 365 Users, Office 365 
 | 3 | [03-home.md](03-home.md) | ekran glowny: obsada z raportami, przerwy, komunikat | 2–3 h |
 | 4 | [04-dokumentacja.md](04-dokumentacja.md) | drzewo dokumentacji z zakladkami serwisow | 1–2 h |
 | 5 | [05-nowa-strona.md](05-nowa-strona.md) | dodawanie strony w wybranym miejscu drzewa | 1 h |
+| 6 | [06-rota.md](06-rota.md) | grafik z Excela do listy `DT_Rota` | zalezy od ukladu pliku |
+
+Konwencje nazewnicze: [KONWENCJE.md](KONWENCJE.md). Cala aplikacja jest po angielsku,
+instrukcje po polsku.
 
 Gierki i role dokladamy pozniej — szkielet jest na nie przygotowany.
 
@@ -44,9 +48,9 @@ takze przy slabym rozroznianiu barw.
 ## Ekrany
 
 ```
-scrHome          komunikat managera | obsada dnia z raportami | przerwa + raporty
-scrDocs          zakladki serwisow + drzewo + wyszukiwarka
-scrGry           pusty placeholder (pozniej)
+scr_Home          komunikat managera | obsada dnia z raportami | przerwa + raporty
+scr_Docs          zakladki serwisow + drzewo + wyszukiwarka
+scr_Games           pusty placeholder (pozniej)
 ```
 
 Makiety wygladu powstaly jako osobny canvas „Dashboard zespolu — makiety".
@@ -58,9 +62,9 @@ Nawigacja: pionowy pasek po lewej, ten sam na kazdym ekranie.
 
 | Zrodlo | Rola |
 |---|---|
-| `DT_Rota` | kto i w jakich godzinach pracuje danego dnia |
-| `DT_Breaks` | zaplanowane przerwy godzinne |
-| `DT_Reports` | deklaracje raportow na tydzien (starty / midy / endy) |
+| `DT_Rota` | kto i w jakich godzinach pracuje danego dnia (z Excela, krok 6) |
+| `DT_Breaks` | przerwy godzinne, trzy typowe pory lub wlasna godzina |
+| `DT_DailyChecks` | deklaracje raportow na tydzien (starty / midy / endy) |
 | `DT_ManagerMessages` | komunikaty od managera |
 | `DT_Services` | katalog serwisow — z niego powstaja zakladki dokumentacji |
 | `Site Pages` | strony dokumentacji; drzewo z kolumn `ParentPageId`, `TreePath`, `SortOrder` |

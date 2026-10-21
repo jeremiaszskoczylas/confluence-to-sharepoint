@@ -1,41 +1,66 @@
 // ===========================================================================
-// 04 — OKNO DODAWANIA STRONY (na ekranie scrDocs)
-// Wymaga podlaczonych flow: NowaStrona i OdswiezDrzewo
+// 04 — NEW PAGE DIALOG (na ekranie scr_Docs)
+// Wymaga podlaczonych flow: NewDocPage i RefreshTree
 // (lewy pasek -> Power Automate -> Add flow).
 // ===========================================================================
 
 
-### btnNowaStrona.OnSelect
-// przycisk "+ Nowa strona" w naglowku ekranu
+### btn_Docs_NewPage.Text
 
-Set(gNowaStrona, true);
-Set(gRodzic, Blank());
-Reset(txtNowyTytul)
+"+ New page"
 
----
+### btn_Docs_NewPage.OnSelect
 
-
-### icoNowaZamknij.OnSelect
-
-Set(gNowaStrona, false)
+Set(gblNewPage, true);
+Set(gblParentId, Blank());
+Reset(txt_NewPage_Title)
 
 ---
 
 
-### btnNowaAnuluj.OnSelect
+### ico_NewPage_Close.OnSelect
 
-Set(gNowaStrona, false)
+Set(gblNewPage, false)
 
 ---
 
 
-### lblPodgladAdresu.Text
-// pokazuje, jak bedzie wygladal adres strony
+### btn_NewPage_Cancel.Text
 
-"Adres: /SitePages/" & gSerwis & "-" &
+"Cancel"
+
+### btn_NewPage_Cancel.OnSelect
+
+Set(gblNewPage, false)
+
+---
+
+
+### lbl_NewPage_Title.Text
+
+"New documentation page"
+
+### lbl_NewPage_Hint.Text
+
+"It will be created in SharePoint and placed where you choose in the tree"
+
+---
+
+
+### txt_NewPage_Title.HintText
+
+"e.g. Reservation Amendments - exceptions"
+
+---
+
+
+### lbl_NewPage_Address.Text
+// podglad adresu, taki sam slug jak liczy flow
+
+"Address: /SitePages/" & gblService & "-" &
 Substitute(
     Substitute(
-        Substitute(Trim(txtNowyTytul.Text), " ", "-"),
+        Substitute(Trim(txt_NewPage_Title.Text), " ", "-"),
         "/", ""
     ),
     "?", ""
@@ -44,108 +69,108 @@ Substitute(
 ---
 
 
-### drpNowySerwis.Items
+### drp_NewPage_Service.Items
 
-colSerwisy
+colServices
 
-### drpNowySerwis.Default
+### drp_NewPage_Service.Default
 
-LookUp(colSerwisy, Kod = gSerwis)
+LookUp(colServices, Code = gblService)
 
 ---
 
 
-### drpNowaKategoria.Items
+### drp_NewPage_Category.Items
 
-Distinct(Filter(colStrony, Service = gSerwis && !IsBlank(Category)), Category)
+Distinct(Filter(colPages, Service = gblService && !IsBlank(Category)), Category)
 
 ---
 // --------------------------------------------------------------------------
-// WYBOR MIEJSCA W DRZEWIE
+// PARENT PICKER
 // --------------------------------------------------------------------------
 
 
-### galRodzic.Items
+### gal_NewPage_Parent.Items
 
-SortByColumns(Filter(colStrony, Service = gSerwis), "TreeSort", Ascending)
-
----
-
-
-### recRodzicTlo.Fill
-// wewnatrz galerii galRodzic
-
-If(gRodzic = ThisItem.ID, gKolorAkcentTlo, gKolorPanel)
+SortByColumns(Filter(colPages, Service = gblService), "TreeSort", Ascending)
 
 ---
 
 
-### lblRodzic.X
+### rec_Parent_Row.Fill
+// wewnatrz galerii gal_NewPage_Parent
 
-12 + ThisItem.Poziom * 20
+If(gblParentId = ThisItem.ID, gblColorAccentSoft, gblColorPanel)
 
-### lblRodzic.Text
+---
+
+
+### lbl_Parent_Title.X
+
+12 + ThisItem.Depth * 20
+
+### lbl_Parent_Title.Text
 
 ThisItem.Title
 
-### lblRodzic.FontWeight
+### lbl_Parent_Title.FontWeight
 
-If(gRodzic = ThisItem.ID, FontWeight.Semibold, FontWeight.Normal)
+If(gblParentId = ThisItem.ID, FontWeight.Semibold, FontWeight.Normal)
 
-### lblRodzic.OnSelect
+### lbl_Parent_Title.OnSelect
 
-Set(gRodzic, ThisItem.ID)
-
----
-
-
-### lblRodzicZnacznik.Text
-
-If(gRodzic = ThisItem.ID, "rodzic", "")
+Set(gblParentId, ThisItem.ID)
 
 ---
 
 
-### lblPodgladMiejsca.Text
+### lbl_Parent_Badge.Text
 
-If(IsBlank(gRodzic),
-    "Zaznacz strone nadrzedna na liscie powyzej",
-    "Trafi tutaj:  " & LookUp(colStrony, ID = gRodzic).Title &
-    "  >  " & If(IsBlank(txtNowyTytul.Text), "(tytul)", txtNowyTytul.Text)
+If(gblParentId = ThisItem.ID, "parent", "")
+
+---
+
+
+### lbl_NewPage_Preview.Text
+
+If(IsBlank(gblParentId),
+    "Select a parent page above",
+    "Will be placed under:  " & LookUp(colPages, ID = gblParentId).Title &
+    "  >  " & If(IsBlank(txt_NewPage_Title.Text), "(title)", txt_NewPage_Title.Text)
 )
 
 ---
 // --------------------------------------------------------------------------
-// UTWORZENIE STRONY
+// CREATE
 // --------------------------------------------------------------------------
 
 
-### btnNowaUtworz.DisplayMode
+### btn_NewPage_Create.Text
 
-If(IsBlank(gRodzic) || IsBlank(Trim(txtNowyTytul.Text)),
+"Create page"
+
+### btn_NewPage_Create.DisplayMode
+
+If(IsBlank(gblParentId) || IsBlank(Trim(txt_NewPage_Title.Text)),
     DisplayMode.Disabled,
     DisplayMode.Edit
 )
 
----
-
-
-### btnNowaUtworz.OnSelect
+### btn_NewPage_Create.OnSelect
 // Kolejnosc: utworz strone -> przelicz drzewo -> odswiez kolekcje -> otworz strone.
-// Przeliczenie drzewa trwa kilkanascie sekund, stad wskaznik gTworze.
 
-Set(gTworze, true);
-Set(gWynik,
-    NowaStrona.Run(
-        Trim(txtNowyTytul.Text),
-        Text(gRodzic),
-        drpNowySerwis.Selected.Kod,
-        Coalesce(drpNowaKategoria.Selected.Value, "")
+Set(gblCreating, true);
+Set(gblCreateResult,
+    NewDocPage.Run(
+        Trim(txt_NewPage_Title.Text),
+        Text(gblParentId),
+        drp_NewPage_Service.Selected.Code,
+        Coalesce(drp_NewPage_Category.Selected.Value, "")
     )
 );
-OdswiezDrzewo.Run();
+RefreshTree.Run();
 Refresh('Site Pages');
-ClearCollect(colStrony,
+ClearCollect(colPages,
     AddColumns(
         RenameColumns(
             ShowColumns(
@@ -153,45 +178,45 @@ ClearCollect(colStrony,
                 "ID", "Title", "ParentPageId", "TreePath", "TreeSort", "SortOrder",
                 "Service", "Name"
             ),
-            "Name", "Plik"
+            "Name", "FileName"
         ),
-        "Poziom", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
+        "Depth", (Len(TreePath) - Len(Substitute(TreePath, "/", ""))) - 2
     )
 );
-Set(gTworze, false);
-Set(gNowaStrona, false);
-Notify("Strona utworzona", NotificationType.Success, 3000);
-Launch(gWitrynaUrl & Mid(gWynik.adres, Find("/SitePages/", gWynik.adres)), {}, LaunchTarget.New)
+Set(gblCreating, false);
+Set(gblNewPage, false);
+Notify("Page created", NotificationType.Success, 3000);
+Launch(gblSiteUrl & Mid(gblCreateResult.address, Find("/SitePages/", gblCreateResult.address)), {}, LaunchTarget.New)
 
 ---
 
 
-### lblTworze.Visible
+### lbl_NewPage_Working.Visible
 
-gTworze
+gblCreating
 
-### lblTworze.Text
+### lbl_NewPage_Working.Text
 
-"Tworze strone i przeliczam drzewo..."
+"Creating the page and rebuilding the tree..."
 
 ---
 // --------------------------------------------------------------------------
-// WIDOCZNOSC OKNA — wklej w kazda kontrolke okna
+// WIDOCZNOSC OKNA — ta sama formula w kazdej kontrolce okna
 // --------------------------------------------------------------------------
 
 
-### recNowaTlo.Visible
-### recNowa.Visible
-### lblNowaTytul.Visible
-### lblNowaOpis.Visible
-### icoNowaZamknij.Visible
-### txtNowyTytul.Visible
-### lblPodgladAdresu.Visible
-### drpNowySerwis.Visible
-### drpNowaKategoria.Visible
-### galRodzic.Visible
-### lblPodgladMiejsca.Visible
-### btnNowaAnuluj.Visible
-### btnNowaUtworz.Visible
+### rec_NewPage_Overlay.Visible
+### rec_NewPage_Dialog.Visible
+### lbl_NewPage_Title.Visible
+### lbl_NewPage_Hint.Visible
+### ico_NewPage_Close.Visible
+### txt_NewPage_Title.Visible
+### lbl_NewPage_Address.Visible
+### drp_NewPage_Service.Visible
+### drp_NewPage_Category.Visible
+### gal_NewPage_Parent.Visible
+### lbl_NewPage_Preview.Visible
+### btn_NewPage_Cancel.Visible
+### btn_NewPage_Create.Visible
 
-gNowaStrona
+gblNewPage

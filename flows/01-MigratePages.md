@@ -4,8 +4,14 @@ Tworzy w Site Pages po jednej stronie na kazdy wiersz `Pending` w `DT_MigrationM
 Tresc jest juz wtedy sparsowana, ale bez linkow wewnetrznych, sciezki i podstron —
 te dokłada krok 2.
 
-Podmien `<WITRYNA>` i `<EKSPORT>` (patrz [README.md](README.md)).
+Podmien `<WITRYNA>`, `<EKSPORT>` i `<SERWIS>` (patrz [README.md](README.md)).
 Nazwy akcji dokladnie jak w naglowkach.
+
+**Ten sam flow migruje kazdy kolejny serwis.** Przy drugiej przestrzeni Confluence
+zmieniasz tylko trzy rzeczy: `<EKSPORT>` na nowy folder, `<SERWIS>` na kod nowego
+serwisu i wgrywasz nowe wiersze do `DT_MigrationMap` z tym kodem w kolumnie
+`Service`. Nic sie nie nadpisze, bo nazwy plikow dostaja prefiks serwisu,
+a filtr w kroku 2 bierze wylacznie wiersze tego serwisu.
 
 ---
 
@@ -17,9 +23,9 @@ List Name (lista):
 ```
 DT_MigrationMap
 ```
-Filter Query (tekst):
+Filter Query (tekst) — bierze tylko strony biezacego serwisu:
 ```
-MigrationStatus eq 'Pending'
+MigrationStatus eq 'Pending' and Service eq '<SERWIS>'
 ```
 Top Count (tekst) — na pierwszy bieg `1`, potem `5000`:
 ```
@@ -111,6 +117,10 @@ ConfluencePageId (fx):
 ```
 items('Apply_to_each')?['ConfluenceId']
 ```
+Service Value (Enter custom value, potem tekst) — kod serwisu:
+```
+<SERWIS>
+```
 DocStatus Value (lista):
 ```
 Draft
@@ -127,7 +137,7 @@ Method: POST
 
 Uri (fx) — podmien `<WITRYNA>` w DWOCH miejscach; podwojne apostrofy sa celowe:
 ```
-concat('_api/web/getfilebyserverrelativeurl(''<WITRYNA>/', body('CreatePage')?['d']?['Url'], ''')/moveto(newurl=''<WITRYNA>/SitePages/', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'), ''',flags=1)')
+concat('_api/web/getfilebyserverrelativeurl(''<WITRYNA>/', body('CreatePage')?['d']?['Url'], ''')/moveto(newurl=''<WITRYNA>/SitePages/<SERWIS>-', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'), ''',flags=1)')
 ```
 Headers — jeden wiersz: Accept → application/json;odata=verbose
 
@@ -167,9 +177,9 @@ TargetPageId (fx):
 ```
 body('CreatePage')?['d']?['Id']
 ```
-TargetUrl (fx):
+TargetUrl (fx) — ta sama nazwa co w RenamePage, z prefiksem serwisu:
 ```
-concat('SitePages/', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'))
+concat('SitePages/<SERWIS>-', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'))
 ```
 MigratedOn (fx):
 ```
@@ -189,4 +199,6 @@ utcNow()
 ## Znane ograniczenia
 
 - Cudzyslow w tytule rozbija JSON w `CreatePage`. Przejrzyj tytuly przed biegiem.
-- Dwie strony o tym samym `SourceFile` nadpisza sie nawzajem przy zmianie nazwy.
+- Dwie strony o tym samym `SourceFile` **w tym samym serwisie** nadpisza sie
+  nawzajem. Miedzy serwisami kolizji nie ma, bo nazwa pliku zaczyna sie od kodu
+  serwisu: `GMSC-Home-Page.aspx` i `SRV2-Home-Page.aspx` to dwa rozne pliki.

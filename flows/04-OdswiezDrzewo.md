@@ -2,6 +2,9 @@
 
 Jedyny flow, ktory uruchamiasz po zakonczeniu migracji.
 
+Obsluguje wszystkie serwisy naraz: strony grupowane sa po kolumnie `Service`,
+kazdy serwis dostaje wlasny korzen i wlasne sekcje mapy.
+
 Czyta biblioteke **Site Pages**, a nie mape migracji — dzieki temu obejmuje takze
 strony zalozone recznie. Przelicza `TreePath`, `TreeSort`, `SortOrder` i `Category`
 na podstawie kolumny `ParentPageId`, po czym buduje strone-mape od nowa.
@@ -28,7 +31,7 @@ Method: GET
 
 Uri (tekst) — CALE pole, jedna linia:
 ```
-_api/web/lists/getbytitle('Site Pages')/items?$select=Id,Title,ParentPageId,SortOrder,FileRef,FileLeafRef&$filter=FSObjType eq 0&$top=5000
+_api/web/lists/getbytitle('Site Pages')/items?$select=Id,Title,ParentPageId,SortOrder,FileRef,FileLeafRef,Service&$filter=FSObjType eq 0&$top=5000
 ```
 Headers — jeden wiersz: Accept → application/json;odata=verbose
 
@@ -202,7 +205,8 @@ nawigacje zapewnia mapa.
 
 ## Co zobaczysz w mapie
 
-Korzen, pod nim zwijane galezie z zagniezdzonymi listami. Jesli jakas strona nie ma
+Korzen, pod nim zwijane galezie z zagniezdzonymi listami. Przy kilku serwisach
+kazdy ma wlasny korzen poprzedzony nazwa serwisu. Jesli jakas strona nie ma
 `ParentPageId`, trafia na koniec mapy do sekcji **„Bez przypisania"** — to sygnal,
 ze trzeba uzupelnic kolumne, a nie blad.
 

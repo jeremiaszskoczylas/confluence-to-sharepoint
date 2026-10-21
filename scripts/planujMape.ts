@@ -1,11 +1,11 @@
 function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
   // UTRZYMANIE. Drzewo liczone z biblioteki Site Pages (kolumna ParentPageId),
-  // a nie z mapy migracji - dzieki temu obejmuje takze strony zalozone recznie
-  // po migracji. Zwraca metadane do wpisania (TreePath, TreeSort, SortOrder,
-  // Category) oraz fragmenty HTML strony-mapy.
+  // a nie z mapy migracji - dzieki temu obejmuje takze strony zalozone recznie.
+  // Strony sa grupowane po kolumnie Service, wiec kazdy serwis dostaje wlasny
+  // korzen i wlasne sekcje mapy; serwisy nie mieszaja sie ze soba.
   interface W {
     Id: number; Title: string; ParentPageId: number; SortOrder: number;
-    FileRef: string; FileLeafRef: string;
+    FileRef: string; FileLeafRef: string; Service?: string;
   }
   let surowe: W[];
   try { surowe = JSON.parse(dane) as W[]; }
@@ -23,6 +23,8 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
   }
   const jest: { [k: string]: boolean } = {};
   for (const r of rows) { jest[String(r.Id)] = true; }
+  const serwisOf = (r: W) =>
+    (r.Service === undefined || r.Service === null || r.Service === "") ? "" : r.Service;
   const rodzic = (r: W) => {
     const p = r.ParentPageId;
     return p !== undefined && p !== null && p > 0 && jest[String(p)] === true ? p : 0;
@@ -35,26 +37,6 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
   };
   const kids = (id: number) => rows.filter(r => rodzic(r) === id).sort(porzadek);
 
-  // Korzen: strona bez rodzica, ktora ma dzieci. Przy kilku kandydatach wygrywa
-  // ta z najwiekszym poddrzewem. Pozostale bezrodzicowe to sieroty.
-  const bezRodzica = rows.filter(r => rodzic(r) === 0);
-  const policz = (id: number): number => {
-    let n = 1;
-    for (const d of kids(id)) { n += policz(d.Id); }
-    return n;
-  };
-  let korzen: W | undefined = undefined;
-  let naj = 0;
-  for (const r of bezRodzica) {
-    const n = policz(r.Id);
-    if (n > naj) { naj = n; korzen = r; }
-  }
-  if (korzen === undefined || naj < 2) {
-    return '{"blad":"nie znaleziono korzenia drzewa - czy strony maja wypelnione ParentPageId?"}';
-  }
-  const korzenId: number = korzen.Id;
-  const sieroty = bezRodzica.filter(r => r.Id !== korzenId).sort(porzadek);
-
   const bezNr = (t: string) => t.replace(/^\d+\.\s*/, "");
   const pad = (n: number) => ("00000" + String(n)).slice(-5);
   const url = (r: W) => (r.FileRef === undefined || r.FileRef === null ? "" : r.FileRef);
@@ -62,15 +44,15 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
   const link = (r: W) => '<a href="' + url(r) + '">' + esc(r.Title) + "</a>";
 
   interface P {
-    id: number; title: string; treePath: string; treeSort: string;
+    id: number; title: string; service: string; treePath: string; treeSort: string;
     sortOrder: number; category: string;
   }
   const pages: P[] = [];
-  const lista = (id: number, poziom: number): string => {
+  const lista = (id: number): string => {
     const d = kids(id);
     if (d.length === 0) { return ""; }
     let s = "<ul>";
-    for (const x of d) { s += "<li>" + link(x) + lista(x.Id, poziom + 1) + "</li>"; }
+    for (const x of d) { s += "<li>" + link(x) + lista(x.Id) + "</li>"; }
     return s + "</ul>";
   };
   const zejdz = (r: W, lancuch: W[], kategoria: string, poz: number) => {
@@ -78,6 +60,7 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
     pages.push({
       id: r.Id,
       title: r.Title,
+      service: serwisOf(r),
       treePath: "/" + chain.map(x => String(x.Id)).join("/") + "/",
       treeSort: chain.map(x => pad(x.Id)).join("."),
       sortOrder: poz * 10,
@@ -89,17 +72,61 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
       zejdz(d[i], chain, kat, i + 1);
     }
   };
-  zejdz(korzen, [], "", 1);
+
+  // lista serwisow w kolejnosci pierwszego wystapienia
+  const serwisy: string[] = [];
+  for (const r of rows) {
+    const s = serwisOf(r);
+    if (serwisy.indexOf(s) < 0) { serwisy.push(s); }
+  }
 
   const mapa: string[] = [];
-  mapa.push("<p>&#127968; <strong>" + link(korzen) + "</strong></p>");
-  for (const g of kids(korzenId)) {
-    mapa.push("<p><strong>" + link(g) + "</strong></p>" + lista(g.Id, 1));
+  const sieroty: W[] = [];
+  let korzeni = 0;
+
+  for (const s of serwisy) {
+    const wSerwisie = rows.filter(r => serwisOf(r) === s);
+    const bezRodzica = wSerwisie.filter(r => rodzic(r) === 0);
+    const policz = (id: number): number => {
+      let n = 1;
+      for (const d of kids(id)) { n += policz(d.Id); }
+      return n;
+    };
+    let korzen: W | undefined = undefined;
+    let naj = 0;
+    for (const r of bezRodzica) {
+      const n = policz(r.Id);
+      if (n > naj) { naj = n; korzen = r; }
+    }
+    if (korzen === undefined || naj < 2) {
+      for (const r of bezRodzica) { sieroty.push(r); }
+      continue;
+    }
+    korzeni++;
+    const korzenId: number = korzen.Id;
+    for (const r of bezRodzica) { if (r.Id !== korzenId) { sieroty.push(r); } }
+    zejdz(korzen, [], "", 1);
+
+    // naglowek serwisu tylko gdy serwisow jest wiecej niz jeden
+    const naglowek = serwisy.length > 1 && s.length > 0
+      ? '<p><font color="#8E0B22"><strong>' + esc(s) + "</strong></font></p>"
+      : "";
+    mapa.push(naglowek + "<p>&#127968; <strong>" + link(korzen) + "</strong></p>");
+    for (const g of kids(korzenId)) {
+      mapa.push("<p><strong>" + link(g) + "</strong></p>" + lista(g.Id));
+    }
+  }
+
+  if (korzeni === 0) {
+    return '{"blad":"nie znaleziono korzenia drzewa - czy strony maja wypelnione ParentPageId?"}';
   }
   if (sieroty.length > 0) {
-    let s = "<p><strong>Bez przypisania &mdash; " + sieroty.length + "</strong></p><ul>";
-    for (const r of sieroty) { s += "<li>" + link(r) + "</li>"; }
+    const posort = sieroty.sort(porzadek);
+    let s = "<p><strong>Bez przypisania &mdash; " + posort.length + "</strong></p><ul>";
+    for (const r of posort) { s += "<li>" + link(r) + "</li>"; }
     mapa.push(s + "</ul>");
   }
-  return JSON.stringify({ pages: pages, mapa: mapa, sieroty: sieroty.length });
+  return JSON.stringify({
+    pages: pages, mapa: mapa, sieroty: sieroty.length, serwisy: korzeni
+  });
 }

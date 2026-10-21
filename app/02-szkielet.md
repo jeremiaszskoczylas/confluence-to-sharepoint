@@ -21,7 +21,7 @@ Format Tablet jest wlasciwy takze dla przegladarki — nazwa myli, chodzi o prop
 Lewy pasek → **Data** → **Add data**. Dodaj kolejno:
 
 - **SharePoint** → adres witryny → zaznacz listy: `DT_Rota`, `DT_Breaks`,
-  `DT_Reports`, `DT_ManagerMessages`, `DT_Services` oraz biblioteke **Site Pages**
+  `DT_DailyChecks`, `DT_ManagerMessages`, `DT_Services` oraz biblioteke **Site Pages**
 - **Office 365 Users**
 
 ## C. Motyw i zmienne startowe
@@ -29,27 +29,27 @@ Lewy pasek → **Data** → **Add data**. Dodaj kolejno:
 Zaznacz **App** w drzewie po lewej → wlasciwosc **OnStart** → wklej calosc:
 
 ```
-Set(gKolorTlo, RGBA(244, 244, 245, 1));
-Set(gKolorPanel, RGBA(255, 255, 255, 1));
-Set(gKolorAkcent, RGBA(200, 16, 46, 1));
-Set(gKolorAkcentCiemny, RGBA(142, 11, 34, 1));
-Set(gKolorAkcentTlo, RGBA(251, 233, 236, 1));
-Set(gKolorPasek, RGBA(35, 35, 38, 1));
-Set(gKolorTekst, RGBA(28, 28, 30, 1));
-Set(gKolorSzary, RGBA(104, 104, 110, 1));
-Set(gKolorSzaryJasny, RGBA(134, 134, 141, 1));
-Set(gKolorLinia, RGBA(0, 0, 0, 0.09));
+Set(gblColorBg, RGBA(244, 244, 245, 1));
+Set(gblColorPanel, RGBA(255, 255, 255, 1));
+Set(gblColorAccent, RGBA(200, 16, 46, 1));
+Set(gblColorAccentDark, RGBA(142, 11, 34, 1));
+Set(gblColorAccentSoft, RGBA(251, 233, 236, 1));
+Set(gblColorNav, RGBA(35, 35, 38, 1));
+Set(gblColorText, RGBA(28, 28, 30, 1));
+Set(gblColorMuted, RGBA(104, 104, 110, 1));
+Set(gblColorFaint, RGBA(134, 134, 141, 1));
+Set(gblColorLine, RGBA(0, 0, 0, 0.09));
 
-Set(gJa, User());
-Set(gDzis, Today());
-Set(gPoniedzialek, DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), Days));
-Set(gEkran, "Home");
-Set(gEdycjaKom, false);
-Set(gManager, false)
+Set(gblUser, User());
+Set(gblToday, Today());
+Set(gblWeekStart, DateAdd(Today(), -(Weekday(Today(), StartOfWeek.Monday) - 1), Days));
+Set(gblScreen, "Home");
+Set(gblEditMessage, false);
+Set(gblIsManager, false)
 ```
 
-`gManager` zostaje na `false` — role wlaczymy pozniej, opis na koncu
-[03-home.md](03-home.md). `gPoniedzialek` to poniedzialek biezacego tygodnia,
+`gblIsManager` zostaje na `false` — role wlaczymy pozniej, opis na koncu
+[03-home.md](03-home.md). `gblWeekStart` to poniedzialek biezacego tygodnia,
 uzywany przy raportach.
 
 **Uruchom OnStart teraz:** trzy kropki przy `App` → **Run OnStart**. Po kazdej
@@ -61,9 +61,9 @@ Lewy pasek → **Tree view** → **+ New screen** → **Blank**. Zaloz trzy i na
 je (dwuklik na nazwie):
 
 ```
-scrHome
-scrDocs
-scrGry
+scr_Home
+scr_Docs
+scr_Games
 ```
 
 Pierwszy ekran z szablonu skasuj, jesli zostal pusty `Screen1`.
@@ -72,16 +72,16 @@ Dla **kazdego** z trzech ekranow ustaw:
 
 - **Fill**:
 ```
-gKolorTlo
+gblColorBg
 ```
 
 ## E. Pasek nawigacji
 
-Robimy raz na `scrHome`, potem kopiujemy na pozostale ekrany.
+Robimy raz na `scr_Home`, potem kopiujemy na pozostale ekrany.
 
 ### Tlo paska
 
-**Insert** → **Rectangle**, nazwa `recNav`:
+**Insert** → **Rectangle**, nazwa `rec_Nav_Bg`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -89,11 +89,11 @@ Robimy raz na `scrHome`, potem kopiujemy na pozostale ekrany.
 | Y | `0` |
 | Width | `220` |
 | Height | `Parent.Height` |
-| Fill | `gKolorPasek` |
+| Fill | `gblColorNav` |
 
 ### Tytul
 
-**Insert** → **Text label**, nazwa `lblLogo`:
+**Insert** → **Text label**, nazwa `lbl_Nav_Logo`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
@@ -106,59 +106,59 @@ Robimy raz na `scrHome`, potem kopiujemy na pozostale ekrany.
 
 ### Przyciski menu
 
-**Insert** → **Button**, nazwa `btnNavHome`:
+**Insert** → **Button**, nazwa `btn_Nav_Home`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
 | Text | `"Strona glowna"` |
 | X / Y | `12` / `110` |
 | Width / Height | `196` / `44` |
-| Fill | `If(gEkran = "Home", RGBA(255,255,255,0.18), RGBA(255,255,255,0))` |
+| Fill | `If(gblScreen = "Home", RGBA(255,255,255,0.18), RGBA(255,255,255,0))` |
 | HoverFill | `RGBA(255,255,255,0.28)` |
 | Color / HoverColor / PressedColor | `RGBA(255,255,255,1)` |
 | BorderThickness | `0` |
 | Align | `Align.Left` |
 | PaddingLeft | `16` |
-| OnSelect | `Set(gEkran, "Home"); Navigate(scrHome)` |
+| OnSelect | `Set(gblScreen, "Home"); Navigate(scr_Home)` |
 
 Skopiuj przycisk dwa razy (Ctrl+C, Ctrl+V) i zmien:
 
-**btnNavDocs** — Y `160`, Text `"Dokumentacja"`,
+**btn_Nav_Docs** — Y `160`, Text `"Dokumentacja"`,
 OnSelect:
 ```
-Set(gEkran, "Docs"); Navigate(scrDocs)
+Set(gblScreen, "Docs"); Navigate(scr_Docs)
 ```
 Fill:
 ```
-If(gEkran = "Docs", RGBA(255,255,255,0.18), RGBA(255,255,255,0))
+If(gblScreen = "Docs", RGBA(255,255,255,0.18), RGBA(255,255,255,0))
 ```
 
-**btnNavGry** — Y `210`, Text `"Gierki"`,
+**btn_Nav_Games** — Y `210`, Text `"Gierki"`,
 OnSelect:
 ```
-Set(gEkran, "Gry"); Navigate(scrGry)
+Set(gblScreen, "Gry"); Navigate(scr_Games)
 ```
 Fill:
 ```
-If(gEkran = "Gry", RGBA(255,255,255,0.18), RGBA(255,255,255,0))
+If(gblScreen = "Gry", RGBA(255,255,255,0.18), RGBA(255,255,255,0))
 ```
 
 ### Stopka paska: kto jest zalogowany
 
-**Insert** → **Media** → **Image**, nazwa `imgJa`:
+**Insert** → **Media** → **Image**, nazwa `imgblUser`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| Image | `Office365Users.UserPhotoV2(gJa.Email)` |
+| Image | `Office365Users.UserPhotoV2(gblUser.Email)` |
 | X / Y | `24` / `Parent.Height - 86` |
 | Width / Height | `40` / `40` |
 | ImagePosition | `ImagePosition.Fill` |
 
-**Text label** `lblJa`:
+**Text label** `lbl_Nav_Me`:
 
 | Wlasciwosc | Wartosc |
 |---|---|
-| Text | `gJa.FullName` |
+| Text | `gblUser.FullName` |
 | X / Y | `72` / `Parent.Height - 82` |
 | Width / Height | `140` / `32` |
 | Color | `RGBA(255,255,255,1)` |
@@ -169,22 +169,22 @@ chwili przy pierwszym uruchomieniu.
 
 ### Kopiowanie paska na pozostale ekrany
 
-Zaznacz w drzewie `recNav`, `lblLogo`, trzy przyciski, `imgJa`, `lblJa`
-(Ctrl i klikanie) → Ctrl+C → wejdz na `scrDocs` → Ctrl+V. To samo na `scrGry`.
+Zaznacz w drzewie `rec_Nav_Bg`, `lbl_Nav_Logo`, trzy przyciski, `imgblUser`, `lbl_Nav_Me`
+(Ctrl i klikanie) → Ctrl+C → wejdz na `scr_Docs` → Ctrl+V. To samo na `scr_Games`.
 
 ## F. Obszar tresci
 
 Na kazdym ekranie tresc zaczyna sie od X = `248`. Zapamietaj te liczbe,
 powtarza sie w krokach 2 i 3.
 
-Na `scrGry` wstaw na razie jedna etykiete:
+Na `scr_Games` wstaw na razie jedna etykiete:
 
 | Wlasciwosc | Wartosc |
 |---|---|
 | Text | `"Wkrotce"` |
 | X / Y | `248` / `40` |
 | Size | `24` |
-| Color | `gKolorSzary` |
+| Color | `gblColorMuted` |
 
 ## G. Sprawdzenie
 
