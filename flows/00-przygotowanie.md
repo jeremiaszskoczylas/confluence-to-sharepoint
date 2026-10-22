@@ -170,12 +170,20 @@ body('Drzewo')?['result']
 
 ## F. Strona mapy
 
-Nic nie trzeba zakladac. Strone `<MAPA>` tworzy od zera
-[03-BudujMape.md](03-BudujMape.md). W lewym panelu witryny dodaj do niej link
-dopiero po pierwszym biegu.
+Strone mapy **zalozysz recznie**: Site Pages → **New** → **Page** → pusty
+szablon → tytul, np. `Documentation Map` → **Publish**. Tresci nie pisz.
+
+[04-OdswiezDrzewo](04-OdswiezDrzewo.md) wpisuje drzewo w istniejaca strone
+i nie zaklada nowych — bez tego konczy sie bledem 404.
+
+**Nie ustawiaj** na niej kolumny `Service`. Strony map nie naleza do drzewa;
+puste `Service` trzyma je poza nim.
+
+Link w lewym panelu witryny dodaj od razu — strona juz istnieje.
 
 ## Kontrola przed krokiem 1
 
+- strona mapy serwisu istnieje i jest pusta
 - lista migracyjna serwisu ma tyle wierszy, ile stron w eksporcie, wszystkie `Pending`
 - `ParentConfluenceId` wypelnione (strona glowna ma 0)
 - w `SiteAssets/DocMedia/attachments/` sa podfoldery z obrazami

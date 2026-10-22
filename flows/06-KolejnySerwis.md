@@ -58,8 +58,15 @@ uruchamiasz krok 2 migracji.
 
 Zaloz nowa liste `DT_MigrationMap_Switchboard` z kolumnami wg
 [00-przygotowanie](00-przygotowanie.md), sekcja B. Najszybciej:
-Site contents → lista GMSC → **Settings** → **Save list as template**,
-potem utworz z niej nowa. Albo zaloz recznie, kolumn jest jedenascie.
+Site contents → **New** → **List** → **From existing list** → wskaz liste GMSC →
+nazwa `DT_MigrationMap_Switchboard`. Kopiuje komplet kolumn razem z wyborami
+`MigrationStatus`, a nie kopiuje wierszy — dokladnie o to chodzi.
+
+(Starsza droga, **Save list as template**, bywa niedostepna: SharePoint Online
+ukrywa ja, gdy w witrynie wylaczone sa skrypty niestandardowe.)
+
+Zadne flow nie zaklada list — te jedna czynnosc robisz recznie raz na serwis.
+Wypelni ja juz flow z punktu 6, razem z kolumna `Service`.
 
 ### 6. Wiersze w tej liscie
 
