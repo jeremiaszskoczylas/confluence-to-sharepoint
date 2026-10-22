@@ -2,8 +2,15 @@
 
 Jedyny flow, ktory uruchamiasz po zakonczeniu migracji.
 
-Obsluguje wszystkie serwisy naraz: strony grupowane sa po kolumnie `Service`,
-kazdy serwis dostaje wlasny korzen i wlasne sekcje mapy.
+**Dwie rzeczy naraz, o roznym zasiegu:**
+
+- **metadane drzewa** (`TreePath`, `TreeSort`, `SortOrder`, `Category`) przelicza
+  dla **wszystkich** serwisow — potrzebuje ich aplikacja do zakladek
+- **strone-mape** w SharePoincie buduje dla **jednego** serwisu, tego podanego
+  w polu `serwisMapy`. Puste pole = mapa ze wszystkimi serwisami
+
+Dzieki temu `Documentation-Map` moze pokazywac tylko GMSC, a zakladki w aplikacji
+wszystkie serwisy.
 
 Czyta biblioteke **Site Pages**, a nie mape migracji — dzieki temu obejmuje takze
 strony zalozone recznie. Przelicza `TreePath`, `TreeSort`, `SortOrder` i `Category`
@@ -45,10 +52,15 @@ dane (fx):
 ```
 string(body('GetStrony')?['d']?['results'])
 ```
-pomin (tekst):
+pomin (tekst) — nazwa pliku strony-mapy, zeby nie liczyla sama siebie:
 ```
 <MAPA>
 ```
+serwisMapy (tekst) — kod serwisu, ktory ma byc na stronie-mapie:
+```
+<SERWIS>
+```
+Zostaw **puste**, jesli mapa ma zawierac wszystkie serwisy.
 
 ## 4. Plan — Data Operation → Compose
 
@@ -208,6 +220,19 @@ Body: PUSTE
 
 ---
 
+## Sprawdzenie po biegu
+
+W wyniku akcji `Planuj` (rozwin `Plan`) znajdziesz liczniki:
+
+| Pole | Co znaczy |
+|---|---|
+| `serwisy` | ile serwisow ma poprawny korzen |
+| `wMapie` | ile z nich trafilo na strone-mape |
+| `sieroty` | strony z `Service`, ale bez rodzica — do uzupelnienia |
+| `pozaDokumentacja` | strony bez `Service`, pominiete (strony witryny) |
+
+Jesli `sieroty` rosna, ktoras strona zgubila `ParentPageId`.
+
 ## Jak dodac nowa strone do dokumentacji
 
 1. Site Pages → New → Page, napisz tresc, Publish.
@@ -223,8 +248,13 @@ nawigacje zapewnia mapa.
 
 ## Co zobaczysz w mapie
 
-Korzen, pod nim zwijane galezie z zagniezdzonymi listami. Przy kilku serwisach
-kazdy ma wlasny korzen poprzedzony nazwa serwisu. Jesli jakas strona nie ma
+Korzen podanego serwisu, pod nim zwijane galezie z zagniezdzonymi listami.
+
+Gdy `serwisMapy` zostawisz puste, a serwisow jest kilka, kazdy dostaje wlasny
+korzen poprzedzony nazwa serwisu.
+
+Sekcja Bez przypisania na koncu dotyczy tylko serwisu z mapy: strony, ktore
+maja `Service`, ale nie maja rodzica. Strony innych serwisow jej nie zasmiecaja. Jesli jakas strona nie ma
 `ParentPageId`, trafia na koniec mapy do sekcji **„Bez przypisania"** — to sygnal,
 ze trzeba uzupelnic kolumne, a nie blad.
 

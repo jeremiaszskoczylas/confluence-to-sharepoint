@@ -1,5 +1,10 @@
-function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
-  // UTRZYMANIE. Drzewo liczone z biblioteki Site Pages (kolumna ParentPageId),
+function main(wb: ExcelScript.Workbook, dane: string, pomin: string, serwisMapy: string): string {
+  // UTRZYMANIE. Metadane drzewa (TreePath, TreeSort, SortOrder, Category) licza sie
+  // ZAWSZE dla wszystkich serwisow - potrzebuje ich aplikacja. Natomiast fragmenty
+  // strony-mapy obejmuja tylko serwis podany w serwisMapy; puste = wszystkie.
+  // Dzieki temu mapa w SharePoincie moze pokazywac jeden serwis, a zakladki
+  // w aplikacji wszystkie.
+  // Drzewo liczone z biblioteki Site Pages (kolumna ParentPageId),
   // a nie z mapy migracji - dzieki temu obejmuje takze strony zalozone recznie.
   // Strony sa grupowane po kolumnie Service, wiec kazdy serwis dostaje wlasny
   // korzen i wlasne sekcje mapy; serwisy nie mieszaja sie ze soba.
@@ -102,6 +107,11 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
     if (serwisy.indexOf(s) < 0) { serwisy.push(s); }
   }
 
+  const kodMapy = (serwisMapy === undefined || serwisMapy === null) ? "" : serwisMapy.trim();
+  const doMapy = (s: string) => kodMapy.length === 0 || s === kodMapy;
+  let ileWMapie = 0;
+  for (const s of serwisy) { if (doMapy(s)) { ileWMapie++; } }
+
   const mapa: string[] = [];
   const sieroty: W[] = [];
   let korzeni = 0;
@@ -130,11 +140,13 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
     }
     korzeni++;
     const korzenId: number = korzen.Id;
-    for (const r of bezRodzica) { if (r.Id !== korzenId) { sieroty.push(r); } }
+    // metadane liczymy zawsze, takze dla serwisow spoza mapy
     zejdz(korzen, [], "", 1);
+    if (!doMapy(s)) { continue; }
+    for (const r of bezRodzica) { if (r.Id !== korzenId) { sieroty.push(r); } }
 
     // naglowek serwisu tylko gdy serwisow jest wiecej niz jeden
-    const naglowek = serwisy.length > 1 && s.length > 0
+    const naglowek = ileWMapie > 1 && s.length > 0
       ? '<p><font color="#8E0B22"><strong>' + esc(s) + "</strong></font></p>"
       : "";
     mapa.push(naglowek + "<p>&#127968; <strong>" + link(korzen) + "</strong></p>");
@@ -152,6 +164,7 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
   const wDrzewie: { [k: string]: boolean } = {};
   for (const x of pages) { wDrzewie[String(x.id)] = true; }
   for (const r of rows) {
+    if (!doMapy(serwisOf(r))) { continue; }
     if (wDrzewie[String(r.Id)] !== true && sieroty.indexOf(r) < 0) { sieroty.push(r); }
   }
   if (sieroty.length > 0) {
@@ -162,6 +175,7 @@ function main(wb: ExcelScript.Workbook, dane: string, pomin: string): string {
   }
   return JSON.stringify({
     pages: pages, mapa: mapa, sieroty: sieroty.length, serwisy: korzeni,
+    wMapie: ileWMapie,
     pozaDokumentacja: pozaDokumentacja
   });
 }
