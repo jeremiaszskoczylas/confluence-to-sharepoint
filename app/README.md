@@ -3,9 +3,25 @@
 Aplikacja Canvas, uklad szeroki (16:9), otwierana linkiem w przegladarce.
 Wszystko na standardowych konektorach: SharePoint, Office 365 Users, Office 365 Outlook.
 
-## SortOrder budowania
+## Zanim zaczniesz
 
-| # | FileName | Co powstaje | Czas |
+Aplikacja czyta dane, ktore musza juz istniec. Trzy warunki:
+
+1. **Listy SharePoint zalozone** — krok 1 tego katalogu. Bez nich nie ma
+   czego podlaczyc.
+2. **Strony dokumentacji maja wypelniona kolumne `Service`.** Drzewo bierze
+   wylacznie strony z przypisanym serwisem; reszta biblioteki to strony witryny.
+3. **Flow [04-OdswiezDrzewo](../flows/04-OdswiezDrzewo.md) uruchomiony chociaz raz.**
+   Migracja zapisala `TreePath`, ale krok 4 przelicza go na identyfikatory
+   biblioteki — tych samych uzywa drzewo w aplikacji. Bez tego ekran dokumentacji
+   pokaze same korzenie, a strzalki rozwijania nie beda reagowac.
+
+Ekran glowny (krok 3) nie zalezy od zadnego z punktow 2 i 3 — mozesz go zbudowac
+od razu po zalozeniu list.
+
+## Kolejnosc budowania
+
+| # | Plik | Co powstaje | Czas |
 |---|---|---|---|
 | 0 | [00-powerapps-podstawy.md](00-powerapps-podstawy.md) | **przeczytaj najpierw** — Power Apps dla osoby z Power Automate | 15 min czytania |
 | 1 | [01-listy.md](01-listy.md) | listy SharePoint i kolumna `Service` | 40 min |
@@ -19,6 +35,13 @@ Konwencje nazewnicze: [KONWENCJE.md](KONWENCJE.md). Cala aplikacja jest po angie
 instrukcje po polsku.
 
 Gierki i role dokladamy pozniej — szkielet jest na nie przygotowany.
+
+## Wiele serwisow
+
+Aplikacja obsluguje je od poczatku, bez przerabiania. Zakladki na ekranie
+dokumentacji powstaja z listy `DT_Services`, a drzewo, wyszukiwarka i okno
+nowej strony filtruja po kolumnie `Service`. Dodanie serwisu to wiersz na liscie
+i wybor w kolumnie — w aplikacji nie zmieniasz ani jednej formuly.
 
 ## Formuly osobno
 
@@ -50,7 +73,7 @@ takze przy slabym rozroznianiu barw.
 ```
 scr_Home          komunikat managera | obsada dnia z raportami | przerwa + raporty
 scr_Docs          zakladki serwisow + drzewo + wyszukiwarka
-scr_Games           pusty placeholder (pozniej)
+scr_Games        pusty placeholder (pozniej)
 ```
 
 Makiety wygladu powstaly jako osobny canvas „Dashboard zespolu — makiety".
@@ -64,7 +87,7 @@ Nawigacja: pionowy pasek po lewej, ten sam na kazdym ekranie.
 |---|---|
 | `DT_Rota` | kto i w jakich godzinach pracuje danego dnia (z Excela, krok 6) |
 | `DT_Breaks` | przerwy godzinne, trzy typowe pory lub wlasna godzina |
-| `DT_DailyChecks` | deklaracje raportow na tydzien (starty / midy / endy) |
+| `DT_DailyChecks` | Daily Checks na tydzien (Starts / Throughout / End), reset w sobote |
 | `DT_ManagerMessages` | komunikaty od managera |
 | `DT_Services` | katalog serwisow — z niego powstaja zakladki dokumentacji |
 | `Site Pages` | strony dokumentacji; drzewo z kolumn `ParentPageId`, `TreePath`, `SortOrder` |
