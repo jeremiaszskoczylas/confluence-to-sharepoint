@@ -169,7 +169,8 @@ Set(gblCreateResult,
         Coalesce(drp_NewPage_Category.Selected.Result, "")
     )
 );
-OdswiezDrzewo.Run();
+// Drugi argument pusty: przeliczamy metadane, nie ruszamy stron map.
+OdswiezDrzewo.Run(LookUp(colServices, Title = drp_NewPage_Service.Selected.Title).Code, "");
 Refresh('Site Pages');
 ClearCollect(colPages,
     AddColumns(

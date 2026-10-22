@@ -61,7 +61,7 @@ Te same flow, zmieniasz dwie wartosci. Pelna procedura z lista kontrolna:
 | 5 | wybory `Category` dla galezi Switchboarda | nowe nazwy galezi = nowe wybory |
 | 6 | [01](01-MigratePages.md) z `<EKSPORT>` i `<SERWIS>` dla SWB | filtr bierze tylko wiersze SWB |
 | 7 | [02](02-RemapLinks.md) z tymi samymi dwiema wartosciami | drzewo liczone osobno dla SWB |
-| 8 | [04](04-OdswiezDrzewo.md) | mapa z obydwoma serwisami, kazdy pod swoim naglowkiem |
+| 8 | [04](04-OdswiezDrzewo.md) | uruchom z `serwis` = `SWB` i wlasna strona mapy |
 
 GMSC nie ucierpi, bo nazwy plikow zaczynaja sie od kodu serwisu
 (`GMSC-Home-Page.aspx` i `SWB-Home-Page.aspx` to dwa rozne pliki), filtr w kroku 1
@@ -77,6 +77,20 @@ i mapa zbuduja sie tak samo. Pelny poradnik: [07-RecznySerwis](07-RecznySerwis.m
 
 Dziala to dlatego, ze po migracji zrodlem prawdy jest biblioteka Site Pages,
 a nie lista migracyjna. Krok 4 nie pyta, skad wziela sie strona.
+
+## Mapa per serwis
+
+Krok 4 pyta przy starcie o dwie rzeczy: **kod serwisu** i **nazwe strony mapy**.
+Kazdy serwis moze miec wlasna strone:
+
+| serwis | stronaMapy | efekt |
+|---|---|---|
+| `GMSC` | `Documentation-Map.aspx` | drzewo GMSC na stronie GMSC |
+| `SWB` | `Documentation-Map-Switchboard.aspx` | drzewo Switchboarda na jego stronie |
+| dowolny | *(puste)* | samo przeliczenie metadanych, bez ruszania map |
+
+Metadane drzewa licza sie zawsze dla wszystkich serwisow, bo potrzebuje ich
+aplikacja. Ogranicza sie tylko zawartosc strony mapy.
 
 ## Utrzymanie
 

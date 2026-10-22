@@ -17,7 +17,7 @@ to szczegolowe sciagi do poszczegolnych krokow.
 | 1 | [01-MigratePages.md](01-MigratePages.md) | raz, tworzy strony | ~10 min biegu |
 | 2 | [02-RemapLinks.md](02-RemapLinks.md) | po migracji, potem przy kazdej zmianie parsera | 30–40 min biegu |
 | 3 | [03-BudujMape.md](03-BudujMape.md) | po kroku 2, gdy serwis jest jeden; przy wielu zastepuje go krok 4 | ~1 min |
-| 4 | [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md) | **utrzymanie** — po kazdej nowej/usunietej/przeniesionej stronie | ~2 min |
+| 4 | [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md) | **utrzymanie** — serwis i strone mapy wybierasz przy starcie | ~2 min |
 | 5 | [05-NowaStrona.md](05-NowaStrona.md) | wywolywany z aplikacji przy dodawaniu strony | kilka sekund |
 | 6 | [06-KolejnySerwis.md](06-KolejnySerwis.md) | migracja drugiej i kazdej nastepnej przestrzeni z Confluence | jak kroki 1–2 |
 | 7 | [07-RecznySerwis.md](07-RecznySerwis.md) | nowy serwis pisany recznie, bez eksportu HTML | zalezy od liczby stron |

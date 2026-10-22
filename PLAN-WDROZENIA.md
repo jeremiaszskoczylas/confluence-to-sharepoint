@@ -48,9 +48,11 @@ Wg [flows/04-OdswiezDrzewo.md](flows/04-OdswiezDrzewo.md). Dwanascie akcji,
 okolo 20 minut. Wczesniej wklej do Excela skrypty `planujMape` i `budujMape`
 z katalogu `scripts/`.
 
-W akcji `Planuj` pole **`serwisMapy`** wpisz `GMSC`. Dzieki temu strona
-`Documentation-Map` pokazuje tylko GMSC, a aplikacja i tak dostanie metadane
-wszystkich serwisow do swoich zakladek.
+Flow ma dwa pola wypelniane **przy kazdym uruchomieniu**, nie na sztywno:
+`serwis` i `stronaMapy`. Przy biegu dla GMSC wpisujesz `GMSC`
+i `Documentation-Map.aspx`.
+
+Dzieki temu ten sam flow obsluzy pozniej Switchboarda z jego wlasna strona mapy.
 
 ### 1.6 Uruchom go
 

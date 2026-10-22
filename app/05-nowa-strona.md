@@ -9,7 +9,7 @@ i otwiera sie do edycji.
 > (Ctrl+F) i kopiuj blok pod nim. Pierwszy raz w Power Apps?
 > Zacznij od [00-powerapps-podstawy.md](00-powerapps-podstawy.md).
 
-Wymaga dwoch flow: [05-NowaStrona](../flows/05-NowaStrona.md) oraz
+Wymaga dwoch flow (drugi wolany z dwoma argumentami: kod serwisu i pusta nazwa strony mapy, bo map tu nie przebudowujemy): [05-NowaStrona](../flows/05-NowaStrona.md) oraz
 [04-OdswiezDrzewo](../flows/04-OdswiezDrzewo.md) z triggerem Power Apps.
 
 Wszystko na `scr_Docs`.
@@ -193,7 +193,7 @@ Set(gblCreateResult,
         Coalesce(drp_NewPage_Category.Selected.Value, "")
     )
 );
-RefreshTree.Run();
+OdswiezDrzewo.Run(<kod serwisu>, "");
 Refresh('Site Pages');
 Set(gblCreating, false);
 Set(gblNewPage, false);
