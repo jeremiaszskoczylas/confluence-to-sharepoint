@@ -37,8 +37,14 @@ Te same we wszystkich sciagach. Wypelnij raz i trzymaj pod reka.
 | `<WITRYNA>` | sciezka witryny bez domeny i bez ukosnika na koncu | `/sites/nazwa` albo `/teams/Dzial/podwitryna` |
 | `<EKSPORT>` | folder rozpakowanego eksportu w bibliotece plikow | `confluence-export/NAZWA` |
 | `<MAPA>` | nazwa pliku strony-mapy z paska adresu | `Documentation-Map.aspx` |
-| `<SERWIS>` | kod serwisu z listy `DT_Services`, kolumna `Code` | `GMSC` |
+| `<SERWIS>` | kod serwisu; w krokach 1, 2 i 4 podajesz go **w polu triggera**, nie w sciądze | `GMSC` |
 | `<BIBLIOTEKA>` | biblioteka plikow, w ktorej lezy eksport | `Dashboard_Team` |
+
+## Listy migracyjne
+
+**Kazdy serwis ma wlasna liste robocza:** `DT_MigrationMap` dla pierwszego,
+`DT_MigrationMap_Switchboard` dla kolejnego. Nazwe listy podajesz w polu
+triggera, wiec jeden zbudowany flow obsluguje wszystkie serwisy.
 
 ## Migracja kolejnego serwisu
 

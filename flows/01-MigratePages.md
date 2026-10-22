@@ -4,28 +4,60 @@ Tworzy w Site Pages po jednej stronie na kazdy wiersz `Pending` w `DT_MigrationM
 Tresc jest juz wtedy sparsowana, ale bez linkow wewnetrznych, sciezki i podstron —
 te dokłada krok 2.
 
-Podmien `<WITRYNA>`, `<EKSPORT>` i `<SERWIS>` (patrz [README.md](README.md)).
+Podmien tylko `<WITRYNA>` i `<BIBLIOTEKA>` (patrz [README.md](README.md)).
+Liste, serwis i folder eksportu podajesz przy kazdym uruchomieniu.
 Nazwy akcji dokladnie jak w naglowkach.
 
-**Ten sam flow migruje kazdy kolejny serwis.** Przy drugiej przestrzeni Confluence
-zmieniasz tylko trzy rzeczy: `<EKSPORT>` na nowy folder, `<SERWIS>` na kod nowego
-serwisu i wgrywasz nowe wiersze do `DT_MigrationMap` z tym kodem w kolumnie
-`Service`. Nic sie nie nadpisze, bo nazwy plikow dostaja prefiks serwisu,
-a filtr w kroku 2 bierze wylacznie wiersze tego serwisu.
+**Ten sam zbudowany flow migruje kazdy serwis.** Przy kolejnej przestrzeni
+zakladasz dla niej osobna liste migracyjna, rozpakowujesz eksport do osobnego
+folderu i uruchamiasz ten flow z innymi wartosciami w trzech polach.
+Nic sie nie nadpisze: nazwy plikow stron dostaja prefiks serwisu, a kazdy serwis
+ma wlasna liste roboczca.
 
 ---
 
 ## 1. Trigger — Manually trigger a flow
 
+Dodaj trzy wejscia tekstowe, **w tej kolejnosci**, przyciskiem
+**Add an input → Text**:
+
+```
+lista
+```
+```
+serwis
+```
+```
+eksport
+```
+
+- `lista` — nazwa listy migracyjnej tego serwisu, np. `DT_MigrationMap`
+  albo `DT_MigrationMap_Switchboard`
+- `serwis` — kod z `DT_Services`, np. `GMSC` albo `SWB`
+- `eksport` — folder eksportu w bibliotece, np. `confluence-export/SWB`
+
+Dzieki nim **jeden zbudowany flow migruje kazdy serwis**. Przy kolejnej
+przestrzeni nie przepisujesz zadnej akcji — wpisujesz inne wartosci przy starcie.
+
+> **Jak odwolywac sie do pol triggera.** Power Automate nadaje im wlasne klucze
+> (`text`, `text_1`, `text_2`) i nie zawsze sa to nazwy, ktore wpisales. Dlatego
+> **wszedzie ponizej wstawiaj tokeny z dynamic content**, zamiast przepisywac
+> wyrazenia recznie. Podane wyrazenia to wariant awaryjny.
+
+> Zeby zobaczyc prawdziwe klucze: uruchom flow raz, w historii biegu kliknij
+> trigger i **Show raw outputs**.
+
+
 ## 2. GetPending — SharePoint → Get items
 
-List Name (lista):
+List Name — **Enter custom value**, potem token **lista** z dynamic content.
+Awaryjnie (fx):
 ```
-DT_MigrationMap
+triggerBody()?['text']
 ```
-Filter Query (tekst) — bierze tylko strony biezacego serwisu:
+Filter Query (tekst) — lista jest juz per serwis, wiec wystarczy status:
 ```
-MigrationStatus eq 'Pending' and Service eq '<SERWIS>'
+MigrationStatus eq 'Pending'
 ```
 Top Count (tekst) — na pierwszy bieg `1`, potem `5000`:
 ```
@@ -42,7 +74,7 @@ Akcje 4–11 WEWNATRZ petli. **Takze akcja 11 OdhaczWMapie** — odwoluje sie do
 
 File Path (fx):
 ```
-concat('/<BIBLIOTEKA>/<EKSPORT>/', items('Apply_to_each')?['SourceFile'])
+concat('/<BIBLIOTEKA>/', triggerBody()?['text_2'], '/', items('Apply_to_each')?['SourceFile'])
 ```
 
 ## 5. ParsujTresc — Excel Online → Run script
@@ -118,9 +150,9 @@ ConfluencePageId (fx):
 ```
 items('Apply_to_each')?['ConfluenceId']
 ```
-Service Value (Enter custom value, potem tekst) — kod serwisu:
+Service Value — **Enter custom value**, potem token **serwis**. Awaryjnie (fx):
 ```
-<SERWIS>
+triggerBody()?['text_1']
 ```
 DocStatus Value (lista):
 ```
@@ -144,7 +176,7 @@ Method: POST
 
 Uri (fx) — podmien `<WITRYNA>` w DWOCH miejscach; podwojne apostrofy sa celowe:
 ```
-concat('_api/web/getfilebyserverrelativeurl(''<WITRYNA>/', body('CreatePage')?['d']?['Url'], ''')/moveto(newurl=''<WITRYNA>/SitePages/<SERWIS>-', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'), ''',flags=1)')
+concat('_api/web/getfilebyserverrelativeurl(''<WITRYNA>/', body('CreatePage')?['d']?['Url'], ''')/moveto(newurl=''<WITRYNA>/SitePages/', triggerBody()?['text_1'], '-', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'), ''',flags=1)')
 ```
 Headers — jeden wiersz: Accept → application/json;odata=verbose
 
@@ -164,10 +196,7 @@ Body: PUSTE
 
 ## 11. OdhaczWMapie — SharePoint → Update item
 
-List Name (lista):
-```
-DT_MigrationMap
-```
+List Name — **Enter custom value**, token **lista** (ten sam co w kroku 2).
 Id (fx):
 ```
 items('Apply_to_each')?['ID']
@@ -186,7 +215,7 @@ body('CreatePage')?['d']?['Id']
 ```
 TargetUrl (fx) — ta sama nazwa co w RenamePage, z prefiksem serwisu:
 ```
-concat('SitePages/<SERWIS>-', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'))
+concat('SitePages/', triggerBody()?['text_1'], '-', replace(items('Apply_to_each')?['SourceFile'], '.html', '.aspx'))
 ```
 MigratedOn (fx):
 ```

@@ -6,11 +6,11 @@ i `Service` na podstawie `DT_MigrationMap`. Nie rusza tresci stron.
 **Kiedy uzyc:** gdy po jakims biegu strony maja `ConfluencePageId` rowne zero,
 pusta hierarchie albo gdy licznik `sieroty` w kroku 4 nagle urosl.
 
-Dziala, bo `DT_MigrationMap` trzyma komplet: ktora strona Confluence odpowiada
+Dziala, bo lista migracyjna trzyma komplet: ktora strona Confluence odpowiada
 ktorej stronie SharePointa i kto jest czyim rodzicem. Dopoki ta lista jest cala,
 metadane stron da sie odtworzyc w kazdej chwili.
 
-Podmien `<WITRYNA>` i `<SERWIS>`.
+Podmien tylko `<WITRYNA>`. Liste i serwis podajesz przy uruchomieniu.
 
 ---
 
@@ -27,12 +27,20 @@ pola wymienione w tresci zadania. Czego nie wymienisz, tego nie dotknie.
 
 ## 1. Trigger — Manually trigger a flow
 
+Dwa wejscia tekstowe (**Add an input → Text**):
+
+```
+lista
+```
+```
+serwis
+```
+
+`lista` to lista migracyjna naprawianego serwisu, `serwis` to jego kod.
+
 ## 2. GetAll — SharePoint → Get items
 
-List Name (lista):
-```
-DT_MigrationMap
-```
+List Name — **Enter custom value**, token **lista** z dynamic content.
 Top Count (tekst):
 ```
 5000
@@ -53,10 +61,7 @@ witryna (tekst) — Z UKOSNIKIEM NA KONCU:
 ```
 <WITRYNA>/
 ```
-serwis (tekst):
-```
-<SERWIS>
-```
+serwis — token **serwis** z dynamic content.
 
 ## 4. Plan — Data Operation → Compose
 
@@ -95,7 +100,7 @@ application/json;odata=verbose
 ```
 Body (fx) — CALE pole, jedna linia:
 ```
-concat('{"formValues":[{"FieldName":"ConfluencePageId","FieldValue":"', items('Apply_to_each')?['confId'], '"},{"FieldName":"ParentPageId","FieldValue":"', items('Apply_to_each')?['parentPageId'], '"},{"FieldName":"Service","FieldValue":"<SERWIS>"}],"bNewDocumentUpdate":true}')
+concat('{"formValues":[{"FieldName":"ConfluencePageId","FieldValue":"', items('Apply_to_each')?['confId'], '"},{"FieldName":"ParentPageId","FieldValue":"', items('Apply_to_each')?['parentPageId'], '"},{"FieldName":"Service","FieldValue":"', triggerBody()?['text_1'], '"}],"bNewDocumentUpdate":true}')
 ```
 
 `bNewDocumentUpdate` ustawione na `true` zapisuje bez tworzenia nowej wersji
@@ -117,7 +122,7 @@ powinien spasc do zera albo do liczby stron, ktore swiadomie nie maja rodzica.
 
 ## Czego ten flow nie odtworzy
 
-- stron **spoza migracji** (zalozonych recznie) — nie ma ich w `DT_MigrationMap`.
+- stron **spoza migracji** (zalozonych recznie) — nie ma ich na liscie migracyjnej.
   Ich `ParentPageId` ustawiasz recznie, wg [07-RecznySerwis](07-RecznySerwis.md)
 - `Category` i `DocStatus` — wylicza je krok 4 albo ustawiasz recznie
 - tresci stron — od tego jest [02-RemapLinks](02-RemapLinks.md)

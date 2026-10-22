@@ -54,7 +54,14 @@ uruchamiasz krok 2 migracji.
    `SiteAssets/DocMedia/attachments/`. Podfoldery maja nazwy z identyfikatorow
    stron Confluence, wiec nie nadpisza tych z GMSC.
 
-### 5. Wiersze w liscie migracyjnej
+### 5. Wlasna lista migracyjna
+
+Zaloz nowa liste `DT_MigrationMap_Switchboard` z kolumnami wg
+[00-przygotowanie](00-przygotowanie.md), sekcja B. Najszybciej:
+Site contents → lista GMSC → **Settings** → **Save list as template**,
+potem utworz z niej nowa. Albo zaloz recznie, kolumn jest jedenascie.
+
+### 6. Wiersze w tej liscie
 
 Uruchom flow z kroku 0, sekcja E, z dwiema zmianami:
 
@@ -62,18 +69,18 @@ Uruchom flow z kroku 0, sekcja E, z dwiema zmianami:
   ```
   /<BIBLIOTEKA>/confluence-export/SWB/index.html
   ```
-- akcja `Dodaj` → pole `Service`:
+- akcja `Dodaj` → **lista**: `DT_MigrationMap_Switchboard`, pole `Service`:
   ```
   SWB
   ```
 
-Wiersze GMSC zostaja nietkniete, bo flow tylko **dopisuje** nowe.
+Wiersze GMSC leza w osobnej liscie, wiec nic im nie grozi.
 
 W akcji `ZapiszDrzewo` zmien **File Name** na `drzewo-SWB.txt`, zeby nie nadpisac
 pliku GMSC. Kazdy serwis ma wlasny plik hierarchii.
 
-Kontrola: w `DT_MigrationMap` sa teraz wiersze obu serwisow, a nowe maja
-`Service` = `SWB` i `MigrationStatus` = `Pending`.
+Kontrola: `DT_MigrationMap_Switchboard` ma komplet wierszy SWB ze statusem
+`Pending`.
 
 ---
 
@@ -81,27 +88,24 @@ Kontrola: w `DT_MigrationMap` sa teraz wiersze obu serwisow, a nowe maja
 
 ### Krok 1 — MigratePages
 
-W ściądze [01-MigratePages.md](01-MigratePages.md) podmien:
+Uruchom [01-MigratePages](01-MigratePages.md) i wypelnij pola triggera:
 
 | Placeholder | Wartosc dla Switchboard |
 |---|---|
-| `<EKSPORT>` | `confluence-export/SWB` |
-| `<SERWIS>` | `SWB` |
+| `lista` | `DT_MigrationMap_Switchboard` |
+| `serwis` | `SWB` |
+| `eksport` | `confluence-export/SWB` |
 
-Reszta bez zmian. Uruchom najpierw z `Top Count` = `1`, obejrzyj strone,
-potem `5000`.
+**Zadnej akcji nie przepisujesz** — ten sam zbudowany flow obsluguje oba serwisy.
+Najpierw `Top Count` = `1`, obejrzyj strone, potem `5000`.
 
-Filtr w akcji `GetPending` brzmi teraz:
-```
-MigrationStatus eq 'Pending' and Service eq 'SWB'
-```
-Wiersze GMSC maja status `LinksRemapped`, wiec i tak by nie weszly — ale filtr
-po serwisie zabezpiecza takze wtedy, gdy kiedys zresetujesz GMSC.
+Flow czyta wylacznie liste podana w polu `lista`, wiec wiersze GMSC sa poza
+jego zasiegiem.
 
 ### Krok 2 — RemapLinks
 
-W ściądze [02-RemapLinks.md](02-RemapLinks.md) podmien te same dwie wartosci:
-`<EKSPORT>` na folder SWB, `<SERWIS>` na `SWB`.
+Uruchom [02-RemapLinks](02-RemapLinks.md) z tymi samymi trzema wartosciami
+co w kroku 1.
 
 Pole `serwis` w akcji `Planuj` jest tu kluczowe. Dzieki niemu skrypt liczy
 drzewo **tylko** ze stron Switchboarda: wlasny korzen, wlasne kategorie,
@@ -131,7 +135,7 @@ Jesli aplikacja byla otwarta, kliknij ikone odswiezania na ekranie dokumentacji.
 
 | Mechanizm | Co chroni |
 |---|---|
-| filtr `Service eq 'SWB'` w kroku 1 | bierze wylacznie wiersze Switchboarda |
+| osobna lista migracyjna | krok 1 nie widzi wierszy innego serwisu |
 | prefiks w nazwie pliku | `GMSC-Home-Page.aspx` i `SWB-Home-Page.aspx` to dwa rozne pliki, nawet gdy obie przestrzenie maja strone „Home Page" |
 | parametr `serwis` w kroku 2 | drzewo i linki liczone osobno; strona glowna GMSC nie stanie sie rodzicem strony Switchboarda |
 | grupowanie po `Service` w kroku 4 | kazdy serwis dostaje wlasny korzen w mapie |
@@ -153,9 +157,9 @@ Przed uruchomieniem kroku 1:
 - [ ] kolumna `Service` w Site Pages ma wybor `SWB`
 - [ ] eksport rozpakowany do `confluence-export/SWB`
 - [ ] zalaczniki skopiowane do `DocMedia/attachments/`
-- [ ] `DT_MigrationMap` ma wiersze SWB ze statusem `Pending` i wypelnionym `Service`
+- [ ] `DT_MigrationMap_Switchboard` ma wiersze SWB ze statusem `Pending`
 - [ ] kolumna `Category` w Site Pages ma wybory dla galezi Switchboarda
-- [ ] w ściądze kroku 1 podmienione `<EKSPORT>` i `<SERWIS>`
+- [ ] znasz trzy wartosci do pol triggera: lista, serwis, folder eksportu
 - [ ] w akcji `OdhaczWMapie` pola poza `Id`, `Title` i statusem sa puste
 
 Po kroku 2:

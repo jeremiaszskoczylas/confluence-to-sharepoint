@@ -5,7 +5,8 @@ adresy w SharePoincie, dokłada sciezke nadrzedna i blok podstron, wypelnia meta
 drzewa (`ParentPageId`, `TreePath`, `TreeSort`, `SortOrder`, `Category`).
 
 Uruchamiasz po kroku 1 oraz za kazdym razem, gdy zmieni sie `parseTresc`.
-Podmien `<WITRYNA>`, `<EKSPORT>` i `<SERWIS>` (patrz [README.md](README.md)).
+Podmien tylko `<WITRYNA>` i `<BIBLIOTEKA>` (patrz [README.md](README.md)).
+Liste, serwis i folder eksportu podajesz przy uruchomieniu.
 
 Flow przetwarza **jeden serwis na raz**. Drzewo, mapowanie linkow i sciezki
 liczone sa tylko z jego stron, wiec linki nie przeciekaja miedzy serwisami,
@@ -15,13 +16,36 @@ Nazwy akcji dokladnie jak w naglowkach.
 ---
 ## 1. Trigger — Manually trigger a flow
 
+Trzy wejscia tekstowe, **w tej samej kolejnosci co w kroku 1**
+(**Add an input → Text**):
+
+```
+lista
+```
+```
+serwis
+```
+```
+eksport
+```
+
+> **Jak odwolywac sie do pol triggera.** Power Automate nadaje im wlasne klucze
+> (`text`, `text_1`, `text_2`) i nie zawsze sa to nazwy, ktore wpisales. Dlatego
+> **wszedzie ponizej wstawiaj tokeny z dynamic content**, zamiast przepisywac
+> wyrazenia recznie. Podane wyrazenia to wariant awaryjny.
+
+> Zeby zobaczyc prawdziwe klucze: uruchom flow raz, w historii biegu kliknij
+> trigger i **Show raw outputs**.
+
+
 ---
 
 ## 2. GetAll — SharePoint → Get items
 
-List Name (lista):
+List Name — **Enter custom value**, potem token **lista** z dynamic content.
+Awaryjnie (fx):
 ```
-DT_MigrationMap
+triggerBody()?['text']
 ```
 Top Count (tekst):
 ```
@@ -45,9 +69,9 @@ witryna (tekst) — Z UKOSNIKIEM NA KONCU:
 ```
 <WITRYNA>/
 ```
-serwis (tekst) — kod serwisu; puste = wszystkie strony (stare zachowanie):
+serwis — token **serwis** z dynamic content. Awaryjnie (fx):
 ```
-<SERWIS>
+triggerBody()?['text_1']
 ```
 
 ---
@@ -75,9 +99,9 @@ Akcje 6–11 WEWNATRZ petli.
 
 File Path (fx):
 ```
-concat('/<BIBLIOTEKA>/<EKSPORT>/', items('Apply_to_each')?['file'])
+concat('/<BIBLIOTEKA>/', triggerBody()?['text_2'], '/', items('Apply_to_each')?['file'])
 ```
-Przy kolejnym serwisie `<EKSPORT>` wskazuje jego folder eksportu.
+Folder eksportu bierze sie z pola `eksport` w triggerze.
 
 ---
 
@@ -216,10 +240,7 @@ Body: PUSTE
 
 ## 11. OdhaczWMapie — SharePoint → Update item
 
-List Name (lista):
-```
-DT_MigrationMap
-```
+List Name — **Enter custom value**, token **lista** (ten sam co w kroku 2).
 Id (fx):
 ```
 items('Apply_to_each')?['id']

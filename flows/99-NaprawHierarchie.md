@@ -1,6 +1,6 @@
 # 99 — NaprawHierarchie (awaryjny)
 
-Odtwarza `ParentConfluenceId` i `Depth` w `DT_MigrationMap` z pliku `drzewo.txt`
+Odtwarza `ParentConfluenceId` i `Depth` w liscie migracyjnej serwisu z pliku `drzewo.txt`
 (wynik skryptu parseIndex). Nie rusza zadnej innej kolumny.
 
 Kiedy uzyc: gdy hierarchia w mapie zostala nadpisana (np. przez akcje Update item
@@ -15,6 +15,9 @@ z wpisanym 0 w polu ParentConfluenceId).
 ---
 
 ## 1. Trigger — Manually trigger a flow
+
+Dwa wejscia tekstowe: `lista` (lista migracyjna serwisu) i `drzewo`
+(sciezka do pliku z hierarchia, np. `/<BIBLIOTEKA>/Reports/drzewo-SWB.txt`).
 
 ## 2. GetDrzewo — SharePoint → Get file content using path
 
@@ -44,7 +47,7 @@ Akcje 5–6 w galezi **If yes**.
 
 ## 5. SzukajWiersz — SharePoint → Get items
 
-List Name: `DT_MigrationMap`
+List Name — **Enter custom value**, token **lista** z triggera
 
 Filter Query (fx) — CALE pole:
 ```
@@ -69,7 +72,7 @@ Akcje 6 wstaw w galezi **If yes**.
 
 ## 6. Popraw — SharePoint → Update item
 
-List Name: `DT_MigrationMap`
+List Name — **Enter custom value**, token **lista** z triggera
 
 Id (fx):
 ```
@@ -96,7 +99,7 @@ Galaz If no: pusta.
 
 ## Po biegu
 
-`DT_MigrationMap`: `ParentConfluenceId` znowu wypelnione, np. wiersz
+Lista migracyjna: `ParentConfluenceId` znowu wypelnione, np. wiersz
 `Known Error Handling` → `1149032772`, strona glowna → `0`, galezie → id strony glownej.
 
 ## Zasada na przyszlosc (dotyczy KAZDEJ akcji Update item / Update file properties)

@@ -35,12 +35,13 @@ Nowa lista wg [flows/00-przygotowanie.md](flows/00-przygotowanie.md), sekcja B2.
 Jeden wiersz: `Title` = `GMSC`, `Code` = `GMSC`, `SortOrder` = `10`,
 `IsActive` zaznaczone.
 
-### 1.4 Kolumna Service w DT_MigrationMap
+### 1.4 Kolumna Service w liscie migracyjnej
 
 `DT_MigrationMap` → **Add column** → Jeden wiersz tekstu, nazwa `Service`.
 W widoku siatki wpisz `GMSC` we wszystkich wierszach.
 
-Potrzebne przy migracji Switchboarda — filtr w kroku 1 bierze wiersze po serwisie.
+Przy kolejnym serwisie zakladasz **osobna liste**, np. `DT_MigrationMap_Switchboard`.
+Nazwe listy podajesz w polu triggera, wiec jeden zbudowany flow obsluzy obie.
 
 ### 1.5 Zbuduj flow 04-OdswiezDrzewo
 

@@ -24,6 +24,9 @@ Site Pages → widok **All Pages**. Zeby nie kasowac recznie po jednej:
 Filtr po `Service` jest bezpieczniejszy, bo przy kilku serwisach kasuje tylko
 jeden. Przy pierwszym resecie, gdy serwis jest jeden, oba filtry daja to samo.
 
+Osobne listy migracyjne ulatwiaja reset: czyscisz liste jednego serwisu
+i ladujesz ja od nowa, nie dotykajac pozostalych.
+
 ### 2. Strona mapy
 
 `Documentation-Map.aspx` mozesz zostawic — kroki 3 i 4 nadpisuja ja w miejscu.
@@ -38,7 +41,8 @@ porzadkuje widok i zwalnia miejsce. Usuniete strony i tak nie blokuja nazw.
 
 Dwie drogi:
 
-**Droga szybka — reset statusow.** Otworz `DT_MigrationMap` w widoku listy,
+**Droga szybka — reset statusow.** Otworz liste migracyjna resetowanego serwisu
+w widoku listy,
 zaznacz wszystkie wiersze i wyczysc kolumny: `MigrationStatus` z powrotem na
 `Pending`, `TargetPageId`, `TargetUrl`, `MigratedOn`, `ErrorMessage` na puste.
 Edycja wielu wierszy naraz: przelacz widok na **Edit in grid view**, zaznacz
@@ -111,7 +115,7 @@ sa tak samo potrzebne.
   Dopoki istnieje, mozesz poprawic parser i przepuscic wszystko jeszcze raz.
   Po usunieciu zostaja tylko strony takie, jakie sa, i dalsze zmiany robisz
   recznie w edytorze.
-- **`DT_MigrationMap`** — potrzebna do krokow 1–3. Po migracji to slad
+- **lista migracyjna serwisu** — potrzebna do krokow 1–2. Po migracji to slad
   historyczny: ktory plik odpowiada ktorej stronie.
 - **`drzewo.txt`** — ratunek, gdyby hierarchia w mapie znowu zostala nadpisana.
 

@@ -14,7 +14,7 @@ droga, ktora juz raz zadziala, plus obsluga wielu serwisow.
 | Rzecz | Gdzie | Uwaga |
 |---|---|---|
 | kolumny w Site Pages | biblioteka witryny | komplet w [00](00-przygotowanie.md), sekcja A |
-| `DT_MigrationMap`, `DT_Services` | listy witryny | [00](00-przygotowanie.md), sekcje B i B2 |
+| lista migracyjna serwisu, `DT_Services` | listy witryny | osobna lista na serwis: `DT_MigrationMap`, `DT_MigrationMap_Switchboard`… |
 | eksport HTML | biblioteka plikow | osobny folder na serwis |
 | zalaczniki | `SiteAssets/DocMedia/attachments/` | **tu mieszkaja obrazy na zawsze** |
 | skrypty | Excel Online, Automate | nazwy dokladnie jak pliki w `scripts/` |
@@ -28,7 +28,7 @@ Cztery wartosci do podmiany w sciagach: `<WITRYNA>`, `<BIBLIOTEKA>`, `<EKSPORT>`
 
 | # | Krok | Czas | Sprawdz po kroku |
 |---|---|---|---|
-| 1 | [00](00-przygotowanie.md) sekcja E — zaladuj liste migracyjna z `index.html` | 2 min | tyle wierszy, ile stron; wszystkie `Pending`; `Service` wypelniony |
+| 1 | [00](00-przygotowanie.md) sekcja E — zaladuj liste migracyjna z `index.html` | 2 min | tyle wierszy, ile stron; wszystkie `Pending` |
 | 2 | [00](00-przygotowanie.md) sekcja A — uzupelnij wybory `Category` | 5 min | po jednym wyborze na galaz (wiersze z `Depth` = 1), bez numeru |
 | 3 | [01-MigratePages](01-MigratePages.md), `Top Count` = `1` | 1 min | **obejrzyj te strone dokladnie**: naglowki, ramki, obrazy |
 | 4 | [01](01-MigratePages.md) ponownie, `Top Count` = `5000` | ~10 min | komplet `PageCreated`, `TargetPageId`, `TargetUrl` |

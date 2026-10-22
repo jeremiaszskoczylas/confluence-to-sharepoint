@@ -25,9 +25,16 @@ porzadkowego). **Wybory uzupelnisz po sekcji E** — galezie to wiersze
 `DT_MigrationMap` z `Depth` rownym 1. Brakujacy wybor = blad przy zapisie
 metadanych w kroku 2.
 
-## B. Lista DT_MigrationMap
+## B. Lista migracyjna — jedna na serwis
 
-Nowa lista. Kolumny:
+**Kazdy serwis ma wlasna liste robocza.** Pierwsza nazwij `DT_MigrationMap`,
+kolejne z sufiksem serwisu, np. `DT_MigrationMap_Switchboard`.
+
+Osobne listy zamiast jednej wspolnej, bo: reset jednego serwisu to wyczyszczenie
+jego listy, limit pieciu tysiecy elementow liczy sie osobno, a pomylka przy jednym
+serwisie nie dotyka drugiego.
+
+Kolumny (te same w kazdej liscie):
 
 | Nazwa | Typ |
 |---|---|
@@ -37,7 +44,7 @@ Nowa lista. Kolumny:
 | `Depth` | Liczba |
 | `SourceFile` | Jeden wiersz tekstu |
 | `MigrationStatus` | Wybor: `Pending`, `PageCreated`, `LinksRemapped`, `Failed` |
-| `Service` | Jeden wiersz tekstu — kod serwisu, ten sam co `Code` w `DT_Services` |
+| `Service` | Jeden wiersz tekstu — kod serwisu; przy osobnych listach to zabezpieczenie, nie filtr |
 | `TargetPageId` | Liczba |
 | `TargetUrl` | Jeden wiersz tekstu |
 | `MigratedOn` | Data i godzina |
@@ -80,7 +87,7 @@ Kazdy plik z katalogu `scripts/` tego repo wklej jako osobny skrypt w Excel Onli
 Sondy diagnostyczne (`analyzeConfluenceHtml`, `pokazFragment`, `pokazTaby`) wklej
 dopiero, gdy beda potrzebne.
 
-## E. Zaladowanie DT_MigrationMap
+## E. Zaladowanie listy migracyjnej
 
 `parseIndex` czyta `index.html` z eksportu i zwraca plaska liste
 `ConfluenceId|ParentConfluenceId|Depth|Tytul|Plik`, po jednym wierszu na strone.
@@ -111,7 +118,8 @@ Select an output (fx):
 skip(split(body('Drzewo')?['result'], decodeUriComponent('%0A')), 1)
 ```
 
-Wewnatrz petli **Dodaj** — SharePoint → Create item, lista `DT_MigrationMap`:
+Wewnatrz petli **Dodaj** — SharePoint → Create item, **lista tego serwisu**
+(`DT_MigrationMap` dla pierwszego, `DT_MigrationMap_Switchboard` dla kolejnego):
 
 Title (fx):
 ```
@@ -168,7 +176,7 @@ dopiero po pierwszym biegu.
 
 ## Kontrola przed krokiem 1
 
-- `DT_MigrationMap` ma tyle wierszy, ile stron w eksporcie, wszystkie `Pending`
+- lista migracyjna serwisu ma tyle wierszy, ile stron w eksporcie, wszystkie `Pending`
 - `ParentConfluenceId` wypelnione (strona glowna ma 0)
 - w `SiteAssets/DocMedia/attachments/` sa podfoldery z obrazami
 - w Excelu widac skrypty z punktu D

@@ -61,7 +61,7 @@ Prefiks `DT_` zostaje, nazwy po angielsku, kolumny w PascalCase.
 | `DT_DailyChecks` | deklaracje Daily Checks na tydzien |
 | `DT_ManagerMessages` | komunikaty od managera |
 | `DT_Services` | katalog serwisow |
-| `DT_MigrationMap` | lista robocza migracji z Confluence |
+| `DT_MigrationMap` | lista robocza migracji — **jedna na serwis**, kolejne z sufiksem, np. `DT_MigrationMap_Switchboard` |
 
 ## Slownik: co sie zmienilo wzgledem wczesniejszych wersji
 
