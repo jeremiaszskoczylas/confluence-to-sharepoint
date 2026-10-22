@@ -129,35 +129,42 @@ outputs('Plan')?['pages']
 
 Wewnatrz petli jedna akcja:
 
-## 7. UstawMetadane — SharePoint → Update file properties
+## 7. UstawMetadane — Send an HTTP request to SharePoint   (w petli)
 
-Library Name (Enter custom value):
-```
-Site Pages
-```
-Id (fx):
-```
-items('Apply_to_each')?['id']
-```
-SortOrder (fx):
-```
-items('Apply_to_each')?['sortOrder']
-```
-TreePath (fx):
-```
-items('Apply_to_each')?['treePath']
-```
-TreeSort (fx):
-```
-items('Apply_to_each')?['treeSort']
-```
-Category Value (Enter custom value, potem fx):
-```
-if(equals(items('Apply_to_each')?['category'], ''), null, items('Apply_to_each')?['category'])
-```
-**WSZYSTKIE pozostale pola PUSTE** — zwlaszcza `ParentPageId`. To twoje zrodlo prawdy,
-flow ma je czytac, nigdy nadpisywac.
+> **Dlaczego nie akcja Update file properties.** Tamta akcja wysyla komplet kolumn
+> z formularza, a pole zostawione puste potrafi zostac zapisane jako **zero**
+> w kolumnie liczbowej. Tak gina `ConfluencePageId` i `ParentPageId`.
+> `ValidateUpdateListItem` zmienia **wylacznie** pola wymienione w tresci zadania.
 
+Method: POST
+
+Uri (fx):
+```
+concat('_api/web/lists/getbytitle(''Site Pages'')/items(', items('Apply_to_each')?['id'], ')/validateUpdateListItem')
+```
+Headers — dwa wiersze:
+```
+Accept
+```
+```
+application/json;odata=verbose
+```
+```
+Content-Type
+```
+```
+application/json;odata=verbose
+```
+Body (fx) — CALE pole, jedna linia:
+```
+concat('{"formValues":[{"FieldName":"SortOrder","FieldValue":"', items('Apply_to_each')?['sortOrder'], '"},{"FieldName":"TreePath","FieldValue":"', items('Apply_to_each')?['treePath'], '"},{"FieldName":"TreeSort","FieldValue":"', items('Apply_to_each')?['treeSort'], '"},{"FieldName":"Category","FieldValue":"', items('Apply_to_each')?['category'], '"}],"bNewDocumentUpdate":true}')
+```
+
+Zapisywane sa tylko cztery kolumny: `SortOrder`, `TreePath`, `TreeSort`
+i `Category`. `ParentPageId`, `ConfluencePageId`, `Service` i `DocStatus`
+pozostaja nietkniete — to twoje zrodlo prawdy.
+
+Pusta `Category` (korzen serwisu) zapisze sie jako pusty wybor i to jest w porzadku.
 ## 8. CzyBudowacMape — Control → Condition   (PONIZEJ petli)
 
 Gdy `stronaMapy` jest puste, flow konczy sie tutaj: metadane sa przeliczone,
@@ -332,6 +339,10 @@ Sekcja **„Bez przypisania"** na koncu dotyczy tylko tego serwisu.
 - Kazdy bieg tworzy nowa strone mapy i nadpisuje wskazana (`flags=1`). Reczne
   zmiany w mapie przepadaja — to strona generowana.
 - `Category` musi istniec w wyborach kolumny w Site Pages, inaczej zapis metadanych padnie.
-- Flow nie rusza tresci stron dokumentacji. Bezpieczny do uruchamiania w dowolnym momencie.
+- Flow nie rusza tresci stron dokumentacji ani kolumn `ParentPageId`,
+  `ConfluencePageId`, `Service` i `DocStatus`. Bezpieczny do uruchamiania
+  w dowolnym momencie.
+- Gdyby ktorys bieg mimo wszystko wyzerowal metadane, odtworzysz je
+  flow [97-NaprawMetadaneStron](97-NaprawMetadaneStron.md) z `DT_MigrationMap`.
 - Strony map **nie moga miec** wypelnionej kolumny `Service` — inaczej wejda
   do wlasnego drzewa.

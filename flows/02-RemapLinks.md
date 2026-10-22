@@ -190,7 +190,13 @@ DocStatus Value (lista):
 ```
 Published
 ```
-Pozostale pola PUSTE.
+**Pozostale pola PUSTE.**
+
+> **Uwaga.** Akcja `Update file properties` wysyla komplet kolumn z formularza,
+> a puste pole liczbowe bywa zapisane jako **zero**. Jesli po biegu zobaczysz
+> `ConfluencePageId` albo `ParentPageId` rowne zero tam, gdzie mialy byc liczby,
+> odtworz je flow [97-NaprawMetadaneStron](97-NaprawMetadaneStron.md)
+> i rozwaz przejscie na `ValidateUpdateListItem`, jak w kroku 4.
 
 ---
 

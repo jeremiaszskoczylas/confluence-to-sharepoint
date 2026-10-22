@@ -126,7 +126,13 @@ DocStatus Value (lista):
 ```
 Draft
 ```
-**Pozostale pola PUSTE.** `ParentPageId`, `SortOrder`, `TreePath`, `TreeSort`
+**Pozostale pola PUSTE.**
+
+> **Uwaga.** Akcja `Update file properties` wysyla komplet kolumn z formularza,
+> a puste pole liczbowe bywa zapisane jako **zero**. Jesli po biegu zobaczysz
+> `ConfluencePageId` albo `ParentPageId` rowne zero tam, gdzie mialy byc liczby,
+> odtworz je flow [97-NaprawMetadaneStron](97-NaprawMetadaneStron.md)
+> i rozwaz przejscie na `ValidateUpdateListItem`, jak w kroku 4. `ParentPageId`, `SortOrder`, `TreePath`, `TreeSort`
 i `Category` wypelnia krok 2 — wpisane tu zero zepsuje drzewo.
 
 ## 9. RenamePage — Send an HTTP request to SharePoint
