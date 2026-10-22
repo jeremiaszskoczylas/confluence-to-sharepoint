@@ -7,6 +7,10 @@ akcją `Run script`.
 Całość działa na **standardowych konektorach Power Platform** — bez premium, bez Dataverse,
 bez rejestracji aplikacji w Entra ID.
 
+## Od czego zaczac
+
+[PLAN-WDROZENIA.md](PLAN-WDROZENIA.md) — co robic po kolei od stanu obecnego,
+w czterech etapach, z czasami i kontrola po kazdym kroku.
 ## Dashboard (Power Apps)
 
 Instrukcje budowy aplikacji sa w katalogu [app/](app/). Jesli nie budowales
