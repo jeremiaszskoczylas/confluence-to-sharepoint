@@ -180,47 +180,52 @@ string(setProperty(setProperty(json('{"__metadata":{"type":"SP.Publishing.SitePa
 
 ---
 
-## 9. UstawMetadane — SharePoint → Update file properties
+## 9. UstawMetadane — Send an HTTP request to SharePoint
 
-Library Name (Enter custom value):
-```
-Site Pages
-```
-Id (fx):
-```
-items('Apply_to_each')?['pageId']
-```
-ParentPageId (fx):
-```
-items('Apply_to_each')?['parentPageId']
-```
-SortOrder (fx):
-```
-items('Apply_to_each')?['sortOrder']
-```
-TreePath (fx):
-```
-items('Apply_to_each')?['treePath']
-```
-TreeSort (fx):
-```
-items('Apply_to_each')?['treeSort']
-```
-Category Value (Enter custom value, potem fx):
-```
-if(equals(items('Apply_to_each')?['category'], ''), null, items('Apply_to_each')?['category'])
-```
-DocStatus Value (lista):
-```
-Published
-```
-**Pozostale pola PUSTE.**
+> **Dlaczego nie „Update file properties".** Tamta akcja wysyla komplet kolumn
+> z formularza. Pole zostawione puste bywa zapisane jako **zero** w kolumnie
+> liczbowej i jako **pusta wartosc** w tekstowej — a ta akcja nie wymienia
+> `ConfluencePageId` ani `Service`. Efekt: po biegu wszystkie strony mialy
+> `ConfluencePageId` rowne zero i **pusta kolumne `Service`**, przez co krok 4
+> nie znajdowal zadnej strony serwisu. Tak bylo przy migracji GMSC.
+> `ValidateUpdateListItem` zmienia **wylacznie** pola wymienione w tresci zadania.
 
-> **Uwaga.** Akcja `Update file properties` wysyla komplet kolumn z formularza,
-> a puste pole liczbowe bywa zapisane jako **zero**. Jesli po biegu zobaczysz
-> `ConfluencePageId` albo `ParentPageId` rowne zero tam, gdzie mialy byc liczby,
-> odtworz je flow [97-NaprawMetadaneStron](97-NaprawMetadaneStron.md)
-> i rozwaz przejscie na `ValidateUpdateListItem`, jak w kroku 4.
+Method: POST
+
+Uri (fx):
+```
+concat('_api/web/lists/getbytitle(''Site Pages'')/items(', items('Apply_to_each')?['pageId'], ')/validateUpdateListItem')
+```
+Headers — dwa wiersze:
+```
+Accept
+```
+```
+application/json;odata=verbose
+```
+```
+Content-Type
+```
+```
+application/json;odata=verbose
+```
+Body (fx) — CALE pole, jedna linia:
+```
+concat('{"formValues":[{"FieldName":"ParentPageId","FieldValue":"', items('Apply_to_each')?['parentPageId'], '"},{"FieldName":"SortOrder","FieldValue":"', items('Apply_to_each')?['sortOrder'], '"},{"FieldName":"TreePath","FieldValue":"', items('Apply_to_each')?['treePath'], '"},{"FieldName":"TreeSort","FieldValue":"', items('Apply_to_each')?['treeSort'], '"},{"FieldName":"Category","FieldValue":"', items('Apply_to_each')?['category'], '"},{"FieldName":"DocStatus","FieldValue":"Published"}],"bNewDocumentUpdate":true}')
+```
+
+Zapisywane jest **szesc kolumn**. `ConfluencePageId` i `Service`, ustawione
+w kroku 1, pozostaja nietkniete — i o to tu chodzi.
+
+`Category` puste czysci kolumne wyboru, nie wywoluje bledu. Pusta zostaje
+korzeniowi serwisu, ktory nie nalezy do zadnej galezi.
+
+`bNewDocumentUpdate` ustawione na `true` zapisuje bez tworzenia nowej wersji
+strony.
+
+> Gdyby ktorys tytul galezi zawieral znak cudzyslowu, rozbilby tresc zadania.
+> W nazwach galezi Confluence sie to nie zdarza, ale jesli akcja nagle zwroci
+> `400 Bad Request`, sprawdz wlasnie to.
 
 ---
 

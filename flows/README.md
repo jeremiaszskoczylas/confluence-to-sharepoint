@@ -9,6 +9,10 @@ w osobnym bloku: potrojne klikniecie zaznacza cala linie, Ctrl+C kopiuje.
 kolejny serwis, utrzymanie, z czasami i kontrola po kazdym kroku. Pliki ponizej
 to szczegolowe sciagi do poszczegolnych krokow.
 
+Migracja konkretnego serwisu, z kontrolami po kazdym kroku i lista rzeczy,
+ktore moglyby nadpisac juz zmigrowany serwis:
+[CHECKLISTA-SWB.md](CHECKLISTA-SWB.md).
+
 ## Kolejnosc
 
 | # | Plik | Kiedy | Czas |
