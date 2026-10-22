@@ -1,43 +1,35 @@
-# 4 — OdswiezDrzewo (utrzymanie)
+# 4 — OdswiezDrzewo: strona mapy serwisu
 
-Jedyny flow, ktory uruchamiasz po zakonczeniu migracji. Przy starcie **wybierasz
-serwis i strone mapy**, wiec jeden flow obsluguje wszystkie serwisy i wszystkie
-strony map.
+Buduje strone z drzewem dokumentacji dla **wybranego serwisu**.
 
-Przyklady uzycia:
+To **ten sam flow, ktory zbudowal dzialajaca mape GMSC** — ta sama kolejnosc
+akcji i te same wyrazenia. Dodane sa tylko dwa pola przy starcie: kod serwisu
+i nazwa strony mapy.
 
-| Serwis | Strona mapy | Efekt |
+Dziesiec akcji, okolo minuty biegu.
+
+| serwis | stronaMapy | Efekt |
 |---|---|---|
-| `GMSC` | `Documentation-Map.aspx` | drzewo GMSC na stronie mapy GMSC |
+| `GMSC` | `Documentation-Map.aspx` | drzewo GMSC na stronie GMSC |
 | `SWB` | `Documentation-Map-Switchboard.aspx` | drzewo Switchboarda na jego stronie |
-| `GMSC` | *(puste)* | tylko przeliczenie metadanych, bez ruszania map |
 
-**Dwie rzeczy naraz, o roznym zasiegu:**
+**Ten flow nie zapisuje niczego na stronach dokumentacji.** Nie dotyka
+`ParentPageId`, `ConfluencePageId`, `Service` ani `DocStatus` — tylko je czyta.
+Kolumny `TreePath`, `TreeSort`, `SortOrder` i `Category` wypelnia krok 2 przy
+migracji, a dla stron zakladanych recznie
+[04b-PrzeliczDrzewo](04b-PrzeliczDrzewo.md).
 
-- **metadane drzewa** (`TreePath`, `TreeSort`, `SortOrder`, `Category`) przelicza
-  dla **wszystkich** serwisow — potrzebuje ich aplikacja do zakladek
-- **strone-mape** buduje dla **jednego** serwisu, tego wybranego przy starcie
-
-Czyta biblioteke **Site Pages**, a nie mape migracji, wiec obejmuje takze strony
-zalozone recznie.
-
-Podmien tylko `<WITRYNA>` (patrz [README.md](README.md)) — serwis i strone mapy
-podajesz przy kazdym uruchomieniu. Nazwy akcji dokladnie jak w naglowkach.
+Podmien tylko `<WITRYNA>`. Nazwy akcji dokladnie jak w naglowkach.
 
 ## Kiedy uruchomic
 
-- doszla nowa strona albo zostala usunieta
-- strona zmienila rodzica albo tytul
-- zalozyles strone mapy dla nowego serwisu
-- chcesz sprawdzic, czy nic nie wypadlo z drzewa
+- po migracji serwisu, zeby powstala jego strona mapy
+- po dodaniu, usunieciu albo przeniesieniu strony
+- po zalozeniu strony mapy dla nowego serwisu
 
 ---
 
-## 1. Trigger — Power Apps (V2)
-
-Ten trigger daje pola do wypelnienia przy kazdym uruchomieniu, a jednoczesnie
-pozwala wywolac flow z aplikacji. Recznie uruchamiasz go przez
-**Test → Manually → Run**, i wtedy Power Automate zapyta o wartosci.
+## 1. Trigger — Manually trigger a flow
 
 Dodaj dwa wejscia tekstowe, **w tej kolejnosci**, przyciskiem
 **Add an input → Text**:
@@ -50,18 +42,12 @@ stronaMapy
 ```
 
 - `serwis` — kod z kolumny `Code` listy `DT_Services`, np. `GMSC` albo `SWB`
-- `stronaMapy` — nazwa pliku strony, np. `Documentation-Map.aspx`.
-  **Zostaw puste, jesli chcesz tylko przeliczyc metadane** bez budowania mapy
+- `stronaMapy` — nazwa pliku strony, np. `Documentation-Map.aspx`
 
 > **Jak odwolywac sie do tych pol.** Power Automate nadaje im wlasne klucze
-> i nie zawsze sa to nazwy, ktore wpisales. Dlatego **wszedzie ponizej wstawiaj
-> tokeny z dynamic content** (panel po prawej, sekcja nazwy triggera), zamiast
-> przepisywac wyrazenia recznie. Podane wyrazenia to wariant awaryjny, gdy
-> podpowiedzi nie dzialaja.
-
-> Zeby zobaczyc prawdziwe klucze: uruchom flow raz, otworz historie biegu,
-> kliknij trigger i **Show raw outputs**. Zobaczysz tam `{"text": "GMSC", ...}`
-> albo `{"serwis": "GMSC", ...}` — i wtedy wiesz, czego uzyc.
+> (`text`, `text_1`) i nie zawsze sa to nazwy, ktore wpisales. **Wszedzie ponizej
+> wstawiaj tokeny z dynamic content**; podane wyrazenia to wariant awaryjny.
+> Prawdziwe klucze zobaczysz w historii biegu: kliknij trigger → **Show raw outputs**.
 
 ## 2. GetStrony — Send an HTTP request to SharePoint
 
@@ -83,18 +69,14 @@ dane (fx):
 ```
 string(body('GetStrony')?['d']?['results'])
 ```
-pomin — **token `stronaMapy`** z dynamic content (zeby mapa nie liczyla sama siebie).
-Awaryjnie (fx):
+pomin — **token `stronaMapy`** (zeby mapa nie liczyla sama siebie). Awaryjnie (fx):
 ```
 triggerBody()?['text_1']
 ```
-serwisMapy — **token `serwis`** z dynamic content. Awaryjnie (fx):
+serwisMapy — **token `serwis`**. Awaryjnie (fx):
 ```
 triggerBody()?['text']
 ```
-
-Jesli po pierwszym biegu `pozaDokumentacja` jest duze, a `pages` male — pola
-triggera nie dochodza i skrypt dostaje puste wartosci. Patrz ramka przy kroku 1.
 
 ## 4. Plan — Data Operation → Compose
 
@@ -103,83 +85,7 @@ Inputs (fx):
 json(body('Planuj')?['result'])
 ```
 
-## 5. StopGdyBlad — Control → Condition
-
-Bezpiecznik: gdy skrypt nie znalazl korzenia drzewa, flow ma stanac, a nie zapisac
-pustej mapy.
-
-Lewa strona (fx):
-```
-empty(coalesce(outputs('Plan')?['blad'], ''))
-```
-is equal to: `false`
-
-W galezi **If yes**: Control → **Terminate**, Status `Failed`, Message (fx):
-```
-outputs('Plan')?['blad']
-```
-Galaz If no: pusta. Akcje 6–13 dodaj PONIZEJ warunku.
-
-## 6. Apply to each — Control
-
-Select an output (fx):
-```
-outputs('Plan')?['pages']
-```
-
-Wewnatrz petli jedna akcja:
-
-## 7. UstawMetadane — Send an HTTP request to SharePoint   (w petli)
-
-> **Dlaczego nie akcja Update file properties.** Tamta akcja wysyla komplet kolumn
-> z formularza, a pole zostawione puste potrafi zostac zapisane jako **zero**
-> w kolumnie liczbowej. Tak gina `ConfluencePageId` i `ParentPageId`.
-> `ValidateUpdateListItem` zmienia **wylacznie** pola wymienione w tresci zadania.
-
-Method: POST
-
-Uri (fx):
-```
-concat('_api/web/lists/getbytitle(''Site Pages'')/items(', items('Apply_to_each')?['id'], ')/validateUpdateListItem')
-```
-Headers — dwa wiersze:
-```
-Accept
-```
-```
-application/json;odata=verbose
-```
-```
-Content-Type
-```
-```
-application/json;odata=verbose
-```
-Body (fx) — CALE pole, jedna linia:
-```
-concat('{"formValues":[{"FieldName":"SortOrder","FieldValue":"', items('Apply_to_each')?['sortOrder'], '"},{"FieldName":"TreePath","FieldValue":"', items('Apply_to_each')?['treePath'], '"},{"FieldName":"TreeSort","FieldValue":"', items('Apply_to_each')?['treeSort'], '"},{"FieldName":"Category","FieldValue":"', items('Apply_to_each')?['category'], '"}],"bNewDocumentUpdate":true}')
-```
-
-Zapisywane sa tylko cztery kolumny: `SortOrder`, `TreePath`, `TreeSort`
-i `Category`. `ParentPageId`, `ConfluencePageId`, `Service` i `DocStatus`
-pozostaja nietkniete — to twoje zrodlo prawdy.
-
-Pusta `Category` (korzen serwisu) zapisze sie jako pusty wybor i to jest w porzadku.
-## 8. CzyBudowacMape — Control → Condition   (PONIZEJ petli)
-
-Gdy `stronaMapy` jest puste, flow konczy sie tutaj: metadane sa przeliczone,
-zadna strona nie zostaje ruszona. Tak wola go aplikacja po dodaniu strony.
-
-Lewa strona (fx) — zamiast `triggerBody()...` mozesz wstawic token **stronaMapy**
-do srodka funkcji `empty()`:
-```
-empty(triggerBody()?['text_1'])
-```
-is equal to: `false`
-
-**Akcje 9–13 wstaw w galezi If yes.** Galaz If no: pusta.
-
-## 9. BudujMape — Excel Online → Run script
+## 5. BudujMape — Excel Online → Run script
 
 Script (lista):
 ```
@@ -190,10 +96,10 @@ fragmenty (fx):
 string(outputs('Plan')?['mapa'])
 ```
 
-## 10. StopGdyERR — Control → Condition
+## 6. StopGdyERR — Control → Condition
 
-Drugi bezpiecznik, na wynik `budujMape`. Bez niego komunikat bledu zostalby
-zapisany jako tresc mapy, a zmiana nazwy nadpisalaby dzialajaca strone.
+Bezpiecznik. Bez niego komunikat bledu zostalby zapisany jako tresc mapy,
+a zmiana nazwy nadpisalaby dzialajaca strone.
 
 Lewa strona (fx):
 ```
@@ -205,10 +111,9 @@ W galezi **If yes**: Control → **Terminate**, Status `Failed`, Message (fx):
 ```
 body('BudujMape')?['result']
 ```
-Galaz If no: pusta. Akcje 11–13 dodaj ponizej tego warunku, nadal wewnatrz
-galezi If yes z punktu 8.
+Galaz If no: pusta. Akcje 7–10 dodaj PONIZEJ warunku.
 
-## 11. CreatePage — Send an HTTP request to SharePoint
+## 7. CreatePage — Send an HTTP request to SharePoint
 
 Method: POST
 
@@ -229,13 +134,12 @@ Content-Type
 ```
 application/json;odata=verbose
 ```
-Body (fx) — tytul strony bierzemy z nazwy pliku, bez rozszerzenia i z myslnikami
-zamienionymi na spacje:
+Body (fx) — tytul powstaje z nazwy pliku: bez rozszerzenia, myslniki na spacje:
 ```
 string(setProperty(json('{"__metadata":{"type":"SP.Publishing.SitePage"},"PageLayoutType":"Article","PromotedState":0}'),'Title',replace(replace(triggerBody()?['text_1'], '.aspx', ''), '-', ' ')))
 ```
 
-## 12. SaveDraft — Send an HTTP request to SharePoint
+## 8. SaveDraft — Send an HTTP request to SharePoint
 
 Method: POST
 
@@ -243,14 +147,14 @@ Uri (fx):
 ```
 concat('_api/sitepages/pages(', body('CreatePage')?['d']?['Id'], ')/savepageasdraft')
 ```
-Headers: te same dwa co w 11.
+Headers: te same dwa co w 7.
 
 Body (fx) — CALE pole:
 ```
 string(setProperty(setProperty(json('{"__metadata":{"type":"SP.Publishing.SitePage"}}'),'Title',replace(replace(triggerBody()?['text_1'], '.aspx', ''), '-', ' ')),'CanvasContent1',body('BudujMape')?['result']))
 ```
 
-## 13. RenamePage — Send an HTTP request to SharePoint
+## 9. RenamePage — Send an HTTP request to SharePoint
 
 Method: POST
 
@@ -262,7 +166,7 @@ Headers — jeden wiersz: Accept → application/json;odata=verbose
 
 Body: PUSTE
 
-## 14. PublishMapa — Send an HTTP request to SharePoint
+## 10. Publish — Send an HTTP request to SharePoint
 
 Method: POST
 
@@ -276,73 +180,40 @@ Body: PUSTE
 
 ---
 
-## Jak tego uzywac
+## Sprawdzenie
 
-### Odswiezenie mapy GMSC
+- `BudujMape` → `result` zaczyna sie od `[{"controlType":4,"id":"c5f0a545`
+- `CreatePage` → w body jest `d.Id` (liczba) i `d.Url` (losowa nazwa pliku)
+- `SaveDraft`, `RenamePage`, `Publish` → 200
+- strona z pola `stronaMapy` (Ctrl+F5): link do korzenia serwisu, pod nim
+  zwijane galezie z zagniezdzonymi listami
 
-**Test → Manually → Run** → `serwis` = `GMSC`, `stronaMapy` = `Documentation-Map.aspx`
-
-### Nowy serwis, nowa strona mapy
-
-1. Zaloz strone recznie: Site Pages → **New** → **Page** → pusty szablon →
-   tytul `Documentation Map Switchboard` → **Publish**.
-   Nie wpisuj tresci, flow i tak ja nadpisze.
-2. **Nie ustawiaj** kolumny `Service` na tej stronie. Strony map nie naleza do
-   drzewa; puste `Service` trzyma je poza nim.
-3. Uruchom flow: `serwis` = `SWB`, `stronaMapy` = `Documentation-Map-Switchboard.aspx`
-
-Nazwe pliku sprawdzisz w pasku adresu po otwarciu strony. Tytul `Documentation Map
-Switchboard` daje zwykle plik `Documentation-Map-Switchboard.aspx`.
-
-Strony nie musisz nawet zakladac wczesniej — flow tworzy ja sam, jesli nie
-istnieje. Zakladasz ja recznie tylko po to, zeby od razu dodac link w lewym panelu
-witryny.
-
-### Samo przeliczenie metadanych, bez map
-
-`serwis` = dowolny, `stronaMapy` = **puste**. Przydaje sie po dodaniu strony,
-gdy nie chcesz czekac na przebudowe mapy. Tak wola ten flow aplikacja.
-
----
-
-## Sprawdzenie po biegu
-
-W wyniku akcji `Planuj` (rozwin `Plan`) znajdziesz liczniki:
+W wyniku akcji `Planuj` (rozwin `Plan`) sa liczniki:
 
 | Pole | Co znaczy |
 |---|---|
 | `serwisy` | ile serwisow ma poprawny korzen |
-| `wMapie` | ile z nich trafilo na strone-mape (przy wybranym serwisie: 1) |
-| `sieroty` | strony z `Service`, ale bez rodzica — do uzupelnienia |
+| `wMapie` | ile trafilo na te strone (przy wybranym serwisie: 1) |
+| `sieroty` | strony tego serwisu majace `Service`, ale bez rodzica |
 | `pozaDokumentacja` | strony bez `Service`, pominiete (strony witryny i strony map) |
 
-Jesli `sieroty` rosna, ktoras strona zgubila `ParentPageId`.
-Jesli `wMapie` to zero, kod serwisu nie pasuje do zadnej strony — sprawdz pisownie.
+Gdy `wMapie` to zero, kod serwisu nie pasuje do zadnej strony — sprawdz pisownie.
 
-## Co zobaczysz na stronie mapy
+## Nowa strona mapy dla kolejnego serwisu
 
-Korzen wybranego serwisu, pod nim zwijane galezie z zagniezdzonymi listami.
-Sekcja **„Bez przypisania"** na koncu dotyczy tylko tego serwisu.
+1. Site Pages → **New** → **Page** → pusty szablon → tytul
+   `Documentation Map Switchboard` → **Publish**. Tresci nie pisz, flow ja nadpisze.
+2. **Nie ustawiaj** kolumny `Service` na stronie mapy. Strony map nie naleza
+   do drzewa; puste `Service` trzyma je poza nim.
+3. Uruchom flow: `serwis` = `SWB`, `stronaMapy` = `Documentation-Map-Switchboard.aspx`
 
-## Jak dodac nowa strone do dokumentacji
-
-1. Site Pages → New → Page, napisz tresc, Publish.
-2. Page details → ustaw:
-   - `ParentPageId` = **Id strony nadrzednej** (kolumna `ID` w widoku listy)
-   - `Service` = kod serwisu
-   - `DocStatus` = `Published`
-   - `ConfluencePageId` = `0` — oznacza strone spoza migracji
-3. Uruchom ten flow dla serwisu tej strony. Reszta kolumn i mapa uzupelnia sie same.
+Strony nie musisz zakladac wczesniej — flow utworzy ja sam. Robisz to recznie
+tylko po to, zeby od razu dodac link w lewym panelu witryny.
 
 ## Zasady
 
-- Kazdy bieg tworzy nowa strone mapy i nadpisuje wskazana (`flags=1`). Reczne
-  zmiany w mapie przepadaja — to strona generowana.
-- `Category` musi istniec w wyborach kolumny w Site Pages, inaczej zapis metadanych padnie.
-- Flow nie rusza tresci stron dokumentacji ani kolumn `ParentPageId`,
-  `ConfluencePageId`, `Service` i `DocStatus`. Bezpieczny do uruchamiania
-  w dowolnym momencie.
-- Gdyby ktorys bieg mimo wszystko wyzerowal metadane, odtworzysz je
-  flow [97-NaprawMetadaneStron](97-NaprawMetadaneStron.md) z `DT_MigrationMap`.
-- Strony map **nie moga miec** wypelnionej kolumny `Service` — inaczej wejda
-  do wlasnego drzewa.
+- Kazdy bieg tworzy nowa strone i nadpisuje wskazana (`flags=1`). Reczne zmiany
+  w mapie przepadaja — to strona generowana.
+- Flow **tylko czyta** biblioteke. Nie zapisuje metadanych, wiec nie ma jak
+  zepsuc hierarchii ani zapetlic sie na setkach stron.
+- Strony map nie moga miec wypelnionej kolumny `Service`.

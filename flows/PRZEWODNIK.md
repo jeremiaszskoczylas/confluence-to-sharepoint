@@ -33,7 +33,7 @@ Cztery wartosci do podmiany w sciagach: `<WITRYNA>`, `<BIBLIOTEKA>`, `<EKSPORT>`
 | 3 | [01-MigratePages](01-MigratePages.md), `Top Count` = `1` | 1 min | **obejrzyj te strone dokladnie**: naglowki, ramki, obrazy |
 | 4 | [01](01-MigratePages.md) ponownie, `Top Count` = `5000` | ~10 min | komplet `PageCreated`, `TargetPageId`, `TargetUrl` |
 | 5 | [02-RemapLinks](02-RemapLinks.md) | 30–40 min | sciezka nadrzedna, dzialajace odnosniki, `ParentPageId` ≠ 0 |
-| 6 | [04-OdswiezDrzewo](04-OdswiezDrzewo.md) | 2 min | mapa: korzen i galezie; `TreePath` wypelniony |
+| 6 | [04-OdswiezDrzewo](04-OdswiezDrzewo.md), `serwis` = GMSC | 1 min | mapa: korzen i galezie |
 
 Krok 3 jest najwazniejszy w calej liscie. Blad parsera zauwazony na jednej stronie
 kosztuje minute, zauwazony po kroku 5 kosztuje 40 minut powtorki.

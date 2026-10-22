@@ -45,8 +45,9 @@ Nazwe listy podajesz w polu triggera, wiec jeden zbudowany flow obsluzy obie.
 
 ### 1.5 Zbuduj flow 04-OdswiezDrzewo
 
-Wg [flows/04-OdswiezDrzewo.md](flows/04-OdswiezDrzewo.md). Dwanascie akcji,
-okolo 20 minut. Wczesniej wklej do Excela skrypty `planujMape` i `budujMape`
+Wg [flows/04-OdswiezDrzewo.md](flows/04-OdswiezDrzewo.md). Dziesiec akcji,
+okolo 15 minut. To ten sam uklad, ktory zbudowal dzialajaca mape GMSC —
+bez petli, wiec nic nie zapisuje na stronach. Wczesniej wklej do Excela skrypty `planujMape` i `budujMape`
 z katalogu `scripts/`.
 
 Flow ma dwa pola wypelniane **przy kazdym uruchomieniu**, nie na sztywno:
