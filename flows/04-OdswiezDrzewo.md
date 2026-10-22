@@ -53,6 +53,16 @@ stronaMapy
 - `stronaMapy` — nazwa pliku strony, np. `Documentation-Map.aspx`.
   **Zostaw puste, jesli chcesz tylko przeliczyc metadane** bez budowania mapy
 
+> **Jak odwolywac sie do tych pol.** Power Automate nadaje im wlasne klucze
+> i nie zawsze sa to nazwy, ktore wpisales. Dlatego **wszedzie ponizej wstawiaj
+> tokeny z dynamic content** (panel po prawej, sekcja nazwy triggera), zamiast
+> przepisywac wyrazenia recznie. Podane wyrazenia to wariant awaryjny, gdy
+> podpowiedzi nie dzialaja.
+
+> Zeby zobaczyc prawdziwe klucze: uruchom flow raz, otworz historie biegu,
+> kliknij trigger i **Show raw outputs**. Zobaczysz tam `{"text": "GMSC", ...}`
+> albo `{"serwis": "GMSC", ...}` — i wtedy wiesz, czego uzyc.
+
 ## 2. GetStrony — Send an HTTP request to SharePoint
 
 Method: GET
@@ -73,17 +83,18 @@ dane (fx):
 ```
 string(body('GetStrony')?['d']?['results'])
 ```
-pomin (fx) — nazwa strony mapy z triggera, zeby nie liczyla sama siebie:
+pomin — **token `stronaMapy`** z dynamic content (zeby mapa nie liczyla sama siebie).
+Awaryjnie (fx):
 ```
 triggerBody()?['text_1']
 ```
-serwisMapy (fx) — kod serwisu z triggera:
+serwisMapy — **token `serwis`** z dynamic content. Awaryjnie (fx):
 ```
 triggerBody()?['text']
 ```
 
-Jesli podpowiedzi pokazuja inne nazwy pol, wstaw tokeny **serwis** i **stronaMapy**
-z dynamic content zamiast wpisywac wyrazenia recznie.
+Jesli po pierwszym biegu `pozaDokumentacja` jest duze, a `pages` male — pola
+triggera nie dochodza i skrypt dostaje puste wartosci. Patrz ramka przy kroku 1.
 
 ## 4. Plan — Data Operation → Compose
 
@@ -152,7 +163,8 @@ flow ma je czytac, nigdy nadpisywac.
 Gdy `stronaMapy` jest puste, flow konczy sie tutaj: metadane sa przeliczone,
 zadna strona nie zostaje ruszona. Tak wola go aplikacja po dodaniu strony.
 
-Lewa strona (fx):
+Lewa strona (fx) — zamiast `triggerBody()...` mozesz wstawic token **stronaMapy**
+do srodka funkcji `empty()`:
 ```
 empty(triggerBody()?['text_1'])
 ```

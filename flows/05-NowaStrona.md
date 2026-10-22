@@ -38,7 +38,12 @@ Inputs (fx) — CALE pole, jedna linia:
 concat(triggerBody()['text_2'], '-', replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(trim(triggerBody()['text']), ' ', '-'), '/', ''), '\', ''), ':', ''), '*', ''), '?', ''), '"', ''), '<', ''), '>', ''), '|', ''), '.aspx')
 ```
 
-**Uwaga na numeracje wejsc.** Power Automate numeruje je
+**Uwaga na nazwy pol triggera.** Power Automate nadaje im wlasne klucze i nie
+zawsze sa to nazwy, ktore wpisales. Najpewniej: wstawiaj **tokeny z dynamic
+content**. Zeby zobaczyc prawdziwe klucze, uruchom flow raz i w historii biegu
+kliknij trigger → **Show raw outputs**.
+
+Podane nizej wyrazenia zakladaja, ze Power Automate numeruje je
 wejscia w kolejnosci dodania: `text` = tytul, `text_1` = rodzicId,
 `text_2` = serwis, `text_3` = kategoria. Jesli podpowiedzi pokazuja inne nazwy,
 wstaw tokeny z dynamic content zamiast wpisywac je recznie.
