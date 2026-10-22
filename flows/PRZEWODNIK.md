@@ -69,6 +69,15 @@ bierze tylko wiersze danego serwisu, a drzewo i odnosniki liczone sa per serwis.
 
 ---
 
+## Serwis bez Confluence
+
+Nowy serwis nie musi pochodzic z eksportu. Strony mozesz napisac wprost
+w SharePoincie, ustawic `Service` i `ParentPageId`, uruchomic krok 4 — drzewo
+i mapa zbuduja sie tak samo. Pelny poradnik: [07-RecznySerwis](07-RecznySerwis.md).
+
+Dziala to dlatego, ze po migracji zrodlem prawdy jest biblioteka Site Pages,
+a nie lista migracyjna. Krok 4 nie pyta, skad wziela sie strona.
+
 ## Utrzymanie
 
 Po migracji uruchamiasz **tylko krok 4**, i to po zmianach w strukturze:

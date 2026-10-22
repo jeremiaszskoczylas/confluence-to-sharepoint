@@ -19,7 +19,8 @@ to szczegolowe sciagi do poszczegolnych krokow.
 | 3 | [03-BudujMape.md](03-BudujMape.md) | po kroku 2, gdy serwis jest jeden; przy wielu zastepuje go krok 4 | ~1 min |
 | 4 | [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md) | **utrzymanie** — po kazdej nowej/usunietej/przeniesionej stronie | ~2 min |
 | 5 | [05-NowaStrona.md](05-NowaStrona.md) | wywolywany z aplikacji przy dodawaniu strony | kilka sekund |
-| 6 | [06-KolejnySerwis.md](06-KolejnySerwis.md) | migracja drugiej i kazdej nastepnej przestrzeni | jak kroki 1–2 |
+| 6 | [06-KolejnySerwis.md](06-KolejnySerwis.md) | migracja drugiej i kazdej nastepnej przestrzeni z Confluence | jak kroki 1–2 |
+| 7 | [07-RecznySerwis.md](07-RecznySerwis.md) | nowy serwis pisany recznie, bez eksportu HTML | zalezy od liczby stron |
 | ! | [98-ResetMigracji.md](98-ResetMigracji.md) | czyszczenie przed migracja od zera | 10 min |
 | ! | [99-NaprawHierarchie.md](99-NaprawHierarchie.md) | awaryjnie, gdy hierarchia w mapie migracji zostanie nadpisana | ~5 min |
 
