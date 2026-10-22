@@ -116,9 +116,17 @@ mapowanie linkow w obrebie serwisu.
 **Nie uruchamiaj [03-BudujMape.md](03-BudujMape.md).** Ten flow buduje mape
 jednego serwisu i nadpisalby mape GMSC.
 
-Zamiast tego uruchom [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md). Czyta on
-biblioteke Site Pages, grupuje strony po kolumnie `Service` i buduje jedna
-mape z obydwoma serwisami, kazdy pod wlasnym naglowkiem.
+Zamiast tego zaloz recznie strone mapy nowego serwisu (Site Pages → **New** →
+**Page** → pusty szablon → tytul `Documentation Map Switchboard` → **Publish**;
+tresci nie pisz) i uruchom [04-OdswiezDrzewo.md](04-OdswiezDrzewo.md) z polami:
+
+```
+serwis      = SWB
+stronaMapy  = Documentation-Map-Switchboard.aspx
+```
+
+Kazdy serwis ma **wlasna** strone mapy. Flow wpisuje drzewo w te strone, ktora
+wskazesz, i nie dotyka pozostalych — mapa GMSC zostaje nietknieta.
 
 Od tego momentu krok 3 nie jest ci juz potrzebny w ogole.
 

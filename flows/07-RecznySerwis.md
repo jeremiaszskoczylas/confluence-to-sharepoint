@@ -122,11 +122,23 @@ Korzen wskazuje na zero, galezie na korzen, strony szczegolowe na swoja galaz.
 
 ## D. Zbudowanie drzewa i mapy
 
-Uruchom [04-OdswiezDrzewo](04-OdswiezDrzewo.md).
+Dwa flow, w tej kolejnosci:
 
-Krok 4 przeliczy `TreePath`, `TreeSort`, `SortOrder` i `Category` dla wszystkich
-stron wszystkich serwisow, po czym zbuduje mape od nowa. Serwis Switchboard
-pojawi sie w niej pod wlasnym naglowkiem, obok GMSC.
+1. [04b-PrzeliczDrzewo](04b-PrzeliczDrzewo.md) — przelicza `TreePath`,
+   `TreeSort`, `SortOrder` i `Category` ze swiezo wpisanych `ParentPageId`.
+   Przy stronach zakladanych recznie ten krok jest **obowiazkowy**: nikt inny
+   tych kolumn nie wypelni.
+2. [04-OdswiezDrzewo](04-OdswiezDrzewo.md) — wpisuje drzewo w strone mapy.
+
+Przed krokiem 2 zaloz strone mapy tego serwisu (Site Pages → **New** → **Page**
+→ pusty szablon → **Publish**). Flow nie tworzy stron, tylko wypelnia wskazana:
+
+```
+serwis      = SWB
+stronaMapy  = Documentation-Map-Switchboard.aspx
+```
+
+Kazdy serwis ma wlasna strone mapy. Mapa GMSC zostaje nietknieta.
 
 Trwa to okolo dwoch minut.
 

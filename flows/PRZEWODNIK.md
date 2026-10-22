@@ -61,7 +61,8 @@ Te same flow, zmieniasz dwie wartosci. Pelna procedura z lista kontrolna:
 | 5 | wybory `Category` dla galezi Switchboarda | nowe nazwy galezi = nowe wybory |
 | 6 | [01](01-MigratePages.md) z `<EKSPORT>` i `<SERWIS>` dla SWB | filtr bierze tylko wiersze SWB |
 | 7 | [02](02-RemapLinks.md) z tymi samymi dwiema wartosciami | drzewo liczone osobno dla SWB |
-| 8 | [04](04-OdswiezDrzewo.md) | uruchom z `serwis` = `SWB` i wlasna strona mapy |
+| 8 | zaloz recznie pusta strone `Documentation Map Switchboard` | krok 4 wypelnia istniejaca strone, nie zaklada nowej |
+| 9 | [04](04-OdswiezDrzewo.md) | uruchom z `serwis` = `SWB` i nazwa tej strony |
 
 GMSC nie ucierpi, bo nazwy plikow zaczynaja sie od kodu serwisu
 (`GMSC-Home-Page.aspx` i `SWB-Home-Page.aspx` to dwa rozne pliki), filtr w kroku 1
@@ -72,39 +73,45 @@ bierze tylko wiersze danego serwisu, a drzewo i odnosniki liczone sa per serwis.
 ## Serwis bez Confluence
 
 Nowy serwis nie musi pochodzic z eksportu. Strony mozesz napisac wprost
-w SharePoincie, ustawic `Service` i `ParentPageId`, uruchomic krok 4 — drzewo
-i mapa zbuduja sie tak samo. Pelny poradnik: [07-RecznySerwis](07-RecznySerwis.md).
+w SharePoincie, ustawic `Service` i `ParentPageId`, uruchomic krok **4b**
+(przelicza metadane drzewa), a potem krok **4** (buduje mape). Pelny poradnik:
+[07-RecznySerwis](07-RecznySerwis.md).
 
 Dziala to dlatego, ze po migracji zrodlem prawdy jest biblioteka Site Pages,
-a nie lista migracyjna. Krok 4 nie pyta, skad wziela sie strona.
+a nie lista migracyjna. Zaden z tych krokow nie pyta, skad wziela sie strona.
 
 ## Mapa per serwis
 
 Krok 4 pyta przy starcie o dwie rzeczy: **kod serwisu** i **nazwe strony mapy**.
-Kazdy serwis moze miec wlasna strone:
+Kazdy serwis ma wlasna strone, ktora flow nadpisuje w miejscu:
 
 | serwis | stronaMapy | efekt |
 |---|---|---|
-| `GMSC` | `Documentation-Map.aspx` | drzewo GMSC na stronie GMSC |
-| `SWB` | `Documentation-Map-Switchboard.aspx` | drzewo Switchboarda na jego stronie |
-| dowolny | *(puste)* | samo przeliczenie metadanych, bez ruszania map |
+| `GMSC` | `Documentation-Map.aspx` | drzewo GMSC wpisane w te strone |
+| `SWB` | `Documentation-Map-Switchboard.aspx` | drzewo Switchboarda w jego strone |
 
-Metadane drzewa licza sie zawsze dla wszystkich serwisow, bo potrzebuje ich
-aplikacja. Ogranicza sie tylko zawartosc strony mapy.
+Strona musi istniec przed uruchomieniem — flow jej nie zaklada. Nazwe wpisuj
+z rozszerzeniem `.aspx`, dokladnie tak jak widnieje w bibliotece Site Pages.
+
+Krok 4 **nie zapisuje metadanych**. Kolumny `TreePath`, `TreeSort`, `SortOrder`
+i `Category` wypelnia krok 2 przy migracji, a dla stron zakladanych recznie
+[04b-PrzeliczDrzewo](04b-PrzeliczDrzewo.md).
 
 ## Utrzymanie
 
-Po migracji uruchamiasz **tylko krok 4**, i to po zmianach w strukturze:
-nowa strona, usunieta strona, zmieniony rodzic albo tytul.
+Po migracji uruchamiasz **krok 4**, i to po zmianach w strukturze:
+nowa strona, usunieta strona, zmieniony rodzic albo tytul. Jesli strona
+powstala poza migracja, najpierw **krok 4b** — to on liczy jej miejsce
+w drzewie.
 
 Dodanie strony recznie: napisz i opublikuj, ustaw `ParentPageId` na Id strony
-nadrzednej oraz `Service`, uruchom krok 4. Strona bez `Service` nie wejdzie do
+nadrzednej oraz `Service`, uruchom **krok 4b** (przelicza metadane nowej strony),
+potem **krok 4** (odswieza mape). Strona bez `Service` nie wejdzie do
 drzewa — biblioteka zawiera takze strony witryny spoza dokumentacji.
 Strona z `Service`, ale bez rodzica, trafi na koniec mapy do sekcji
 „Bez przypisania"; to sygnal, zeby uzupelnic kolumne.
 
-Z poziomu aplikacji robi to [05-NowaStrona](05-NowaStrona.md), ktore wola krok 4
-samo.
+Z poziomu aplikacji strone zaklada [05-NowaStrona](05-NowaStrona.md).
 
 ---
 

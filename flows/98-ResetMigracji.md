@@ -29,8 +29,10 @@ i ladujesz ja od nowa, nie dotykajac pozostalych.
 
 ### 2. Strona mapy
 
-`Documentation-Map.aspx` mozesz zostawic — kroki 3 i 4 nadpisuja ja w miejscu.
-Kasujesz tylko, jesli chcesz sprawdzic, ze powstaje od zera.
+`Documentation-Map.aspx` **zostaw**. Krok 4 nadpisuje jej tresc w miejscu
+i nie potrafi zalozyc strony od nowa — po skasowaniu konczy sie bledem 404.
+Jesli skasujesz ja swiadomie, zaloz ja ponownie recznie przed krokiem 4
+(Site Pages → **New** → **Page** → pusty szablon → **Publish**).
 
 ### 3. Kosz
 

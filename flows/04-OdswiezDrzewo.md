@@ -1,17 +1,18 @@
 # 4 — OdswiezDrzewo: strona mapy serwisu
 
-Buduje strone z drzewem dokumentacji dla **wybranego serwisu**.
-
-To **ten sam flow, ktory zbudowal dzialajaca mape GMSC** — ta sama kolejnosc
-akcji i te same wyrazenia. Dodane sa tylko dwa pola przy starcie: kod serwisu
-i nazwa strony mapy.
+Wpisuje drzewo dokumentacji **wybranego serwisu** do **istniejacej strony**,
+ktorej nazwe podajesz przy starcie. Nie tworzy nowych stron.
 
 Dziesiec akcji, okolo minuty biegu.
 
 | serwis | stronaMapy | Efekt |
 |---|---|---|
-| `GMSC` | `Documentation-Map.aspx` | drzewo GMSC na stronie GMSC |
-| `SWB` | `Documentation-Map-Switchboard.aspx` | drzewo Switchboarda na jego stronie |
+| `GMSC` | `Documentation-Map.aspx` | drzewo GMSC wpisane w te strone |
+| `SWB` | `Documentation-Map-Switchboard.aspx` | drzewo Switchboarda w jego strone |
+
+**Strona musi istniec przed uruchomieniem.** Zakladasz ja raz, recznie
+(Site Pages → New → Page → pusty szablon → Publish), potem flow tylko podmienia
+jej tresc. Jesli strony nie ma, akcja `GetMapa` konczy sie bledem 404.
 
 **Ten flow nie zapisuje niczego na stronach dokumentacji.** Nie dotyka
 `ParentPageId`, `ConfluencePageId`, `Service` ani `DocStatus` — tylko je czyta.
@@ -23,7 +24,7 @@ Podmien tylko `<WITRYNA>`. Nazwy akcji dokladnie jak w naglowkach.
 
 ## Kiedy uruchomic
 
-- po migracji serwisu, zeby powstala jego strona mapy
+- po migracji serwisu, zeby na jego stronie mapy pojawilo sie drzewo
 - po dodaniu, usunieciu albo przeniesieniu strony
 - po zalozeniu strony mapy dla nowego serwisu
 
@@ -42,7 +43,7 @@ stronaMapy
 ```
 
 - `serwis` — kod z kolumny `Code` listy `DT_Services`, np. `GMSC` albo `SWB`
-- `stronaMapy` — nazwa pliku strony, np. `Documentation-Map.aspx`
+- `stronaMapy` — nazwa pliku istniejacej strony, np. `Documentation-Map.aspx`
 
 > **Jak odwolywac sie do tych pol.** Power Automate nadaje im wlasne klucze
 > (`text`, `text_1`) i nie zawsze sa to nazwy, ktore wpisales. **Wszedzie ponizej
@@ -98,8 +99,8 @@ string(outputs('Plan')?['mapa'])
 
 ## 6. StopGdyERR — Control → Condition
 
-Bezpiecznik. Bez niego komunikat bledu zostalby zapisany jako tresc mapy,
-a zmiana nazwy nadpisalaby dzialajaca strone.
+Bezpiecznik. Bez niego komunikat bledu zostalby zapisany jako tresc mapy
+i skasowalby dzialajace drzewo.
 
 Lewa strona (fx):
 ```
@@ -113,13 +114,43 @@ body('BudujMape')?['result']
 ```
 Galaz If no: pusta. Akcje 7–10 dodaj PONIZEJ warunku.
 
-## 7. CreatePage — Send an HTTP request to SharePoint
+## 7. GetMapa — Send an HTTP request to SharePoint
+
+Odnajduje strone, ktora mamy nadpisac, i jej `Id` w bibliotece.
+
+Method: GET
+
+Uri (fx) — podmien `<WITRYNA>`; podwojne apostrofy sa celowe:
+```
+concat('_api/web/getfilebyserverrelativeurl(''<WITRYNA>/SitePages/', triggerBody()?['text_1'], ''')/ListItemAllFields?$select=Id,Title')
+```
+Headers — jeden wiersz: Accept → application/json;odata=verbose
+
+Jesli ta akcja zwroci **404**, strony o tej nazwie nie ma. Sprawdz pisownie
+i rozszerzenie `.aspx`, albo zaloz strone recznie.
+
+## 8. CheckoutMapa — Send an HTTP request to SharePoint
+
+Opublikowanej strony nie da sie zapisac bez wypozyczenia — bez tej akcji
+nastepna konczy sie bledem **409 Conflict**.
 
 Method: POST
 
-Uri (tekst):
+Uri (fx):
 ```
-_api/sitepages/pages
+concat('_api/sitepages/pages(', body('GetMapa')?['d']?['Id'], ')/checkoutpage')
+```
+Headers — jeden wiersz: Accept → application/json;odata=verbose
+
+Body: PUSTE
+
+## 9. SaveDraft — Send an HTTP request to SharePoint
+
+Method: POST
+
+Uri (fx):
+```
+concat('_api/sitepages/pages(', body('GetMapa')?['d']?['Id'], ')/savepageasdraft')
 ```
 Headers — dwa wiersze:
 ```
@@ -134,37 +165,12 @@ Content-Type
 ```
 application/json;odata=verbose
 ```
-Body (fx) — tytul powstaje z nazwy pliku: bez rozszerzenia, myslniki na spacje:
-```
-string(setProperty(json('{"__metadata":{"type":"SP.Publishing.SitePage"},"PageLayoutType":"Article","PromotedState":0}'),'Title',replace(replace(triggerBody()?['text_1'], '.aspx', ''), '-', ' ')))
-```
 
-## 8. SaveDraft — Send an HTTP request to SharePoint
-
-Method: POST
-
-Uri (fx):
+Body (fx) — CALE pole. Tytul przepisujemy ten, ktory strona juz ma, zeby flow
+nie zmienial nazwy nadanej recznie:
 ```
-concat('_api/sitepages/pages(', body('CreatePage')?['d']?['Id'], ')/savepageasdraft')
+string(setProperty(setProperty(json('{"__metadata":{"type":"SP.Publishing.SitePage"}}'),'Title',body('GetMapa')?['d']?['Title']),'CanvasContent1',body('BudujMape')?['result']))
 ```
-Headers: te same dwa co w 7.
-
-Body (fx) — CALE pole:
-```
-string(setProperty(setProperty(json('{"__metadata":{"type":"SP.Publishing.SitePage"}}'),'Title',replace(replace(triggerBody()?['text_1'], '.aspx', ''), '-', ' ')),'CanvasContent1',body('BudujMape')?['result']))
-```
-
-## 9. RenamePage — Send an HTTP request to SharePoint
-
-Method: POST
-
-Uri (fx) — podmien `<WITRYNA>` w DWOCH miejscach; podwojne apostrofy sa celowe:
-```
-concat('_api/web/getfilebyserverrelativeurl(''<WITRYNA>/', body('CreatePage')?['d']?['Url'], ''')/moveto(newurl=''<WITRYNA>/SitePages/', triggerBody()?['text_1'], ''',flags=1)')
-```
-Headers — jeden wiersz: Accept → application/json;odata=verbose
-
-Body: PUSTE
 
 ## 10. Publish — Send an HTTP request to SharePoint
 
@@ -172,7 +178,7 @@ Method: POST
 
 Uri (fx):
 ```
-concat('_api/sitepages/pages(', body('CreatePage')?['d']?['Id'], ')/publish')
+concat('_api/sitepages/pages(', body('GetMapa')?['d']?['Id'], ')/publish')
 ```
 Headers — jeden wiersz: Accept → application/json;odata=verbose
 
@@ -183,8 +189,8 @@ Body: PUSTE
 ## Sprawdzenie
 
 - `BudujMape` → `result` zaczyna sie od `[{"controlType":4,"id":"c5f0a545`
-- `CreatePage` → w body jest `d.Id` (liczba) i `d.Url` (losowa nazwa pliku)
-- `SaveDraft`, `RenamePage`, `Publish` → 200
+- `GetMapa` → w body jest `d.Id` (liczba) i `d.Title`
+- `CheckoutMapa`, `SaveDraft`, `Publish` → 200
 - strona z pola `stronaMapy` (Ctrl+F5): link do korzenia serwisu, pod nim
   zwijane galezie z zagniezdzonymi listami
 
@@ -207,13 +213,21 @@ Gdy `wMapie` to zero, kod serwisu nie pasuje do zadnej strony — sprawdz pisown
    do drzewa; puste `Service` trzyma je poza nim.
 3. Uruchom flow: `serwis` = `SWB`, `stronaMapy` = `Documentation-Map-Switchboard.aspx`
 
-Strony nie musisz zakladac wczesniej — flow utworzy ja sam. Robisz to recznie
-tylko po to, zeby od razu dodac link w lewym panelu witryny.
+Krok 1 jest obowiazkowy — flow nie zaklada stron, tylko wypelnia istniejace.
 
 ## Zasady
 
-- Kazdy bieg tworzy nowa strone i nadpisuje wskazana (`flags=1`). Reczne zmiany
-  w mapie przepadaja — to strona generowana.
-- Flow **tylko czyta** biblioteke. Nie zapisuje metadanych, wiec nie ma jak
-  zepsuc hierarchii ani zapetlic sie na setkach stron.
+- Kazdy bieg podmienia **cala** tresc wskazanej strony. Reczne zmiany w mapie
+  przepadaja — to strona generowana.
+- Flow **tylko czyta** biblioteke stron dokumentacji. Nie zapisuje metadanych,
+  wiec nie ma jak zepsuc hierarchii ani zapetlic sie na setkach stron.
 - Strony map nie moga miec wypelnionej kolumny `Service`.
+
+## Jesli strona wyjdzie pusta
+
+Zdarzylo sie to raz, we wrzesniu, i powodem nie byl ten sposob zapisu, tylko
+stary skrypt budujacy kanwe. Jesli mimo zielonego biegu strona jest pusta:
+
+1. sprawdz w `BudujMape`, czy `result` zaczyna sie od `[{"controlType":4`
+2. jesli tak, a strona nadal pusta — ta konkretna strona jest uszkodzona.
+   Usun ja, zaloz od nowa pod ta sama nazwa i uruchom flow jeszcze raz.

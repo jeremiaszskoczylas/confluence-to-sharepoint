@@ -181,13 +181,16 @@ string(body('CreatePage')?['d']?['Id'])
 ## Po utworzeniu strony
 
 Nowa strona nie ma jeszcze `TreePath`, wiec w drzewie aplikacji pojawi sie
-dopiero po przeliczeniu. Aplikacja wywoluje zaraz potem
-[04-OdswiezDrzewo](04-OdswiezDrzewo.md), ktory uzupelnia sciezke, kolejnosc
-i przebudowuje mape.
+dopiero po przeliczeniu. Robi to [04b-PrzeliczDrzewo](04b-PrzeliczDrzewo.md) —
+to ten flow wypelnia `TreePath`, `TreeSort`, `SortOrder` i `Category`.
 
-Zeby dalo sie go wywolac z aplikacji, zamien w nim trigger
-**Manually trigger a flow** na **Power Apps (V2)** bez zadnych wejsc.
-Recznie uruchamiasz go wtedy przez **Test → Manually → Run**.
+Zeby aplikacja mogla go wywolac zaraz po utworzeniu strony, zamien w nim trigger
+**Manually trigger a flow** na **Power Apps (V2)** z jednym wejsciem tekstowym
+`serwis`. Recznie uruchamiasz go wtedy przez **Test → Manually → Run**.
+
+Strony mapy w SharePoincie to nie dotyczy. Odswieza ja
+[04-OdswiezDrzewo](04-OdswiezDrzewo.md), uruchamiany osobno — potrzebuje nazwy
+strony mapy, a ta jest inna dla kazdego serwisu.
 
 ## Sprawdzenie
 
