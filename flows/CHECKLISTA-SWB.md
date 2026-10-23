@@ -149,10 +149,21 @@ wszystkie `Pending`, `ParentConfluenceId` wypelnione (strona glowna ma 0).
 
 ### 2.6 Wybory w kolumnie Category
 
-Otworz `DT_MigrationMap_SWB`, przefiltruj `Depth` = `1`. To sa galezie
-najwyzszego poziomu. Ich tytuly dopisz jako wybory w kolumnie `Category`
+Galezie najwyzszego poziomu to **dzieci strony glownej**. Znajdziesz je tak:
+
+1. w `DT_MigrationMap_SWB` odszukaj strone glowna — ma `ParentConfluenceId`
+   rowne `0`. Zapisz jej `ConfluenceId`.
+2. przefiltruj liste po `ParentConfluenceId` = ten numer.
+
+To sa galezie. Ich tytuly dopisz jako wybory w kolumnie `Category`
 w Site Pages — **bez numeru porzadkowego**: `01. Call Handling` daje wybor
 `Call Handling`.
+
+> **Nie filtruj po `Depth` = `1`.** `parseIndex` liczy zagniezdzenie list
+> `<ul>` w `index.html`, wiec strona glowna ma `Depth` rowne `1`, a galezie
+> `2`. Filtr po `ParentConfluenceId` jest niezalezny od struktury eksportu
+> i zawsze daje to, czego oczekuje skrypt: `planujDrzewo` wyprowadza
+> `Category` z tytulu tego przodka, ktorego rodzicem jest korzen.
 
 Bez tego **kazda** iteracja kroku 2 skonczy sie bledem.
 

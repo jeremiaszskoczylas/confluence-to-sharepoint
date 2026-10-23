@@ -22,9 +22,14 @@ W kolumnie `Service` dodaj wybor dla kazdego migrowanego serwisu (ten sam kod,
 co `Code` w `DT_Services`). Przy drugim serwisie dopisujesz kolejny wybor.
 
 W kolumnie `Category` dodaj po jednym wyborze na galaz (tytuly bez numeru
-porzadkowego). **Wybory uzupelnisz po sekcji E** — galezie to wiersze
-`DT_MigrationMap` z `Depth` rownym 1. Brakujacy wybor = blad przy zapisie
-metadanych w kroku 2.
+porzadkowego). **Wybory uzupelnisz po sekcji E** — galezie to **dzieci strony
+glownej**: wiersze, ktorych `ParentConfluenceId` rowna sie `ConfluenceId` strony
+glownej (ta ma `ParentConfluenceId` rowne `0`). Brakujacy wybor = blad przy
+zapisie metadanych w kroku 2.
+
+Nie filtruj po `Depth` — ta kolumna liczy zagniezdzenie list `<ul>` w eksporcie,
+wiec strona glowna zwykle ma `1`, a galezie `2`. `ParentConfluenceId` daje ten
+sam wynik niezaleznie od struktury pliku.
 
 ### Dlaczego bez wartosci domyslnych
 

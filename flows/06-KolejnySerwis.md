@@ -38,7 +38,11 @@ SharePoint odrzuca wartosc spoza listy wyborow, wiec bez tego **kazda iteracja**
 kroku 2 skonczy sie bledem.
 
 Nazwy galezi poznasz dopiero po zaladowaniu listy migracyjnej (punkt 5):
-to wiersze `DT_MigrationMap` z `Depth` rownym 1, dla nowego serwisu.
+to **dzieci strony glownej**, czyli wiersze, ktorych `ParentConfluenceId`
+rowna sie `ConfluenceId` strony glownej (ta z `ParentConfluenceId` rownym `0`).
+
+Nie filtruj po `Depth` rownym 1 — `parseIndex` liczy zagniezdzenie list `<ul>`,
+wiec przy typowym eksporcie strona glowna ma `Depth` rowne 1, a galezie 2.
 Tytuly wpisujesz **bez numeru porzadkowego**: `01. Call Handling` w Confluence
 daje wybor `Call Handling`.
 
