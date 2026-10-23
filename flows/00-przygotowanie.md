@@ -49,7 +49,7 @@ i kasujesz je recznie albo przy migracji od zera.
 ## B. Lista migracyjna — jedna na serwis
 
 **Kazdy serwis ma wlasna liste robocza.** Pierwsza nazwij `DT_MigrationMap`,
-kolejne z sufiksem serwisu, np. `DT_MigrationMap_Switchboard`.
+kolejne z sufiksem serwisu, np. `DT_MigrationMap_SWB`.
 
 Osobne listy zamiast jednej wspolnej, bo: reset jednego serwisu to wyczyszczenie
 jego listy, limit pieciu tysiecy elementow liczy sie osobno, a pomylka przy jednym
@@ -140,7 +140,7 @@ skip(split(body('Drzewo')?['result'], decodeUriComponent('%0A')), 1)
 ```
 
 Wewnatrz petli **Dodaj** — SharePoint → Create item, **lista tego serwisu**
-(`DT_MigrationMap` dla pierwszego, `DT_MigrationMap_Switchboard` dla kolejnego):
+(`DT_MigrationMap` dla pierwszego, `DT_MigrationMap_SWB` dla kolejnego):
 
 Title (fx):
 ```

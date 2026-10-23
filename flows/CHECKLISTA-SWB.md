@@ -7,7 +7,7 @@ Pelne opisy akcji sa w [06-KolejnySerwis](06-KolejnySerwis.md). Tutaj jest
 kolejnosc, kontrole i miejsca, w ktorych latwo cos nadpisac.
 
 Zalozenia: `<SERWIS>` = `SWB`, eksport w `confluence-export/SWB`,
-lista `DT_MigrationMap_Switchboard`, mapa `Documentation-Map-Switchboard.aspx`.
+lista `DT_MigrationMap_SWB`, mapa `Documentation-Map-Switchboard.aspx`.
 
 ---
 
@@ -85,7 +85,7 @@ polisa: jesli cokolwiek ruszy GMSC, zobaczysz to od razu, a nie za tydzien.
 
 | Ryzyko | Zabezpieczenie | Co sprawdzasz |
 |---|---|---|
-| wiersze SWB trafia do listy GMSC | flow z sekcji E ma wskazana liste w akcji `Dodaj` | przed uruchomieniem: lista to `DT_MigrationMap_Switchboard` |
+| wiersze SWB trafia do listy GMSC | flow z sekcji E ma wskazana liste w akcji `Dodaj` | przed uruchomieniem: lista to `DT_MigrationMap_SWB` |
 | krok 1 nadpisze strony GMSC | czyta liste SWB, a nazwy plikow zaczynaja sie od kodu serwisu | `GMSC-*.aspx` i `SWB-*.aspx` to rozne pliki |
 | krok 2 zepsuje metadane GMSC | petla idzie po wierszach listy SWB | po biegu: liczba stron GMSC bez zmian |
 | krok 4 nadpisze mape GMSC | wpisuje tresc tylko w strone z pola `stronaMapy` | `stronaMapy` = `Documentation-Map-Switchboard.aspx` |
@@ -122,7 +122,7 @@ Kontrola: w `DocMedia/attachments/` przybylo podfolderow, a stare zostaly.
 ### 2.4 Lista migracyjna
 
 Site contents → **New** → **List** → **From existing list** → wskaz
-`DT_MigrationMap` → nazwa `DT_MigrationMap_Switchboard`.
+`DT_MigrationMap` → nazwa `DT_MigrationMap_SWB`.
 
 Kopiuje komplet kolumn razem z wyborami `MigrationStatus` i **nie kopiuje
 wierszy**. Zadne flow nie zaklada list — to jedyna czynnosc reczna tego typu.
@@ -136,20 +136,20 @@ Flow z [00-przygotowanie](00-przygotowanie.md), sekcja E, z czterema zmianami:
 | Akcja | Pole | Wartosc |
 |---|---|---|
 | `GetIndex` | File Path | `/<BIBLIOTEKA>/confluence-export/SWB/index.html` |
-| `Dodaj` | lista | `DT_MigrationMap_Switchboard` |
+| `Dodaj` | lista | `DT_MigrationMap_SWB` |
 | `Dodaj` | `Service` | `SWB` |
 | `ZapiszDrzewo` | File Name | `drzewo-SWB.txt` |
 
 **Sprawdz liste w akcji `Dodaj` dwa razy.** To jedyne miejsce w calym dniu,
 gdzie pomylka dopisuje smieci do listy GMSC.
 
-Kontrola: `DT_MigrationMap_Switchboard` ma tyle wierszy, ile stron w eksporcie,
+Kontrola: `DT_MigrationMap_SWB` ma tyle wierszy, ile stron w eksporcie,
 wszystkie `Pending`, `ParentConfluenceId` wypelnione (strona glowna ma 0).
 `DT_MigrationMap` ma tyle wierszy, co wczoraj.
 
 ### 2.6 Wybory w kolumnie Category
 
-Otworz `DT_MigrationMap_Switchboard`, przefiltruj `Depth` = `1`. To sa galezie
+Otworz `DT_MigrationMap_SWB`, przefiltruj `Depth` = `1`. To sa galezie
 najwyzszego poziomu. Ich tytuly dopisz jako wybory w kolumnie `Category`
 w Site Pages — **bez numeru porzadkowego**: `01. Call Handling` daje wybor
 `Call Handling`.
@@ -174,7 +174,7 @@ Kontrola: strona istnieje, nazwa pliku to `Documentation-Map-Switchboard.aspx`.
 [01-MigratePages](01-MigratePages.md), pola triggera:
 
 ```
-lista    = DT_MigrationMap_Switchboard
+lista    = DT_MigrationMap_SWB
 serwis   = SWB
 eksport  = confluence-export/SWB
 ```
@@ -259,6 +259,6 @@ i mozna nim przepuscic GMSC od nowa.
 | krok 4: blad 404 na `GetMapa` | strony mapy nie ma albo zla nazwa | punkt 2.7 |
 | petla kreci sie bez konca | zly flow — krok 4 nie ma petli | zatrzymaj (Cancel), sprawdz, ktory flow odpaliles |
 
-Reset samego SWB: wyczysc `DT_MigrationMap_Switchboard`, skasuj strony
+Reset samego SWB: wyczysc `DT_MigrationMap_SWB`, skasuj strony
 z filtrem `Service` = `SWB`, zaladuj liste od nowa punktem 2.5. GMSC
 zostaje nietkniety, bo wszystko jest rozdzielone.

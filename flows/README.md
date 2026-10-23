@@ -48,7 +48,7 @@ Te same we wszystkich sciagach. Wypelnij raz i trzymaj pod reka.
 ## Listy migracyjne
 
 **Kazdy serwis ma wlasna liste robocza:** `DT_MigrationMap` dla pierwszego,
-`DT_MigrationMap_Switchboard` dla kolejnego. Nazwe listy podajesz w polu
+`DT_MigrationMap_SWB` dla kolejnego. Nazwe listy podajesz w polu
 triggera, wiec jeden zbudowany flow obsluguje wszystkie serwisy.
 
 ## Migracja kolejnego serwisu

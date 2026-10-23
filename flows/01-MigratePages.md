@@ -32,7 +32,7 @@ eksport
 ```
 
 - `lista` — nazwa listy migracyjnej tego serwisu, np. `DT_MigrationMap`
-  albo `DT_MigrationMap_Switchboard`
+  albo `DT_MigrationMap_SWB`
 - `serwis` — kod z `DT_Services`, np. `GMSC` albo `SWB`
 - `eksport` — folder eksportu w bibliotece, np. `confluence-export/SWB`
 

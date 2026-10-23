@@ -56,10 +56,10 @@ uruchamiasz krok 2 migracji.
 
 ### 5. Wlasna lista migracyjna
 
-Zaloz nowa liste `DT_MigrationMap_Switchboard` z kolumnami wg
+Zaloz nowa liste `DT_MigrationMap_SWB` z kolumnami wg
 [00-przygotowanie](00-przygotowanie.md), sekcja B. Najszybciej:
 Site contents → **New** → **List** → **From existing list** → wskaz liste GMSC →
-nazwa `DT_MigrationMap_Switchboard`. Kopiuje komplet kolumn razem z wyborami
+nazwa `DT_MigrationMap_SWB`. Kopiuje komplet kolumn razem z wyborami
 `MigrationStatus`, a nie kopiuje wierszy — dokladnie o to chodzi.
 
 (Starsza droga, **Save list as template**, bywa niedostepna: SharePoint Online
@@ -76,7 +76,7 @@ Uruchom flow z kroku 0, sekcja E, z dwiema zmianami:
   ```
   /<BIBLIOTEKA>/confluence-export/SWB/index.html
   ```
-- akcja `Dodaj` → **lista**: `DT_MigrationMap_Switchboard`, pole `Service`:
+- akcja `Dodaj` → **lista**: `DT_MigrationMap_SWB`, pole `Service`:
   ```
   SWB
   ```
@@ -86,7 +86,7 @@ Wiersze GMSC leza w osobnej liscie, wiec nic im nie grozi.
 W akcji `ZapiszDrzewo` zmien **File Name** na `drzewo-SWB.txt`, zeby nie nadpisac
 pliku GMSC. Kazdy serwis ma wlasny plik hierarchii.
 
-Kontrola: `DT_MigrationMap_Switchboard` ma komplet wierszy SWB ze statusem
+Kontrola: `DT_MigrationMap_SWB` ma komplet wierszy SWB ze statusem
 `Pending`.
 
 ---
@@ -99,7 +99,7 @@ Uruchom [01-MigratePages](01-MigratePages.md) i wypelnij pola triggera:
 
 | Placeholder | Wartosc dla Switchboard |
 |---|---|
-| `lista` | `DT_MigrationMap_Switchboard` |
+| `lista` | `DT_MigrationMap_SWB` |
 | `serwis` | `SWB` |
 | `eksport` | `confluence-export/SWB` |
 
@@ -172,7 +172,7 @@ Przed uruchomieniem kroku 1:
 - [ ] kolumna `Service` w Site Pages ma wybor `SWB`
 - [ ] eksport rozpakowany do `confluence-export/SWB`
 - [ ] zalaczniki skopiowane do `DocMedia/attachments/`
-- [ ] `DT_MigrationMap_Switchboard` ma wiersze SWB ze statusem `Pending`
+- [ ] `DT_MigrationMap_SWB` ma wiersze SWB ze statusem `Pending`
 - [ ] kolumna `Category` w Site Pages ma wybory dla galezi Switchboarda
 - [ ] znasz trzy wartosci do pol triggera: lista, serwis, folder eksportu
 - [ ] w akcji `OdhaczWMapie` pola poza `Id`, `Title` i statusem sa puste
