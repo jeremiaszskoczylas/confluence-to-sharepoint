@@ -83,7 +83,7 @@ LookUp(colServices, Code = gblService).Title
 
 ### drp_NewPage_Category.Items
 
-Distinct(Filter(colPages, Service.Value = gblService && !IsBlank(Category.Value)), Category.Value)
+Distinct(Filter(colPages, Service.Value = gblService && !IsBlank(Category)), Category)
 
 ---
 // --------------------------------------------------------------------------

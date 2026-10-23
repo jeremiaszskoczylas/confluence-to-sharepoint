@@ -109,7 +109,7 @@ Service Value (Enter custom value, potem fx):
 ```
 triggerBody()['text_2']
 ```
-Category Value (Enter custom value, potem fx):
+Category (fx) — kolumna tekstowa:
 ```
 if(equals(triggerBody()['text_3'], ''), null, triggerBody()['text_3'])
 ```

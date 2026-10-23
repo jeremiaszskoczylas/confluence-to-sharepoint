@@ -31,15 +31,13 @@ Site Pages → ustawienia kolumny `Service` → dopisz wybor `SWB`.
 
 **Bez tego nie zapiszesz metadanych** — SharePoint odrzuca wartosc spoza listy.
 
-### 3. Wybory w kolumnie Category
+### 3. Kolumna Category — nic nie robisz
 
-Tu masz przewage nad migracja: galezie wymyslasz sam, wiec wybory mozesz dodac
-od razu. Galaz to strona **bezposrednio pod korzeniem** serwisu.
+`Category` jest kolumna **tekstowa**, wypelniana automatycznie z tytulu galezi,
+pod ktora wisi strona. Galaz to strona **bezposrednio pod korzeniem** serwisu.
 
-Przyklad: `Call Handling`, `Escalations`, `Known Errors`.
-
-Wpisuj **bez numeru porzadkowego**, nawet jesli w tytule strony numer bedzie
-(`01. Call Handling` w tytule → wybor `Call Handling`).
+Numer porzadkowy z tytulu jest obcinany: `01. Call Handling` daje
+`Call Handling`.
 
 ---
 

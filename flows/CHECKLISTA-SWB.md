@@ -96,9 +96,6 @@ polisa: jesli cokolwiek ruszy GMSC, zobaczysz to od razu, a nie za tydzien.
 
 ## 2. Przygotowanie
 
-Kolejnosc jest celowo przeplatana: wyborow `Category` nie da sie wpisac
-wczesniej, bo nazw galezi nie znasz, dopoki nie zaladujesz listy.
-
 ### 2.1 Wpis w DT_Services
 
 `Title` = `Switchboard`, `Code` = `SWB`, `SortOrder` = `20`, `IsActive` zaznaczone.
@@ -156,25 +153,14 @@ Kontrola: `DT_MigrationMap_SWB` ma tyle wierszy, ile stron w eksporcie,
 wszystkie `Pending`, `ParentConfluenceId` wypelnione (strona glowna ma 0).
 `DT_MigrationMap` ma tyle wierszy, co wczoraj.
 
-### 2.6 Wybory w kolumnie Category
+### 2.6 Kolumna Category na tekst
 
-Galezie najwyzszego poziomu to **dzieci strony glownej**. Znajdziesz je tak:
+Site Pages → ustawienia kolumny `Category` → zmien typ na **Jeden wiersz
+tekstu**. Istniejace wartosci zostaja.
 
-1. w `DT_MigrationMap_SWB` odszukaj strone glowna — ma `ParentConfluenceId`
-   rowne `0`. Zapisz jej `ConfluenceId`.
-2. przefiltruj liste po `ParentConfluenceId` = ten numer.
-
-To sa galezie. Ich tytuly dopisz jako wybory w kolumnie `Category`
-w Site Pages — **bez numeru porzadkowego**: `01. Call Handling` daje wybor
-`Call Handling`.
-
-> **Nie filtruj po `Depth` = `1`.** `parseIndex` liczy zagniezdzenie list
-> `<ul>` w `index.html`, wiec strona glowna ma `Depth` rowne `1`, a galezie
-> `2`. Filtr po `ParentConfluenceId` jest niezalezny od struktury eksportu
-> i zawsze daje to, czego oczekuje skrypt: `planujDrzewo` wyprowadza
-> `Category` z tytulu tego przodka, ktorego rodzicem jest korzen.
-
-Bez tego **kazda** iteracja kroku 2 skonczy sie bledem.
+Jako wybor wymagalaby dopisywania pozycji przed migracja kazdego serwisu,
+a brakujaca pozycja konczy **kazda** iteracje kroku 2 bledem. Jako tekst
+przyjmuje kazdy tytul galezi i nie wymaga niczego.
 
 ### 2.7 Strona mapy
 
@@ -275,7 +261,7 @@ i mozna nim przepuscic GMSC od nowa.
 | Objaw | Przyczyna | Co zrobic |
 |---|---|---|
 | krok 1 wywala sie na pierwszej stronie | brak wyboru `SWB` w kolumnie `Service` | punkt 2.2 |
-| krok 2 wywala sie na kazdej iteracji | brak wyborow w `Category` | punkt 2.6 |
+| krok 2 wywala sie na kazdej iteracji | `Category` nadal jest kolumna wyboru | punkt 2.6 |
 | po kroku 2 `Service` puste | akcja `Update file properties` | punkt 0, potem [97](97-NaprawMetadaneStron.md) |
 | krok 4: `wMapie: 0` | strony nie maja `Service` = `SWB` | jak wyzej |
 | krok 4: blad 404 na `GetMapa` | strony mapy nie ma albo zla nazwa | punkt 2.7 |

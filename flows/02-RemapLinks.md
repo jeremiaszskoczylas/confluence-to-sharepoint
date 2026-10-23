@@ -227,8 +227,8 @@ concat('{"formValues":[{"FieldName":"ParentPageId","FieldValue":"', items('Apply
 Zapisywane jest **szesc kolumn**. `ConfluencePageId` i `Service`, ustawione
 w kroku 1, pozostaja nietkniete — i o to tu chodzi.
 
-`Category` puste czysci kolumne wyboru, nie wywoluje bledu. Pusta zostaje
-korzeniowi serwisu, ktory nie nalezy do zadnej galezi.
+`Category` puste czysci kolumne, nie wywoluje bledu. Pusta zostaje korzeniowi
+serwisu, ktory nie nalezy do zadnej galezi.
 
 `bNewDocumentUpdate` ustawione na `true` zapisuje bez tworzenia nowej wersji
 strony.
@@ -290,6 +290,6 @@ lub PublishMapa z wczesniejszych wersji — skasuj je.
 - Tresc kazdej strony jest BUDOWANA OD NOWA ze zrodel (parser + mapowanie linkow).
   Reczne edycje stron sprzed tego flow zostana nadpisane. Po nim edycja jest wolna.
 - Strona mapy: osobny flow, krok 3.
-- `category` musi istniec w wyborach kolumny `Category` w Site Pages.
+- `Category` w Site Pages jest kolumna **tekstowa**, wiec przyjmuje kazdy tytul galezi.
 - Flow jest idempotentny — mozna uruchamiac wielokrotnie.
 - Czas: okolo 30 s na strone, czyli 30–40 min dla 60 stron.

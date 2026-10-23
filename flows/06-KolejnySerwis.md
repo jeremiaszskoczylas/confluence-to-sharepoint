@@ -31,23 +31,13 @@ Site Pages → ustawienia kolumny `Service` → dopisz wybor `SWB`.
 Bez tego krok 1 wywali sie przy zapisie metadanych: SharePoint odrzuca
 wartosc spoza listy wyborow.
 
-### 3. Wybory w kolumnie Category
+### 3. Kolumna Category — nic nie robisz
 
-Krok 2 zapisuje `Category` wyliczona z galezi najwyzszego poziomu nowego serwisu.
-SharePoint odrzuca wartosc spoza listy wyborow, wiec bez tego **kazda iteracja**
-kroku 2 skonczy sie bledem.
+`Category` jest kolumna **tekstowa**. Krok 2 wpisuje do niej tytul galezi,
+pod ktora wisi strona, i przyjmie kazda wartosc.
 
-Nazwy galezi poznasz dopiero po zaladowaniu listy migracyjnej (punkt 5):
-to **dzieci strony glownej**, czyli wiersze, ktorych `ParentConfluenceId`
-rowna sie `ConfluenceId` strony glownej (ta z `ParentConfluenceId` rownym `0`).
-
-Nie filtruj po `Depth` rownym 1 — `parseIndex` liczy zagniezdzenie list `<ul>`,
-wiec przy typowym eksporcie strona glowna ma `Depth` rowne 1, a galezie 2.
-Tytuly wpisujesz **bez numeru porzadkowego**: `01. Call Handling` w Confluence
-daje wybor `Call Handling`.
-
-Kolejnosc jest wiec taka: punkty 1, 2, 4, 5, potem wracasz tutaj i dopiero
-uruchamiasz krok 2 migracji.
+Wczesniej byla wyborem i trzeba bylo dopisywac pozycje przed migracja —
+to juz nieaktualne.
 
 ### 4. Pliki eksportu
 
@@ -177,7 +167,6 @@ Przed uruchomieniem kroku 1:
 - [ ] eksport rozpakowany do `confluence-export/SWB`
 - [ ] zalaczniki skopiowane do `DocMedia/attachments/`
 - [ ] `DT_MigrationMap_SWB` ma wiersze SWB ze statusem `Pending`
-- [ ] kolumna `Category` w Site Pages ma wybory dla galezi Switchboarda
 - [ ] znasz trzy wartosci do pol triggera: lista, serwis, folder eksportu
 - [ ] w akcji `OdhaczWMapie` pola poza `Id`, `Title` i statusem sa puste
 

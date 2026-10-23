@@ -14,22 +14,20 @@ Site Pages → Add column. Wszystkie **bez wartosci domyslnej** — pole
 | `SortOrder` | Liczba | kolejnosc wsrod rodzenstwa |
 | `TreePath` | Jeden wiersz tekstu | sciezka id, np. `/8/9/11/12/` |
 | `TreeSort` | Jeden wiersz tekstu | klucz sortowania calego drzewa |
-| `Category` | Wybor | galaz najwyzszego poziomu |
+| `Category` | Jeden wiersz tekstu | galaz najwyzszego poziomu |
 | `DocStatus` | Wybor | `Draft`, `Published`, `Archived` |
 | `Service` | Wybor | kod serwisu; wartosci takie same jak `Code` w `DT_Services` |
 
 W kolumnie `Service` dodaj wybor dla kazdego migrowanego serwisu (ten sam kod,
 co `Code` w `DT_Services`). Przy drugim serwisie dopisujesz kolejny wybor.
 
-W kolumnie `Category` dodaj po jednym wyborze na galaz (tytuly bez numeru
-porzadkowego). **Wybory uzupelnisz po sekcji E** — galezie to **dzieci strony
-glownej**: wiersze, ktorych `ParentConfluenceId` rowna sie `ConfluenceId` strony
-glownej (ta ma `ParentConfluenceId` rowne `0`). Brakujacy wybor = blad przy
-zapisie metadanych w kroku 2.
+Kolumna `Category` jest **tekstowa, nie wyborem**. Wartosc wylicza skrypt
+z tytulu galezi, pod ktora wisi strona, i zapisuje ja krok 2 — nic nie
+uzupelniasz recznie.
 
-Nie filtruj po `Depth` — ta kolumna liczy zagniezdzenie list `<ul>` w eksporcie,
-wiec strona glowna zwykle ma `1`, a galezie `2`. `ParentConfluenceId` daje ten
-sam wynik niezaleznie od struktury pliku.
+Wyborem byla wczesniej i zmuszało to do dopisywania pozycji przed kazda
+migracja nowego serwisu. Przy kilku serwisach galezi jest kilkadziesiat
+i zadna lista wyborow nie nadazy za trescia dokumentacji.
 
 ### Dlaczego bez wartosci domyslnych
 

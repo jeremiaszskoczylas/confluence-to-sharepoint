@@ -190,7 +190,7 @@ Set(gblCreateResult,
         Trim(txt_NewPage_Title.Text),
         Text(gblParentId),
         drp_NewPage_Service.Selected.Code,
-        Coalesce(drp_NewPage_Category.Selected.Value, "")
+        Coalesce(drp_NewPage_Category.Selected.Result, "")
     )
 );
 OdswiezDrzewo.Run(<kod serwisu>, "");

@@ -129,7 +129,7 @@ ale aplikacja z nich korzysta, wiec dla porzadku komplet:
 | `SortOrder` | Liczba | kolejnosc wsrod rodzenstwa |
 | `TreePath` | Jeden wiersz tekstu | sciezka id, np. `/8/9/11/12/` |
 | `TreeSort` | Jeden wiersz tekstu | klucz sortowania drzewa |
-| `Category` | Wybor | galaz najwyzszego poziomu |
+| `Category` | Jeden wiersz tekstu | galaz najwyzszego poziomu |
 | `DocStatus` | Wybor | `Draft`, `Published`, `Archived` |
 | `Service` | Wybor | kod serwisu; wartosci takie same jak `Code` w `DT_Services` |
 
