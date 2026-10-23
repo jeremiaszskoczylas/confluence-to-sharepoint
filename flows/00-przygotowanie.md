@@ -163,10 +163,16 @@ Depth (fx):
 ```
 int(trim(split(item(), '|')[2]))
 ```
-SourceFile (fx):
+SourceFile (fx) — **sama nazwa pliku, bez katalogu**:
 ```
-trim(split(item(), '|')[4])
+last(split(trim(split(item(), '|')[4]), '/'))
 ```
+
+> `parseIndex` przepisuje `href` z `index.html` doslownie. W czesci eksportow
+> sa to same nazwy plikow, w innych sciezki z katalogiem przestrzeni. Krok 1
+> sklada sciezke jako `/<BIBLIOTEKA>/<eksport>/<SourceFile>`, wiec katalog
+> zapisany w `SourceFile` zdublowalby sie i akcja `GetHtml` zwrocilaby
+> **notFound**. `last(split(...))` zostawia ostatni segment, czyli nazwe pliku.
 MigrationStatus Value (lista):
 ```
 Pending
