@@ -4,11 +4,12 @@ Bez tych rzeczy flow-y nie maja na czym pracowac. Kolejnosc ma znaczenie.
 
 ## A. Kolumny w bibliotece Site Pages
 
-Site Pages → Add column. Wszystkie **bez wartosci domyslnej**.
+Site Pages → Add column. Wszystkie **bez wartosci domyslnej** — pole
+*Default value* zostaw puste. Dlaczego to wazne, nizej.
 
 | Nazwa | Typ | Po co |
 |---|---|---|
-| `ConfluencePageId` | Liczba | id strony zrodlowej; 0 = strona nie z migracji |
+| `ConfluencePageId` | Liczba | id strony zrodlowej; puste = strona nie z migracji |
 | `ParentPageId` | Liczba | id strony nadrzednej — **na tym stoi cale drzewo** |
 | `SortOrder` | Liczba | kolejnosc wsrod rodzenstwa |
 | `TreePath` | Jeden wiersz tekstu | sciezka id, np. `/8/9/11/12/` |
@@ -25,6 +26,26 @@ porzadkowego). **Wybory uzupelnisz po sekcji E** — galezie to wiersze
 `DT_MigrationMap` z `Depth` rownym 1. Brakujacy wybor = blad przy zapisie
 metadanych w kroku 2.
 
+### Dlaczego bez wartosci domyslnych
+
+Wartosc domyslna wchodzi przy **tworzeniu** elementu, gdy pole nie zostalo
+podane. Nic nie zepsuje od razu, ale odbiera informacje, ktora przy tym
+procesie jest najcenniejsza: **czym rozni sie „nie ustawiono" od „ustawiono
+na zero"**.
+
+| Kolumna | Domyslna wartosc | Co sie przez nia traci |
+|---|---|---|
+| `ConfluencePageId` | `0` | strona zalozona recznie wyglada jak zmigrowana z zepsutym id; nie odroznisz jej od strony, ktorej metadane zostaly wyzerowane |
+| `ParentPageId` | `0` | drzewo liczy sie tak samo (skrypt traktuje zero i pustke jednakowo), ale nie widzisz, ktora strona czeka na przypisanie rodzica |
+| `SortOrder` | `100` | **to jedyna, ktora zmienia wynik.** Krok 2 nadaje `10`, `20`, `30`…, wiec strona bez przeliczenia wchodzi pomiedzy dziewiata a jedenasta pozycje rodzenstwa. Bez domyslnej wartosci skrypt stawia ja na koncu (`9999`) — tam, gdzie widac, ze cos wymaga uwagi |
+
+Zaden flow ani skrypt nie wymaga tych zer. Krok 1 ustawia `ConfluencePageId`
+i `Service`, krok 2 reszte — zawsze jawnie.
+
+**Usuniecie wartosci domyslnej nie czysci tego, co juz zapisane.** Dziala
+od nastepnego utworzonego elementu. Zera z wczesniejszych biegow zostaja
+i kasujesz je recznie albo przy migracji od zera.
+
 ## B. Lista migracyjna — jedna na serwis
 
 **Kazdy serwis ma wlasna liste robocza.** Pierwsza nazwij `DT_MigrationMap`,
@@ -34,13 +55,13 @@ Osobne listy zamiast jednej wspolnej, bo: reset jednego serwisu to wyczyszczenie
 jego listy, limit pieciu tysiecy elementow liczy sie osobno, a pomylka przy jednym
 serwisie nie dotyka drugiego.
 
-Kolumny (te same w kazdej liscie):
+Kolumny (te same w kazdej liscie), **bez wartosci domyslnych**:
 
 | Nazwa | Typ |
 |---|---|
 | `Title` | domyslna, tytul strony |
 | `ConfluenceId` | Liczba |
-| `ParentConfluenceId` | Liczba |
+| `ParentConfluenceId` | Liczba — `0` u strony glownej, ale wpisuje je flow, nie wartosc domyslna |
 | `Depth` | Liczba |
 | `SourceFile` | Jeden wiersz tekstu |
 | `MigrationStatus` | Wybor: `Pending`, `PageCreated`, `LinksRemapped`, `Failed` |

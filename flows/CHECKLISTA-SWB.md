@@ -32,6 +32,25 @@ Kontrola: w kroku 2 nie ma juz zadnej akcji `Update file properties`.
 
 ---
 
+## 0b. Wartosci domyslne kolumn
+
+Site Pages i listy migracyjne maja miec pola *Default value* **puste** —
+w `ConfluencePageId`, `ParentPageId`, `SortOrder`, `ConfluenceId`
+i `ParentConfluenceId`. Uzasadnienie: [00-przygotowanie](00-przygotowanie.md),
+sekcja A, „Dlaczego bez wartosci domyslnych".
+
+Sprawdz to teraz, bo `From existing list` kopiuje wartosci domyslne razem
+z kolumnami — nowa lista SWB odziedziczy je po GMSC.
+
+Najwazniejsza jest `SortOrder` w Site Pages: domyslne `100` wstawia strone
+w srodek rodzenstwa zamiast na koniec.
+
+Usuniecie domyslnej wartosci dziala od nastepnego utworzonego elementu.
+Zapisanych juz zer nie czysci — przy SWB to bez znaczenia, bo jego strony
+dopiero powstana.
+
+---
+
 ## 1. Zabezpieczenie GMSC przed startem
 
 Zrob zrzut stanu, zebys po migracji mogl porownac. Site Pages → filtr
