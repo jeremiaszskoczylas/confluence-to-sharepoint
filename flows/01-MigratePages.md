@@ -86,6 +86,13 @@ File Path (fx):
 concat('/<BIBLIOTEKA>/', triggerBody()?['text_2'], '/', items('Apply_to_each')?['SourceFile'])
 ```
 
+> **`<BIBLIOTEKA>` to sama nazwa biblioteki dokumentow**, np. `Dashboard_Team`.
+> Nie wpisuj tu folderu eksportu — ten podajesz osobno, w polu `eksport`.
+> Wpisany w obu miejscach zdubluje sie w sciezce:
+> `/Dashboard_Team/Confluence-export/swb/Confluence-export/swb/Strona_123.html`,
+> a akcja zwroci **notFound**. Gotowa sciezke zobaczysz w historii biegu —
+> kliknij akcje i porownaj ja z tym, co widzisz w bibliotece.
+
 ## 5. ParsujTresc — Excel Online → Run script
 
 Script (lista):

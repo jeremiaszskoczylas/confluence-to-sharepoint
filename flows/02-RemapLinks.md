@@ -108,6 +108,9 @@ File Path (fx):
 ```
 concat('/<BIBLIOTEKA>/', triggerBody()?['text_2'], '/', items('Apply_to_each')?['file'])
 ```
+
+> `<BIBLIOTEKA>` to sama nazwa biblioteki, bez folderu eksportu — ten idzie
+> w polu `eksport`. Szczegoly: [01-MigratePages](01-MigratePages.md), punkt 4.
 Folder eksportu bierze sie z pola `eksport` w triggerze.
 
 ---
