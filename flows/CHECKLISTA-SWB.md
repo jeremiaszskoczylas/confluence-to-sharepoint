@@ -115,9 +115,18 @@ spoza listy wyborow.
 1. Eksport przestrzeni Switchboard z Confluence do HTML.
 2. Rozpakuj do `confluence-export/SWB` — **osobny folder**, nie mieszaj z GMSC.
 3. Folder `attachments` z tego eksportu skopiuj do
-   `SiteAssets/DocMedia/attachments/`.
+   `SiteAssets/DocMedia/Switchboard/attachments/` — **wlasny podfolder serwisu**,
+   obok zalacznikow GMSC, nie w nich.
 
-Kontrola: w `DocMedia/attachments/` przybylo podfolderow, a stare zostaly.
+Zapisz sobie pelna sciezke do tego folderu, od korzenia serwera i zakonczona
+ukosnikiem — podasz ja w polu `zalaczniki` w krokach 1 i 2:
+
+```
+/teams/<WITRYNA>/SiteAssets/DocMedia/Switchboard/attachments/
+```
+
+Kontrola: `DocMedia/Switchboard/attachments/` ma podfoldery o nazwach bedacych
+identyfikatorami stron, a `DocMedia/attachments/` (GMSC) jest nietkniety.
 
 ### 2.4 Lista migracyjna
 
@@ -185,9 +194,10 @@ Kontrola: strona istnieje, nazwa pliku to `Documentation-Map-Switchboard.aspx`.
 [01-MigratePages](01-MigratePages.md), pola triggera:
 
 ```
-lista    = DT_MigrationMap_SWB
-serwis   = SWB
-eksport  = confluence-export/SWB
+lista       = DT_MigrationMap_SWB
+serwis      = SWB
+eksport     = Confluence-export/switchboard
+zalaczniki  = /teams/<WITRYNA>/SiteAssets/DocMedia/Switchboard/attachments/
 ```
 
 **`Top Count` = `1`.**
@@ -208,8 +218,9 @@ Zaden nie zostal na `Pending`.
 
 ### 3.3 Krok 2
 
-[02-RemapLinks](02-RemapLinks.md), te same trzy wartosci. Trzydziesci do
-czterdziestu minut.
+[02-RemapLinks](02-RemapLinks.md), **te same cztery wartosci co w kroku 1**.
+Rozna sciezka w polu `zalaczniki` miedzy biegami oznacza obrazki wskazujace
+w pustke. Trzydziesci do czterdziestu minut.
 
 Kontrola — **to jest moment prawdy dla poprawki z punktu 0**. Wez dowolna
 strone SWB:

@@ -93,9 +93,14 @@ wiec bez spacji i polskich znakow.
 ## C. Pliki na miejsce
 
 1. Rozpakuj eksport HTML do biblioteki plikow: `<EKSPORT>`.
-2. Folder `attachments` z eksportu skopiuj do **Site Assets → DocMedia**, tak zeby
-   powstalo `SiteAssets/DocMedia/attachments/<id-strony>/<plik>`. Parser przepisuje
-   sciezki wlasnie na ten uklad.
+2. Folder `attachments` z eksportu skopiuj do **Site Assets → DocMedia**,
+   do **podfolderu nazwanego serwisem**, tak zeby powstalo
+   `SiteAssets/DocMedia/<Serwis>/attachments/<id-strony>/<plik>`.
+
+   Podfolder na serwis trzyma zalaczniki rozdzielone: kasujac jeden serwis,
+   nie ruszasz pozostalych. Pelna sciezke do tego folderu podajesz przy starcie
+   krokow 1 i 2 w polu `zalaczniki`, wiec parser przepisze sciezki tam, gdzie
+   naprawde leza pliki.
 
 ## D. Skrypty do Excela
 

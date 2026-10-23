@@ -18,7 +18,7 @@ ma wlasna liste roboczca.
 
 ## 1. Trigger — Manually trigger a flow
 
-Dodaj trzy wejscia tekstowe, **w tej kolejnosci**, przyciskiem
+Dodaj cztery wejscia tekstowe, **w tej kolejnosci**, przyciskiem
 **Add an input → Text**:
 
 ```
@@ -30,17 +30,26 @@ serwis
 ```
 eksport
 ```
+```
+zalaczniki
+```
 
 - `lista` — nazwa listy migracyjnej tego serwisu, np. `DT_MigrationMap`
   albo `DT_MigrationMap_SWB`
 - `serwis` — kod z `DT_Services`, np. `GMSC` albo `SWB`
 - `eksport` — folder eksportu w bibliotece, np. `confluence-export/SWB`
+- `zalaczniki` — **pelna sciezka** do folderu z zalacznikami tego serwisu,
+  zakonczona `attachments/`. Ta wartosc trafia wprost do `src` obrazkow, wiec
+  liczona jest od korzenia serwera, a nie od witryny:
+  ```
+  /teams/<WITRYNA>/SiteAssets/DocMedia/<Serwis>/attachments/
+  ```
 
 Dzieki nim **jeden zbudowany flow migruje kazdy serwis**. Przy kolejnej
 przestrzeni nie przepisujesz zadnej akcji — wpisujesz inne wartosci przy starcie.
 
 > **Jak odwolywac sie do pol triggera.** Power Automate nadaje im wlasne klucze
-> (`text`, `text_1`, `text_2`) i nie zawsze sa to nazwy, ktore wpisales. Dlatego
+> (`text`, `text_1`, `text_2`, `text_3`) i nie zawsze sa to nazwy, ktore wpisales. Dlatego
 > **wszedzie ponizej wstawiaj tokeny z dynamic content**, zamiast przepisywac
 > wyrazenia recznie. Podane wyrazenia to wariant awaryjny.
 
@@ -85,9 +94,9 @@ parseTresc
 ```
 html (dyn): File Content z GetHtml
 
-base (tekst):
+base — **token `zalaczniki`** z dynamic content. Awaryjnie (fx):
 ```
-<WITRYNA>/SiteAssets/DocMedia/attachments/
+triggerBody()?['text_3']
 ```
 tytul (fx):
 ```

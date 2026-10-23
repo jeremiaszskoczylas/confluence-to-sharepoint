@@ -16,7 +16,7 @@ Nazwy akcji dokladnie jak w naglowkach.
 ---
 ## 1. Trigger — Manually trigger a flow
 
-Trzy wejscia tekstowe, **w tej samej kolejnosci co w kroku 1**
+Cztery wejscia tekstowe, **w tej samej kolejnosci co w kroku 1**
 (**Add an input → Text**):
 
 ```
@@ -28,9 +28,16 @@ serwis
 ```
 eksport
 ```
+```
+zalaczniki
+```
+
+Znaczenie pol: [01-MigratePages](01-MigratePages.md), punkt 1. Wartosci przy
+uruchomieniu musza byc **te same co w kroku 1** — inaczej tresc stron
+wskaze na inny folder zalacznikow niz pierwszy bieg.
 
 > **Jak odwolywac sie do pol triggera.** Power Automate nadaje im wlasne klucze
-> (`text`, `text_1`, `text_2`) i nie zawsze sa to nazwy, ktore wpisales. Dlatego
+> (`text`, `text_1`, `text_2`, `text_3`) i nie zawsze sa to nazwy, ktore wpisales. Dlatego
 > **wszedzie ponizej wstawiaj tokeny z dynamic content**, zamiast przepisywac
 > wyrazenia recznie. Podane wyrazenia to wariant awaryjny.
 
@@ -113,9 +120,9 @@ parseTresc
 ```
 html (dyn): File Content z GetHtml
 
-base (tekst):
+base — **token `zalaczniki`** z dynamic content. Awaryjnie (fx):
 ```
-<WITRYNA>/SiteAssets/DocMedia/attachments/
+triggerBody()?['text_3']
 ```
 tytul (fx):
 ```
