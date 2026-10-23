@@ -93,7 +93,20 @@ tytul (fx):
 ```
 items('Apply_to_each')?['Title']
 ```
-linki, nag, pod — **PUSTE** (wypelnia je krok 2).
+linki, nag, pod — w kroku 1 maja byc **puste**, bo mapowanie odnosnikow jest
+znane dopiero po utworzeniu wszystkich stron. Wypelnia je krok 2.
+
+Power Automate nie pozwala jednak zostawic pustego pola parametru skryptu —
+kazdy argument `main()` jest wymagany. W kazdym z tych trzech pol przelacz sie
+na wyrazenie (**fx**) i wpisz:
+```
+concat('','')
+```
+Zwraca pusty ciag, wiec skrypt pomija mapowanie odnosnikow, naglowek i stopke
+(sprawdza `length > 0`), a pole przechodzi walidacje.
+
+> Nie wpisuj spacji ani slowa `null`. Spacja trafi do tresci strony, a `null`
+> bywa zamieniane na tekst `"null"` i wyladowalby jako naglowek.
 
 ## 6. CreatePage — Send an HTTP request to SharePoint
 

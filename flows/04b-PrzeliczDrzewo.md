@@ -61,7 +61,11 @@ dane (fx):
 ```
 string(body('GetStrony')?['d']?['results'])
 ```
-pomin (tekst) — zostaw PUSTE
+pomin — tu nie pomijamy zadnej strony, ale Power Automate wymaga wartosci
+w kazdym parametrze skryptu. Przelacz sie na wyrazenie (**fx**) i wpisz:
+```
+concat('','')
+```
 
 serwisMapy — **token `serwis`** z dynamic content
 
