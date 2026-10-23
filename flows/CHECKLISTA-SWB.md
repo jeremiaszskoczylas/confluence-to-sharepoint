@@ -45,6 +45,22 @@ z kolumnami — nowa lista SWB odziedziczy je po GMSC.
 Najwazniejsza jest `SortOrder` w Site Pages: domyslne `100` wstawia strone
 w srodek rodzenstwa zamiast na koniec.
 
+Przejrzyj **wszystkie** kolumny obu list i biblioteki, nie tylko liczbowe:
+
+- Site Pages: `ConfluencePageId`, `ParentPageId`, `SortOrder`, `TreePath`,
+  `TreeSort`, `Category`, `DocStatus`, `Service`
+- obie listy migracyjne: `ConfluenceId`, `ParentConfluenceId`, `Depth`,
+  `SourceFile`, `MigrationStatus`, `Service`, `TargetPageId`, `TargetUrl`,
+  `MigratedOn`, `ErrorMessage`
+
+Dwa przypadki grozniejsze od domyslnego zera:
+
+- **`Category`** z domyslna galezia przypisuje do niej kazda nowa strone,
+  zanim krok 2 cokolwiek policzy — strona wyglada na przypisana do galezi,
+  do ktorej nie nalezy
+- **`MigratedOn`** z domyslnym „Dzisiaj" sprawia, ze swiezy wiersz wyglada
+  na juz zmigrowany
+
 Usuniecie domyslnej wartosci dziala od nastepnego utworzonego elementu.
 Zapisanych juz zer nie czysci — przy SWB to bez znaczenia, bo jego strony
 dopiero powstana.
