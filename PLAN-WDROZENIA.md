@@ -40,7 +40,7 @@ Jeden wiersz: `Title` = `GMSC`, `Code` = `GMSC`, `SortOrder` = `10`,
 `DT_MigrationMap` → **Add column** → Jeden wiersz tekstu, nazwa `Service`.
 W widoku siatki wpisz `GMSC` we wszystkich wierszach.
 
-Przy kolejnym serwisie zakladasz **osobna liste**, np. `DT_MigrationMap_Switchboard`.
+Przy kolejnym serwisie zakladasz **osobna liste**, np. `DT_MigrationMap_SWB`.
 Nazwe listy podajesz w polu triggera, wiec jeden zbudowany flow obsluzy obie.
 
 ### 1.5 Zbuduj flow 04-OdswiezDrzewo
