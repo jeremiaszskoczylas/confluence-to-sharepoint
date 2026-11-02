@@ -119,6 +119,7 @@ Wypada natomiast z listy stron do przetworzenia, wiec krok 2 **nie nadpisze jej
 tresci** i nie wypelni jej wlasnych kolumn. Dwie rzeczy robisz dla niej raz, recznie:
 
 - wstawiasz w edytorze jej wlasna sciezke okruszkowa i ramke podstron
+  (jak to zrobic, zeby wygladala jak pozostale: [RECZNA-STRONA](RECZNA-STRONA.md))
 - wpisujesz szesc kolumn metadanych (`ParentPageId`, `SortOrder`, `TreePath`,
   `TreeSort`, `Category`, `DocStatus`)
 

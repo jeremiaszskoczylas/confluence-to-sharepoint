@@ -26,6 +26,7 @@ ktore moglyby nadpisac juz zmigrowany serwis:
 | 5 | [05-NowaStrona.md](05-NowaStrona.md) | wywolywany z aplikacji przy dodawaniu strony | kilka sekund |
 | 6 | [06-KolejnySerwis.md](06-KolejnySerwis.md) | migracja drugiej i kazdej nastepnej przestrzeni z Confluence | jak kroki 1–2 |
 | 7 | [07-RecznySerwis.md](07-RecznySerwis.md) | nowy serwis pisany recznie, bez eksportu HTML | zalezy od liczby stron |
+| M | [RECZNA-STRONA.md](RECZNA-STRONA.md) | strona, ktorej krok 2 nie udzwignie — reczne odtworzenie tego, co generuje `parseTresc` | ~1 h na strone |
 | ! | [97-NaprawMetadaneStron.md](97-NaprawMetadaneStron.md) | awaryjnie, gdy strony straca `ConfluencePageId` albo `ParentPageId` | ~3 min |
 | ! | [98-ResetMigracji.md](98-ResetMigracji.md) | czyszczenie przed migracja od zera | 10 min |
 | ! | [99-NaprawHierarchie.md](99-NaprawHierarchie.md) | awaryjnie, gdy hierarchia w mapie migracji zostanie nadpisana | ~5 min |

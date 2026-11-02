@@ -27,6 +27,10 @@ Komplet szczegolowych sciag do Power Automate jest w katalogu [flows/](flows/) â
 zacznij od [flows/README.md](flows/README.md), ktory podaje kolejnosc
 i trzy wartosci do podmiany.
 
+Strony, ktorych krok 2 nie udzwignie, sklada sie recznie â€”
+[flows/RECZNA-STRONA.md](flows/RECZNA-STRONA.md) opisuje, co dokladnie generuje
+`parseTresc`, zeby reczna strona nie odstawala od pozostalych.
+
 ## Skrypty
 
 | Plik | Parametry | Zastosowanie |
