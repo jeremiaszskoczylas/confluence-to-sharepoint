@@ -67,12 +67,65 @@ Kolumny (te same w kazdej liscie), **bez wartosci domyslnych**:
 | `ParentConfluenceId` | Liczba — `0` u strony glownej, ale wpisuje je flow, nie wartosc domyslna |
 | `Depth` | Liczba |
 | `SourceFile` | Jeden wiersz tekstu |
-| `MigrationStatus` | Wybor: `Pending`, `PageCreated`, `LinksRemapped`, `Failed` |
+| `MigrationStatus` | Wybor: `Pending`, `PageCreated`, `LinksRemapped`, `Failed`, `Skipped`, `Manual` |
 | `Service` | Jeden wiersz tekstu — kod serwisu; przy osobnych listach to zabezpieczenie, nie filtr |
 | `TargetPageId` | Liczba |
 | `TargetUrl` | Jeden wiersz tekstu |
 | `MigratedOn` | Data i godzina |
 | `ErrorMessage` | Wiele wierszy tekstu — na razie zadne flow tu nie pisze, pole na przyszla obsluge bledow |
+
+### Pomijanie wybranych stron
+
+Zeby strona nie zostala zmigrowana, ustaw jej `MigrationStatus` na `Skipped`.
+Zadnego flow nie trzeba zmieniac: krok 1 pobiera wylacznie wiersze `Pending`,
+a krok 2 i mapa biora tylko strony z wypelnionym `TargetPageId`, ktorego
+pominieta strona nigdy nie dostanie.
+
+Zeby dociagnac ja pozniej, przestaw `Skipped` z powrotem na `Pending`,
+uruchom krok 1, a po nim krok 2 na calym serwisie — drzewo przeliczy sie
+razem z nia.
+
+Co pominiecie robi z drzewem:
+
+- odnosniki prowadzace do pominietej strony zamieniaja sie w `#`
+- jej podstrony traca rodzica i staja sie osobnymi korzeniami mapy,
+  z pusta `Category` i skrocona `TreePath`
+
+Dlatego pomijaj liscie, a nie wezly w srodku drzewa. Jesli musisz pominac
+wezel z dziecmi, licz sie z tym, ze cala galaz wyladuje w mapie osobno.
+
+**Przeladowanie listy kasuje te decyzje.** Sekcja E tworzy wszystkie wiersze
+jako `Pending`, wiec po kazdym resecie pominiecia trzeba zaznaczyc od nowa.
+Trzymaj ich spis poza lista — wystarczy plik tekstowy z `ConfluenceId`
+i powodem pominiecia.
+
+### Strony utrzymywane recznie
+
+Status **`Manual`** jest dla stron, ktorych krok 2 nie udzwignie — w praktyce dla
+takich, ktorych `CanvasContent1` przekracza limit SharePointa i zapisuje sie jako
+pusta, nieotwieralna strona. Skladasz je raz recznie w edytorze, a potem maja
+dzialac jak kazda inna zmigrowana strona.
+
+Roznica wzgledem `Skipped`: wiersz `Manual` ma wypelnione `TargetPageId`
+i `TargetUrl`, wiec **zostaje w danych drzewa**. Dziala wiec dla niej wszystko,
+co dotyczy relacji miedzy stronami:
+
+- odnosniki z innych stron prowadza do niej poprawnie
+- rodzic wymienia ja w ramce „Podstrony"
+- mapa dokumentacji pokazuje ja na wlasciwym miejscu
+- sciezka okruszkowa jej podstron przechodzi przez nia poprawnie
+
+Wypada natomiast z listy stron do przetworzenia, wiec krok 2 **nie nadpisze jej
+tresci** i nie wypelni jej wlasnych kolumn. Dwie rzeczy robisz dla niej raz, recznie:
+
+- wstawiasz w edytorze jej wlasna sciezke okruszkowa i ramke podstron
+- wpisujesz szesc kolumn metadanych (`ParentPageId`, `SortOrder`, `TreePath`,
+  `TreeSort`, `Category`, `DocStatus`)
+
+Krok 1 tez jej nie dotknie, bo pobiera wylacznie `Pending`.
+
+Licznik `recznych` w wyniku akcji `Planuj` (krok 2) pokazuje, ile wierszy ma ten
+status — sluzy do sprawdzenia, czy zaden nie zniknal przy edycji listy.
 
 ## B2. Lista DT_Services
 

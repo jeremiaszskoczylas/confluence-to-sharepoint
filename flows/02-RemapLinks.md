@@ -83,6 +83,12 @@ triggerBody()?['text_1']
 
 ---
 
+
+> Wiersze ze statusem `Manual` zostaja w danych drzewa (mapowanie linkow, ramka
+> podstron u rodzica, mapa), ale **nie wchodza do petli** — ich tresci krok 2 nie
+> nadpisuje. Szczegoly: [00-przygotowanie](00-przygotowanie.md), sekcja B,
+> „Strony utrzymywane recznie".
+
 ## 4. Plan — Data Operation → Compose
 
 Inputs (fx):

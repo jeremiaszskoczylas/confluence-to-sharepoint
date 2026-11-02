@@ -2,6 +2,7 @@ function main(wb: ExcelScript.Workbook, dane: string, witryna: string, serwis: s
   interface W {
     Id: number; ID?: number; Title: string; ConfluenceId: number; ParentConfluenceId: number;
     SourceFile: string; TargetUrl: string; TargetPageId: number; Service?: string;
+    MigrationStatus?: string | { Value?: string };
   }
   let surowe: W[];
   try { surowe = JSON.parse(dane) as W[]; }
@@ -28,6 +29,16 @@ function main(wb: ExcelScript.Workbook, dane: string, witryna: string, serwis: s
       (kod.length > 0 ? " dla serwisu " + kod : "") +
       ' - sprawdz kolumny Service, TargetPageId, ConfluenceId i Title"}';
   }
+
+  // MigrationStatus z konektora SharePointa przychodzi jako obiekt {Value:"..."},
+  // a z czystego REST jako tekst - obslugujemy oba ksztalty.
+  const status = (r: W): string => {
+    const s = r.MigrationStatus;
+    if (s === undefined || s === null) { return ""; }
+    if (typeof s === "string") { return s.trim(); }
+    const v = s.Value;
+    return (v === undefined || v === null) ? "" : String(v).trim();
+  };
 
   const byConf: { [k: string]: W } = {};
   for (const r of rows) { byConf[String(r.ConfluenceId)] = r; }
@@ -68,7 +79,11 @@ function main(wb: ExcelScript.Workbook, dane: string, witryna: string, serwis: s
     return out;
   };
 
-  const pages = rows.map(r => {
+  // Strony utrzymywane recznie (status Manual) ZOSTAJA w danych drzewa: sa w mapowaniu
+  // linkow, w ramce podstron u rodzica i w mapie dokumentacji. Wypadaja wylacznie z listy
+  // do przetworzenia, zeby krok 2 nie nadpisal ich recznie zlozonej tresci.
+  const reczne = rows.filter(r => status(r) === "Manual").length;
+  const pages = rows.filter(r => status(r) !== "Manual").map(r => {
     const a = przodkowie(r);
     const chain = a.concat([r]);
     const top = chain[0];
@@ -137,6 +152,6 @@ function main(wb: ExcelScript.Workbook, dane: string, witryna: string, serwis: s
 
   return JSON.stringify({
     pages: pages, linki: JSON.stringify(L), mapa: mapa,
-    korzeni: roots.length, pominietych: pominiete
+    korzeni: roots.length, pominietych: pominiete, recznych: reczne
   });
 }

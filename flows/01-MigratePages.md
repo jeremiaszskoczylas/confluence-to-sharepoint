@@ -68,6 +68,11 @@ Filter Query (tekst) — lista jest juz per serwis, wiec wystarczy status:
 ```
 MigrationStatus eq 'Pending'
 ```
+
+> Wiersze ze statusem `Skipped` do biegu nie wchodza — tak wylaczasz wybrane
+> strony z migracji. Szczegoly i skutki uboczne: [00-przygotowanie](00-przygotowanie.md),
+> sekcja B, „Pomijanie wybranych stron".
+
 Top Count (tekst) — na pierwszy bieg `1`, potem `5000`:
 ```
 1
