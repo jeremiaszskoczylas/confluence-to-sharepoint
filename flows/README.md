@@ -27,6 +27,7 @@ ktore moglyby nadpisac juz zmigrowany serwis:
 | 6 | [06-KolejnySerwis.md](06-KolejnySerwis.md) | migracja drugiej i kazdej nastepnej przestrzeni z Confluence | jak kroki 1–2 |
 | 7 | [07-RecznySerwis.md](07-RecznySerwis.md) | nowy serwis pisany recznie, bez eksportu HTML | zalezy od liczby stron |
 | M | [RECZNA-STRONA.md](RECZNA-STRONA.md) | strona, ktorej krok 2 nie udzwignie — reczne odtworzenie tego, co generuje `parseTresc` | ~1 h na strone |
+| T | [95-TestObrazkow.md](95-TestObrazkow.md) | sonda: sprawdza na osobnej stronie, ktory zapis obrazka przetrwa edycje | ~20 min |
 | S | [96-PokazKanwe.md](96-PokazKanwe.md) | sonda: zwraca `CanvasContent1` wskazanej strony; tylko czyta | ~1 min |
 | ! | [97-NaprawMetadaneStron.md](97-NaprawMetadaneStron.md) | awaryjnie, gdy strony straca `ConfluencePageId` albo `ParentPageId` | ~3 min |
 | ! | [98-ResetMigracji.md](98-ResetMigracji.md) | czyszczenie przed migracja od zera | 10 min |
