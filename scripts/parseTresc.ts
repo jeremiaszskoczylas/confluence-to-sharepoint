@@ -185,8 +185,23 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   if (wTab) { wyn += "</table>"; }
   h = wyn + h.substring(poz);
   h = h.replace(/<span[^>]*class="(cloakToggle|aui-icon)[^"]*"[^>]*><\/span>/gi, "");
+  // Emotikona z kodem znaku w klasie (emoticon-1f621) zostaje w zdaniu jako znak Unicode.
+  h = h.replace(/<img\b[^>]*class="[^"]*\bemoticon-([0-9][0-9a-f]{3,5}(?:-[0-9a-f]{4,6})*)[^"]*"[^>]*>/gi,
+    (m: string, kod: string) => kod.split("-").map(k => "&#x" + k + ";").join(""));
   h = h.replace(/<img[^>]*src="images\/icons\/[^"]*"[^>]*>/gi, "");
-  h = h.replace(/<img[^>]*data-image-src="([^"]+)"[^>]*>/gi, '<img src="$1">');
+  const atrybut = (tag: string, nazwa: string): string => {
+    const m = new RegExp("\\s" + nazwa + '="([^"]*)"', "i").exec(tag);
+    return m === null ? "" : m[1];
+  };
+  // Rozmiar, wyrownanie i tekst alternatywny przydadza sie przy zapisie obrazka nizej.
+  h = h.replace(/<img[^>]*data-image-src="([^"]+)"[^>]*>/gi, (m: string, u: string) => {
+    let a = "";
+    for (const n of ["width", "height", "class", "alt"]) {
+      const w = atrybut(m, n);
+      if (w.length > 0) { a += " " + n + '="' + w + '"'; }
+    }
+    return '<img src="' + u + '"' + a + ">";
+  });
   h = h.replace(
     /<div class="confluence-information-macro confluence-information-macro-([a-z]+)">\s*<div class="confluence-information-macro-body">([\s\S]*?)<\/div>\s*<\/div>/gi,
     (m: string, t: string, c: string) =>
@@ -225,6 +240,97 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
         return u !== undefined ? 'href="' + u + '"' : m;
       });
   }
+  // --- obrazki ---
+  // Edytor CK5 usuwa z tabeli zwykly <img>, gdy ktos wejdzie w edycje strony i ja zapisze.
+  // Obrazek z naszej biblioteki zapisujemy wzorem, ktory edytor uznaje za swoj (sprawdzone
+  // sonda flows/95-TestObrazkow). Wzor to blok, wiec musi wyjsc z akapitu i odnosnika,
+  // ale zostaje w swojej komorce tabeli albo punkcie listy. Musi to sie dziac po czyszczeniu
+  // pustych elementow, bo sam wzor jest pustym <div>, i po mapowaniu linkow.
+  const FRAZA = " p a span strong em b i u s strike font sup sub code small big tt abbr " +
+    "acronym cite dfn kbd samp var bdi bdo q mark time pre h1 h2 h3 h4 h5 h6 ";
+  const BEZ_ZAMKNIECIA = " area base br col embed hr img input link meta param source track wbr ";
+  const naLiscie = (n: string, lista: string) => lista.indexOf(" " + n + " ") >= 0;
+  const bezTresci = (t: string) => t.replace(/\s|&nbsp;|<br[^>]*>/gi, "").length === 0;
+  // Bez szerokosci w zrodle obrazek dostaje cala kolumne, tak jak domyslnie w PnP Core SDK.
+  // Podana szerokosc ma pierwszenstwo, wiec wtedy procent pomijamy, jak w PnP Framework.
+  const zapisObrazka = (tag: string, link: string): string => {
+    const sz = /^\d+$/.test(atrybut(tag, "width")) ? atrybut(tag, "width") : "";
+    const wy = sz.length > 0 && /^\d+$/.test(atrybut(tag, "height")) ? atrybut(tag, "height") : "0";
+    const kl = atrybut(tag, "class");
+    const str = /\bimage-center\b/.test(kl) ? "Center" : (/\bimage-right\b/.test(kl) ? "Right" : "Left");
+    return '<div class="imagePlugin" style="background-color:transparent;position:relative;"' +
+      ' data-alignment="' + str + '" data-imageurl="' + atrybut(tag, "src") + '" data-uploading="0"' +
+      ' data-height="' + wy + '" data-width="' + (sz.length > 0 ? sz : "0") + '"' +
+      ' data-imagenaturalheight="' + wy + '" data-imagenaturalwidth="' + (sz.length > 0 ? sz : "0") + '"' +
+      (sz.length > 0 ? "" : ' data-widthpercentage="100"') +
+      ' data-isoverlaytextenabled="false" data-captiontext="" data-alttext="' + atrybut(tag, "alt") +
+      '" data-linkurl="' + link + '"></div>';
+  };
+  interface Otw { n: string; o: string; s: number; ponowny: boolean }
+  if (base.length > 0 && h.indexOf('src="' + base) >= 0) {
+    const stos: Otw[] = [];
+    const tagRe = /<(\/?)([a-z][a-z0-9]*)\b([^>]*)>/gi;
+    let wy = "";
+    let ostTag = 0;
+    let tg = tagRe.exec(h);
+    while (tg !== null) {
+      wy += h.substring(ostTag, tg.index);
+      ostTag = tg.index + tg[0].length;
+      const n = tg[2].toLowerCase();
+      if (n === "img" && atrybut(tg[0], "src").indexOf(base) === 0) {
+        let granica = -1;
+        for (let j = stos.length - 1; j >= 0 && granica < 0; j--) {
+          if (naLiscie(stos[j].n, " td th li ")) { granica = j; }
+        }
+        let od = -1;
+        for (let j = granica + 1; j < stos.length && od < 0; j++) {
+          if (naLiscie(stos[j].n, FRAZA)) { od = j; }
+        }
+        let link = "";
+        for (let j = stos.length - 1; j > granica && link.length === 0; j--) {
+          if (stos[j].n === "a") { link = atrybut(stos[j].o, "href"); }
+        }
+        if (od >= 0) {
+          for (let j = stos.length - 1; j >= od; j--) {
+            if (bezTresci(wy.substring(stos[j].s + stos[j].o.length))) {
+              wy = wy.substring(0, stos[j].s);
+            } else {
+              wy += "</" + stos[j].n + ">";
+              stos[j].o = stos[j].o.replace(/\s+id="[^"]*"/i, "");
+            }
+          }
+        }
+        wy += zapisObrazka(tg[0], link);
+        if (od >= 0) {
+          for (let j = od; j < stos.length; j++) {
+            stos[j].s = wy.length;
+            stos[j].ponowny = true;
+            wy += stos[j].o;
+          }
+        }
+      } else if (tg[1] === "/") {
+        let j = stos.length - 1;
+        while (j >= 0 && stos[j].n !== n) { j--; }
+        if (j < 0) {
+          wy += tg[0];
+        } else {
+          if (stos[j].ponowny && bezTresci(wy.substring(stos[j].s + stos[j].o.length))) {
+            wy = wy.substring(0, stos[j].s);
+          } else {
+            wy += tg[0];
+          }
+          stos.splice(j);
+        }
+      } else {
+        if (!naLiscie(n, BEZ_ZAMKNIECIA) && !/\/$/.test(tg[3])) {
+          stos.push({ n: n, o: tg[0], s: wy.length, ponowny: false });
+        }
+        wy += tg[0];
+      }
+      tg = tagRe.exec(h);
+    }
+    h = wy + h.substring(ostTag);
+  }
   let gora = "";
   if (nag !== undefined && nag !== null && nag.length > 0) {
     gora += "<p><small>" + nag + "</small></p>";
@@ -262,8 +368,10 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   }
   biez.tresc += h.substring(ost);
   segs.push(biez);
-  const pelne: Seg[] = segs.filter(s =>
-    s.tresc.replace(/<[^>]+>|&nbsp;|\s/g, "").length > 0 || s.nazwa.length > 0);
+  // Sekcja z samym obrazkiem tez ma tresc, choc po usunieciu znacznikow nic w niej nie zostaje.
+  const maTresc = (t: string) =>
+    /<img\b|imagePlugin/i.test(t) || t.replace(/<[^>]+>|&nbsp;|\s/g, "").length > 0;
+  const pelne: Seg[] = segs.filter(s => maTresc(s.tresc) || s.nazwa.length > 0);
   if (pelne.length === 0) { pelne.push({ nazwa: "", rozwin: true, kol: "", tresc: h }); }
 
   // Kazdy segment musi miec zbilansowane <div> - osierocone domkniecia zostaja
@@ -287,7 +395,7 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   for (let n = 0; n < pelne.length; n++) {
     const s = pelne[n];
     let t = zbilansuj(s.tresc.replace(/^\s*<hr>/, ""));
-    if (t.replace(/<[^>]+>|&nbsp;|\s/g, "").length === 0) { t = "<p></p>"; }
+    if (!maTresc(t)) { t = "<p></p>"; }
     // Prawa kolumna dzieli sekcje z lewa (ten sam zoneIndex, sectionIndex 1 i 2,
     // polowa szerokosci). Pozostale segmenty dostaja wlasna sekcje na pelna szerokosc.
     if (s.kol !== "P") { zone++; }
@@ -302,6 +410,7 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
         sectionFactor: s.kol === "" ? 12 : 6
       },
       addedFromPersistedData: true,
+      contentVersion: 5,
       emphasis: {},
       innerHTML: t
     };
@@ -313,5 +422,13 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
     }
     canvas.push(k);
   }
+  // Ustawienia strony odczytane z kanwy strony zalozonej recznie: contentVersion 5 to edytor CK5.
+  canvas.push({
+    controlType: 0,
+    pageSettingsSlice: {
+      isDefaultDescription: true, isDefaultThumbnail: true, isSpellCheckEnabled: true,
+      globalRichTextStylingVersion: 1, rtePageSettings: { contentVersion: 5 }, isEmailReady: false
+    }
+  });
   return JSON.stringify(canvas);
 }

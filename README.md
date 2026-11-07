@@ -62,7 +62,8 @@ Strony, ktorych krok 2 nie udzwignie, sklada sie recznie —
   a na końcu numer zastępczy. Menu `tabs-menu` jest w eksporcie **puste** — Confluence buduje
   je JavaScriptem — więc parser je usuwa i nie szuka w nim etykiet
 - kanwa ma jedną kontrolkę, a przy zakładkach tyle, ile sekcji:
-  `[{controlType:4, position, zoneGroupMetadata?, innerHTML}]`
+  `[{controlType:4, position, contentVersion:5, zoneGroupMetadata?, innerHTML}, ..., {controlType:0, pageSettingsSlice}]`,
+  gdzie `contentVersion` 5 oznacza edytor CK5
 - usuwa puste znaczniki: przełączniki `cloakToggle`, ikony `aui-icon`
 - usuwa ikony dekoracyjne `images/icons/*`
 - zamienia panele informacyjne na prefiksy tekstowe (`⚠️ UWAGA:`, `ℹ️ INFO:`, `📌 NOTATKA:`, `💡 WSKAZÓWKA:`)
@@ -70,6 +71,11 @@ Strony, ktorych krok 2 nie udzwignie, sklada sie recznie —
 - zamienia linki wewnętrzne na placeholdery `{{CONF:<id>}}` do podmiany po utworzeniu stron
 - neutralizuje martwe odnośniki (profile Confluence, `index.html`)
 - zamienia `<input>` na znak `☐`
+- obrazki z biblioteki (`base`) zapisuje jako `div.imagePlugin`, który przetrwa edycję strony.
+  Obrazek jest blokiem: dzieli akapit i wychodzi z odnośnika, ale zostaje w swojej komórce tabeli
+  albo punkcie listy. Rozmiar i wyrównanie bierze ze źródła, a odnośnik przenosi do `data-linkurl`.
+  Bez szerokości w źródle obrazek dostaje całą kolumnę. Obrazki spoza biblioteki zostają jako `<img>`
+- emotikony z kodem znaku w klasie (`emoticon-1f621`) zamienia na znak Unicode
 
 ## Uwagi
 

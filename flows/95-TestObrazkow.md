@@ -198,6 +198,17 @@ Jesli `A` lub `B` znika tylko w jednym miejscu, na przyklad w tabeli, zapisz, w 
 
 ---
 
+## Wynik
+
+Na stronie testowej przed edycja i po niej zostaly wszystkie warianty `A`, `B` i `C`,
+takze w tabeli, na liscie, w sekcjach zwijanych i w kolumnach. Zniknal tylko `T-K`, czyli
+zwykly `<img>` w tabeli. `P-K` i `L-K` zostaly, wiec poza tabela zwykly `<img>` tez przezyl.
+
+Dlatego `parseTresc` zapisuje obrazki wariantem `B`: bez identyfikatorow pliku i bez nowych
+akcji w krokach 1 i 2.
+
+---
+
 ## Po tescie
 
 Skasuj strone `Test Obrazki` z Site Pages. Flow i skrypt moga zostac.
