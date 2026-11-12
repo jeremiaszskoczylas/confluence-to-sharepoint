@@ -65,6 +65,8 @@ Strony, ktorych krok 2 nie udzwignie, sklada sie recznie —
 - kanwa ma jedną kontrolkę, a przy zakładkach tyle, ile sekcji:
   `[{controlType:4, position, contentVersion:5, zoneGroupMetadata?, innerHTML}, ..., {controlType:0, pageSettingsSlice}]`,
   gdzie `contentVersion` 5 oznacza edytor CK5
+- wycina formularze `<form>` razem z zawartością: SharePoint przyjmuje stronę z formularzem,
+  ale potem nie da się jej otworzyć ani edytować
 - usuwa puste znaczniki: przełączniki `cloakToggle`, ikony `aui-icon`
 - usuwa ikony dekoracyjne `images/icons/*`
 - zamienia panele informacyjne na prefiksy tekstowe (`⚠️ UWAGA:`, `ℹ️ INFO:`, `📌 NOTATKA:`, `💡 WSKAZÓWKA:`)

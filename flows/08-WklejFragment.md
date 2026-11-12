@@ -204,7 +204,9 @@ Galaz If no: pusta. Akcje 10–12 dodaj PONIZEJ warunku.
 
 > **Dlaczego 80 000 znakow.** Strona z okolo 139 KB zrodla zapisala sie pusta,
 > a mniejsze strony przechodzily. To nie jest znany limit SharePointa, tylko
-> zapas. Gdy bezpiecznik zadziala, podziel fragment na dwie strony. Mozesz tez podniesc
+> zapas. Pozniej okazalo sie, ze strone psul formularz `<form>` z eksportu, ktory
+> `parseTresc` teraz wycina, wiec rozmiar mogl nie miec znaczenia. Bezpiecznik zostaje
+> na wszelki wypadek. Gdy zadziala, podziel fragment na dwie strony. Mozesz tez podniesc
 > te liczbe na wlasne ryzyko: strona zapisana pusta nie otwiera sie potem w edytorze.
 
 ## 10. Checkout — Send an HTTP request to SharePoint

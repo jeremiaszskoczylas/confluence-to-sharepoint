@@ -14,6 +14,10 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   if (e > 0) { h = h.substring(0, e); }
 
   h = h.replace(/<style[\s\S]*?<\/style>/gi, "");
+  // Formularz z eksportu (pole wyszukiwania, przycisk makra) psuje strone: SharePoint przyjmuje
+  // zapis, ale potem strony nie da sie otworzyc ani edytowac. Wycinamy go razem z zawartoscia.
+  h = h.replace(/<form\b[\s\S]*?<\/form>/gi, "");
+  h = h.replace(/<\/?form\b[^>]*>/gi, "");
   h = h.replace(/<div[^>]*class=["'][^"']*toc-macro[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
   h = h.replace(/<ul[^>]*class=["'][^"']*toc-indentation[^"']*["'][^>]*>[\s\S]*?<\/ul>/gi, "");
   h = h.replace(
