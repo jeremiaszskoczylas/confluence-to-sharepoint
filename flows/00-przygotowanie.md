@@ -269,5 +269,5 @@ Link w lewym panelu witryny dodaj od razu — strona juz istnieje.
 - strona mapy serwisu istnieje i jest pusta
 - lista migracyjna serwisu ma tyle wierszy, ile stron w eksporcie, wszystkie `Pending`
 - `ParentConfluenceId` wypelnione (strona glowna ma 0)
-- w `SiteAssets/DocMedia/attachments/` sa podfoldery z obrazami
+- w `SiteAssets/DocMedia/<Serwis>/attachments/` sa podfoldery z obrazami
 - w Excelu widac skrypty z punktu D

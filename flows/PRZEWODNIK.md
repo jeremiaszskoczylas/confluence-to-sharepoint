@@ -16,7 +16,7 @@ droga, ktora juz raz zadziala, plus obsluga wielu serwisow.
 | kolumny w Site Pages | biblioteka witryny | komplet w [00](00-przygotowanie.md), sekcja A |
 | lista migracyjna serwisu, `DT_Services` | listy witryny | osobna lista na serwis: `DT_MigrationMap`, `DT_MigrationMap_SWB`… |
 | eksport HTML | biblioteka plikow | osobny folder na serwis |
-| zalaczniki | `SiteAssets/DocMedia/attachments/` | **tu mieszkaja obrazy na zawsze** |
+| zalaczniki | `SiteAssets/DocMedia/<Serwis>/attachments/` | osobny folder na serwis; **tu mieszkaja obrazy na zawsze** |
 | skrypty | Excel Online, Automate | nazwy dokladnie jak pliki w `scripts/` |
 
 Cztery wartosci do podmiany w sciagach: `<WITRYNA>`, `<BIBLIOTEKA>`, `<EKSPORT>`,

@@ -119,11 +119,11 @@ Zapisz sobie pelna sciezke do tego folderu, od korzenia serwera i zakonczona
 ukosnikiem — podasz ja w polu `zalaczniki` w krokach 1 i 2:
 
 ```
-/teams/<WITRYNA>/SiteAssets/DocMedia/Switchboard/attachments/
+<WITRYNA>/SiteAssets/DocMedia/Switchboard/attachments/
 ```
 
 Kontrola: `DocMedia/Switchboard/attachments/` ma podfoldery o nazwach bedacych
-identyfikatorami stron, a `DocMedia/attachments/` (GMSC) jest nietkniety.
+identyfikatorami stron, a folder zalacznikow GMSC jest nietkniety.
 
 ### 2.4 Lista migracyjna
 
@@ -183,7 +183,7 @@ Kontrola: strona istnieje, nazwa pliku to `Documentation-Map-Switchboard.aspx`.
 lista       = DT_MigrationMap_SWB
 serwis      = SWB
 eksport     = Confluence-export/switchboard
-zalaczniki  = /teams/<WITRYNA>/SiteAssets/DocMedia/Switchboard/attachments/
+zalaczniki  = <WITRYNA>/SiteAssets/DocMedia/Switchboard/attachments/
 ```
 
 **`Top Count` = `1`.**

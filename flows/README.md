@@ -68,7 +68,7 @@ folder eksportu, wiersze w liscie migracyjnej z kodem serwisu, podmiana
 
 | Rzecz | Potrzebna pozniej? |
 |---|---|
-| `SiteAssets/DocMedia/attachments/` | **tak, zawsze** — tu wskazuja obrazy w tresci stron |
+| `SiteAssets/DocMedia/<Serwis>/attachments/` | **tak, zawsze** — tu wskazuja obrazy w tresci stron |
 | biblioteka Site Pages z kolumnami | **tak** — zrodlo prawdy dla drzewa i aplikacji |
 | folder eksportu HTML | tak, dopoki chcesz moc przebudowac tresc krokiem 2 |
 | `DT_MigrationMap` | do krokow 1–3; potem slad historyczny |

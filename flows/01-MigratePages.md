@@ -42,7 +42,7 @@ zalaczniki
   zakonczona `attachments/`. Ta wartosc trafia wprost do `src` obrazkow, wiec
   liczona jest od korzenia serwera, a nie od witryny:
   ```
-  /teams/<WITRYNA>/SiteAssets/DocMedia/<Serwis>/attachments/
+  <WITRYNA>/SiteAssets/DocMedia/<Serwis>/attachments/
   ```
 
 Dzieki nim **jeden zbudowany flow migruje kazdy serwis**. Przy kolejnej

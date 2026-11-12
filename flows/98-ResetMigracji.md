@@ -62,7 +62,7 @@ za drzewo.
 
 | Zostaw | Dlaczego |
 |---|---|
-| `SiteAssets/DocMedia/attachments/` | **Tu mieszkaja obrazy wszystkich stron.** Sciezki w tresci wskazuja wlasnie tutaj. Skasowanie = puste ramki na kazdej stronie i ponowne wgrywanie 87 MB |
+| `SiteAssets/DocMedia/<Serwis>/attachments/` | **Tu mieszkaja obrazy wszystkich stron serwisu.** Sciezki w tresci wskazuja wlasnie tutaj. Skasowanie = puste ramki na kazdej stronie i ponowne wgrywanie 87 MB |
 | folder eksportu HTML | Krok 2 czyta pliki `.html` przy **kazdym** biegu. Bez nich nie przebudujesz tresci |
 | `drzewo.txt` | Odtworzenie hierarchii, gdyby znowu sie wyzerowala (krok 99) |
 | kolumny w Site Pages | Zakladasz raz, zostaja na zawsze |
@@ -104,7 +104,7 @@ sa tak samo potrzebne.
 
 **Potrzebne na zawsze:**
 
-- **`SiteAssets/DocMedia/attachments/`** — obrazy i pliki wstawione w tresc
+- **`SiteAssets/DocMedia/<Serwis>/attachments/`** — obrazy i pliki wstawione w tresc
   stron. Kazda strona linkuje tutaj. To jest czesc dzialajacej dokumentacji,
   nie pozostalosc po migracji.
 - **biblioteka Site Pages z kolumnami** — zrodlo prawdy po migracji.

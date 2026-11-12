@@ -145,8 +145,8 @@ do mapy pod wlasnym naglowkiem. W aplikacji zakladka pojawia sie sama.
   a krok 3 nadpisalby mape jednym serwisem.
 - **Nie kasuj folderu eksportu HTML.** Etap 3 i kazda przyszla przebudowa tresci
   czytaja z niego.
-- **Nie kasuj `SiteAssets/DocMedia/attachments/`.** Tam mieszkaja obrazy
-  wszystkich stron.
+- **Nie kasuj `SiteAssets/DocMedia/`.** Tam, w folderach serwisow, mieszkaja
+  obrazy wszystkich stron.
 - **Nie zmieniaj nazw istniejacych plikow stron GMSC** na wersje z prefiksem.
   Dzialaja odnosniki i mapa; kolizji ze Switchboardem nie bedzie, bo jego strony
   dostana prefiks `SWB-`.
