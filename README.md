@@ -53,6 +53,9 @@ Strony, ktorych krok 2 nie udzwignie, sklada sie recznie —
 - usuwa atrybuty `style` — czym odsłania treść sekcji `cloak` ukrytych przez `display: none`
 - cloaki → rozwinięte, ponumerowane sekcje z liniami i wykazem odnośników na górze
   (kotwice zgodne z regułą SharePointa)
+- gałęzie decyzyjne (akapit z przełącznikiem cloaka i etykietą, np. `Yes`/`No`, a pod nim ukryta treść)
+  → tabela etykieta | treść, z kolorem przy `Yes` i `No`. Przełącznik może być owinięty w pogrubienie,
+  a pytanie zagnieżdżone w gałęzi dostaje własną tabelę wewnątrz komórki
 - **zakładki** (`tabs-pane`): grupa dwóch zakładek → **dwie kolumny obok siebie**
   (`sectionFactor` 6), tytuł zakładki jako nagłówek w kolumnie; grupa trzech lub więcej →
   natywne sekcje zwijane z kartą aktywną (`active-pane`) rozwiniętą. Treść przed i po
@@ -77,7 +80,7 @@ Strony, ktorych krok 2 nie udzwignie, sklada sie recznie —
 - obrazki z biblioteki (`base`) zapisuje jako `div.imagePlugin`, który przetrwa edycję strony.
   Obrazek jest blokiem: dzieli akapit i wychodzi z odnośnika, ale zostaje w swojej komórce tabeli
   albo punkcie listy. Rozmiar i wyrównanie bierze ze źródła, a odnośnik przenosi do `data-linkurl`.
-  Bez szerokości w źródle obrazek dostaje całą kolumnę. Obrazki spoza biblioteki zostają jako `<img>`
+  Bez szerokości w źródle obrazek dostaje połowę szerokości kolumny, a wysokość dopasowuje się proporcjonalnie. Obrazki spoza biblioteki zostają jako `<img>`
 - emotikony z kodem znaku w klasie (`emoticon-1f621`) zamienia na znak Unicode
 
 ## Uwagi

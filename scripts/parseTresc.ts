@@ -145,49 +145,57 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   }
   // Etykieta nie moze wyjsc poza swoj akapit — (?!<\/p>) zatrzymuje ja na koncu <p>.
   // Miedzy akapitem a cloakiem dopuszczamy puste znaczniki, bo czyszczenie
-  // pustych elementow dzieje sie dopiero pozniej.
-  const gRe = /<p[^>]*>\s*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*((?:[^<]|<(?!\/p>))*)<\/p>(?:\s|<p[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/p>|<div[^>]*><\/div>)*<span[^>]*class="cloak[\s"][^>]*>/gi;
-  let wyn = "";
-  let poz = 0;
-  let wTab = false;
+  // pustych elementow dzieje sie dopiero pozniej. Przelacznik bywa owiniety
+  // w pogrubienie: <p><strong><span class="cloakToggle"></span>Yes</strong></p>.
+  const gRe = /<p[^>]*>\s*(?:<(?:strong|b|em|i|u|span)\b(?![^>]*cloak)[^>]*>\s*)*<span[^>]*class="cloakToggle[^"]*"[^>]*><\/span>\s*((?:[^<]|<(?!\/p>))*)<\/p>(?:\s|<p[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/p>|<div[^>]*><\/div>)*<span[^>]*class="cloak[\s"][^>]*>/gi;
   let str2 = 0;
-  let g = gRe.exec(h);
-  while (g !== null && str2 < 400) {
-    str2++;
-    const etyk = g[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
-    const bStart = gRe.lastIndex;
-    const tk2 = /<span\b|<\/span>/gi;
-    tk2.lastIndex = bStart;
-    let d2 = 1;
-    let kon = h.length;
-    let t3 = tk2.exec(h);
-    while (t3 !== null) {
-      d2 += t3[0].charAt(1) === "/" ? -1 : 1;
-      if (d2 === 0) { kon = t3.index; break; }
-      t3 = tk2.exec(h);
+  // W tresci galezi moze stac kolejne pytanie z wlasnymi Yes/No, wiec tresc kazdej
+  // galezi przetwarzamy tak samo jak cala strone. Glebokosc ograniczona na wypadek petli.
+  const galezie = (s: string, gl: number): string => {
+    const re = new RegExp(gRe.source, "gi");
+    let wyn = "";
+    let poz = 0;
+    let wTab = false;
+    let g = re.exec(s);
+    while (g !== null && str2 < 400) {
+      str2++;
+      const etyk = g[1].replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+      const bStart = re.lastIndex;
+      const tk2 = /<span\b|<\/span>/gi;
+      tk2.lastIndex = bStart;
+      let d2 = 1;
+      let kon = s.length;
+      let t3 = tk2.exec(s);
+      while (t3 !== null) {
+        d2 += t3[0].charAt(1) === "/" ? -1 : 1;
+        if (d2 === 0) { kon = t3.index; break; }
+        t3 = tk2.exec(s);
+      }
+      const przed = s.substring(poz, g.index);
+      const dalej = wTab && przed.replace(/\s|<br[^>]*>/gi, "").length === 0;
+      if (!dalej) {
+        if (wTab) { wyn += "</table>"; }
+        wyn += przed + '<table width="100%">';
+        wTab = true;
+      }
+      const low = etyk.toLowerCase();
+      let ozn = "<strong>" + etyk + "</strong>";
+      if (low === "yes" || low === "tak") {
+        ozn = '<font color="#107C10"><strong>&#10003; ' + etyk + "</strong></font>";
+      } else if (low === "no" || low === "nie") {
+        ozn = '<font color="#C4314B"><strong>&#10007; ' + etyk + "</strong></font>";
+      }
+      const tresc = s.substring(bStart, kon);
+      wyn += '<tr><td width="15%" align="left">' + ozn + "</td>" +
+        '<td align="left">' + (gl < 10 ? galezie(tresc, gl + 1) : tresc) + "</td></tr>";
+      poz = kon + 7;
+      re.lastIndex = poz;
+      g = re.exec(s);
     }
-    const przed = h.substring(poz, g.index);
-    const dalej = wTab && przed.replace(/\s|<br[^>]*>/gi, "").length === 0;
-    if (!dalej) {
-      if (wTab) { wyn += "</table>"; }
-      wyn += przed + '<table width="100%">';
-      wTab = true;
-    }
-    const low = etyk.toLowerCase();
-    let ozn = "<strong>" + etyk + "</strong>";
-    if (low === "yes" || low === "tak") {
-      ozn = '<font color="#107C10"><strong>&#10003; ' + etyk + "</strong></font>";
-    } else if (low === "no" || low === "nie") {
-      ozn = '<font color="#C4314B"><strong>&#10007; ' + etyk + "</strong></font>";
-    }
-    wyn += '<tr><td width="15%" align="left">' + ozn + "</td>" +
-      '<td align="left">' + h.substring(bStart, kon) + "</td></tr>";
-    poz = kon + 7;
-    gRe.lastIndex = poz;
-    g = gRe.exec(h);
-  }
-  if (wTab) { wyn += "</table>"; }
-  h = wyn + h.substring(poz);
+    if (wTab) { wyn += "</table>"; }
+    return wyn + s.substring(poz);
+  };
+  h = galezie(h, 0);
   h = h.replace(/<span[^>]*class="(cloakToggle|aui-icon)[^"]*"[^>]*><\/span>/gi, "");
   // Emotikona z kodem znaku w klasie (emoticon-1f621) zostaje w zdaniu jako znak Unicode.
   h = h.replace(/<img\b[^>]*class="[^"]*\bemoticon-([0-9][0-9a-f]{3,5}(?:-[0-9a-f]{4,6})*)[^"]*"[^>]*>/gi,
@@ -223,6 +231,8 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   h = h.replace(/<(p|div|span|h[1-4])[^>]*>(?:\s|&nbsp;|<br[^>]*>)*<\/\1>/gi, "");
   h = h.replace(/<h2/gi, "<hr><h2");
   h = h.replace(/^\s*<hr>/, "");
+  // Pytanie zagniezdzone w galezi zaczyna komorke tabeli - linia nad nim tylko zaslania.
+  h = h.replace(/(<td[^>]*>)\s*<hr>/gi, "$1");
   // Uszkodzone mapowanie nie moze wywrocic calego biegu. Przy bledzie parsowania
   // ZOSTAWIAMY placeholdery {{CONF:id}} nietkniete: sa widoczne na stronie i od razu
   // wiadomo, ze trzeba powtorzyc bieg. Podmiana na "#" nastepuje tylko wtedy, gdy
@@ -255,7 +265,8 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
   const BEZ_ZAMKNIECIA = " area base br col embed hr img input link meta param source track wbr ";
   const naLiscie = (n: string, lista: string) => lista.indexOf(" " + n + " ") >= 0;
   const bezTresci = (t: string) => t.replace(/\s|&nbsp;|<br[^>]*>/gi, "").length === 0;
-  // Bez szerokosci w zrodle obrazek dostaje cala kolumne, tak jak domyslnie w PnP Core SDK.
+  // Bez szerokosci w zrodle obrazek dostaje polowe kolumny, a wysokosc dopasowuje sie
+  // proporcjonalnie. PnP Core SDK daje domyslnie cala kolumne, przez co zrzuty rozciagaly sie na cala strone.
   // Podana szerokosc ma pierwszenstwo, wiec wtedy procent pomijamy, jak w PnP Framework.
   const zapisObrazka = (tag: string, link: string): string => {
     const sz = /^\d+$/.test(atrybut(tag, "width")) ? atrybut(tag, "width") : "";
@@ -266,7 +277,7 @@ function main(wb: ExcelScript.Workbook, html: string, base: string, tytul: strin
       ' data-alignment="' + str + '" data-imageurl="' + atrybut(tag, "src") + '" data-uploading="0"' +
       ' data-height="' + wy + '" data-width="' + (sz.length > 0 ? sz : "0") + '"' +
       ' data-imagenaturalheight="' + wy + '" data-imagenaturalwidth="' + (sz.length > 0 ? sz : "0") + '"' +
-      (sz.length > 0 ? "" : ' data-widthpercentage="100"') +
+      (sz.length > 0 ? "" : ' data-widthpercentage="50"') +
       ' data-isoverlaytextenabled="false" data-captiontext="" data-alttext="' + atrybut(tag, "alt") +
       '" data-linkurl="' + link + '"></div>';
   };
